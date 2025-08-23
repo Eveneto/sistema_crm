@@ -1,0 +1,12 @@
+# Arquivos sensíveis e temporários
+*.pem
+*.key
+client_secret*.json
+test_*oauth*.html
+test_*oauth*.py
+diagnose_oauth.sh
+https_server.py
+RELATORIO_*.md
+GOOGLE_CONSOLE_CONFIG.md
+PROXIMOS_PASSOS.md
+SUCESSO_*.md
