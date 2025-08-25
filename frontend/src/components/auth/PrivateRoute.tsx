@@ -1,16 +1,17 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { Spin } from 'antd';
-import { RootState } from '../../redux/store';
+import { useAuth } from '../../hooks/useAuth'; // Usar nosso hook customizado
 
 interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, token } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, isLoading, token } = useAuth(); // Usar o hook que reconhece Firebase
   const location = useLocation();
+
+  console.log("🔒 PrivateRoute - isAuthenticated:", isAuthenticated, "token:", !!token, "isLoading:", isLoading);
 
   // Se está carregando, mostra spinner
   if (isLoading) {

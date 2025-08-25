@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { firebaseTokenService } from './firebaseTokenService';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
@@ -19,9 +20,16 @@ api.interceptors.request.use(
                              config.url?.includes('/auth/google-login/');
     
     if (!isPublicAuthRoute) {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      // Prioridade: token Firebase > token Django
+      const firebaseToken = firebaseTokenService.getCurrentToken();
+      const djangoToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      const token = firebaseToken || djangoToken;
+      
       if (token) {
+        // Adiciona header específico para identificar tipo de token
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['X-Auth-Type'] = firebaseToken ? 'firebase' : 'django';
       }
     }
     
@@ -37,11 +45,24 @@ api.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // Remove tokens se não autorizado
+      // Tenta renovar token Firebase se falhou
+      const firebaseToken = firebaseTokenService.getCurrentToken();
+      if (firebaseToken) {
+        const newToken = await firebaseTokenService.forceRefreshToken();
+        if (newToken) {
+          // Retry the original request with new token
+          const originalRequest = error.config;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      }
+      
+      // Remove tokens se não conseguiu renovar
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
+      localStorage.removeItem('firebase_token');
     }
     return Promise.reject(error);
   }

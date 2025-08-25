@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação Firebase</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { margin: 10px 5px; padding: 10px 15px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        #results { margin-top: 20px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Teste do Sistema de Autenticação Firebase + Django</h1>
+    
+    <div class="test-section info">
+        <h3>📊 Status dos Serviços</h3>
+        <p><strong>Frontend React:</strong> <span id="frontend-status">Verificando...</span></p>
+        <p><strong>Backend Django:</strong> <span id="backend-status">Verificando...</span></p>
+        <p><strong>Firebase Config:</strong> <span id="firebase-status">Verificando...</span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 Testes Disponíveis</h3>
+        <button class="btn-primary" onclick="testBackendConnection()">1. Testar Conexão Backend</button>
+        <button class="btn-primary" onclick="testFirebaseInit()">2. Testar Firebase Init</button>
+        <button class="btn-success" onclick="testTokenService()">3. Testar Token Service</button>
+        <button class="btn-warning" onclick="testApiInterceptor()">4. Testar API Interceptor</button>
+        <button class="btn-danger" onclick="clearTests()">Limpar Testes</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Função para adicionar resultado de teste
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-section ${type}`;
+            resultDiv.innerHTML = `<h4>${title}</h4><pre>${content}</pre>`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        // Teste 1: Conexão com Backend
+        async function testBackendConnection() {
+            try {
+                addResult('🔄 Testando conexão com Django...', 'Enviando requisição para http://localhost:8000', 'warning');
+                
+                const response = await fetch('http://localhost:8000/auth/profile/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.status === 401) {
+                    addResult('✅ Backend Django', 'Conectado! (401 esperado - sem token)', 'success');
+                } else {
+                    addResult('✅ Backend Django', `Status: ${response.status}`, 'success');
+                }
+                
+                document.getElementById('backend-status').textContent = '✅ Online';
+            } catch (error) {
+                addResult('❌ Erro no Backend', error.message, 'error');
+                document.getElementById('backend-status').textContent = '❌ Offline';
+            }
+        }
+
+        // Teste 2: Firebase Initialization
+        function testFirebaseInit() {
+            try {
+                // Verifica se o Firebase está inicializado
+                if (typeof window !== 'undefined') {
+                    addResult('🔄 Testando Firebase Init...', 'Verificando configuração Firebase', 'warning');
+                    
+                    // Simula teste de inicialização
+                    setTimeout(() => {
+                        addResult('⚠️ Firebase Config', 'Não é possível testar Firebase diretamente neste contexto. Verifique o console do React app.', 'warning');
+                    }, 1000);
+                } else {
+                    throw new Error('Window object não disponível');
+                }
+            } catch (error) {
+                addResult('❌ Firebase Init Error', error.message, 'error');
+            }
+        }
+
+        // Teste 3: Token Service
+        function testTokenService() {
+            addResult('🔄 Testando Token Service...', 'Verificando localStorage para tokens Firebase', 'warning');
+            
+            const firebaseToken = localStorage.getItem('firebase_token');
+            const userEmail = localStorage.getItem('user_email');
+            const userName = localStorage.getItem('user_name');
+            
+            const result = {
+                firebaseToken: firebaseToken ? 'Presente' : 'Ausente',
+                userEmail: userEmail || 'Não encontrado',
+                userName: userName || 'Não encontrado'
+            };
+            
+            if (firebaseToken) {
+                addResult('✅ Token Service', JSON.stringify(result, null, 2), 'success');
+            } else {
+                addResult('⚠️ Token Service', JSON.stringify(result, null, 2), 'warning');
+            }
+        }
+
+        // Teste 4: API Interceptor
+        async function testApiInterceptor() {
+            try {
+                addResult('🔄 Testando API Interceptor...', 'Testando requisição com headers customizados', 'warning');
+                
+                const testHeaders = {
+                    'Content-Type': 'application/json',
+                    'X-Test-Header': 'interceptor-test'
+                };
+                
+                const response = await fetch('http://localhost:8000/auth/profile/', {
+                    method: 'GET',
+                    headers: testHeaders
+                });
+                
+                addResult('✅ API Interceptor', `Headers enviados: ${JSON.stringify(testHeaders, null, 2)}\\nStatus: ${response.status}`, 'success');
+                
+            } catch (error) {
+                addResult('❌ API Interceptor Error', error.message, 'error');
+            }
+        }
+
+        // Limpar testes
+        function clearTests() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Verificar status na inicialização
+        window.onload = function() {
+            document.getElementById('frontend-status').textContent = '✅ Online';
+            testBackendConnection();
+        };
+    </script>
+</body>
+</html>

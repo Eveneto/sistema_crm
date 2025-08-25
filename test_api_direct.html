@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API Direto</title>
+</head>
+<body>
+    <h1>Teste API Direto</h1>
+    <button onclick="testAPI()">Testar API</button>
+    <div id="results"></div>
+    
+    <script>
+    async function testAPI() {
+        const results = document.getElementById('results');
+        results.innerHTML = '<p>Testando...</p>';
+        
+        try {
+            console.log('Iniciando teste...');
+            
+            const response = await fetch('http://localhost:8000/api/auth/firebase-validate/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Auth-Type': 'firebase',
+                    'Authorization': 'Bearer test-token'
+                }
+            });
+            
+            console.log('Response:', response);
+            console.log('Status:', response.status);
+            
+            const text = await response.text();
+            console.log('Text:', text);
+            
+            results.innerHTML = `
+                <h2>Sucesso!</h2>
+                <p>Status: ${response.status}</p>
+                <p>Response: ${text}</p>
+            `;
+            
+        } catch (error) {
+            console.error('Erro:', error);
+            results.innerHTML = `
+                <h2>Erro!</h2>
+                <p>Erro: ${error.message}</p>
+                <p>Tipo: ${error.name}</p>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>

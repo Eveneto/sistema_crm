@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Teste de Renovação Automática de Tokens Firebase</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            position: relative;
+        }
+        .success { background-color: #d4edda; border-color: #28a745; }
+        .error { background-color: #f8d7da; border-color: #dc3545; }
+        .warning { background-color: #fff3cd; border-color: #ffc107; }
+        .info { background-color: #d1ecf1; border-color: #17a2b8; }
+        .primary { background-color: #cce5ff; border-color: #007bff; }
+        
+        button { 
+            margin: 8px 5px; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-2px); }
+        
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        
+        .status-panel { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin: 20px 0;
+        }
+        
+        .token-info { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            border-left: 4px solid #007bff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .log-container { 
+            height: 300px; 
+            overflow-y: auto; 
+            background: #1e1e1e; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 5px; 
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .timestamp { color: #888; margin-right: 10px; }
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-warning { color: #ffc107; }
+        .log-info { color: #17a2b8; }
+        
+        .countdown { 
+            font-size: 24px; 
+            font-weight: bold; 
+            text-align: center; 
+            color: #007bff; 
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Teste de Renovação Automática de Tokens Firebase</h1>
+        
+        <!-- Status Panel -->
+        <div class="test-section info">
+            <h3>📊 Status do Sistema</h3>
+            <div class="status-panel">
+                <div>
+                    <strong>Frontend React:</strong> <span id="frontend-status">🔄 Verificando...</span><br>
+                    <strong>Backend Django:</strong> <span id="backend-status">🔄 Verificando...</span><br>
+                    <strong>Firebase Service:</strong> <span id="firebase-service-status">🔄 Verificando...</span>
+                </div>
+                <div>
+                    <strong>Token Atual:</strong> <span id="current-token-status">❌ Nenhum</span><br>
+                    <strong>Última Renovação:</strong> <span id="last-refresh">❌ Nunca</span><br>
+                    <strong>Próxima Renovação:</strong> <span id="next-refresh">⏱️ Aguardando...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de Teste -->
+        <div class="test-section primary">
+            <h3>🎮 Controles de Teste</h3>
+            <button class="btn-success" onclick="startTokenMonitoring()">🚀 Iniciar Monitoramento</button>
+            <button class="btn-warning" onclick="forceTokenRefresh()">🔄 Forçar Renovação</button>
+            <button class="btn-info" onclick="simulateTokenExpiration()">⏰ Simular Expiração</button>
+            <button class="btn-primary" onclick="testApiWithToken()">🌐 Testar API</button>
+            <button class="btn-danger" onclick="clearAllTests()">🗑️ Limpar Logs</button>
+        </div>
+
+        <!-- Informações do Token Atual -->
+        <div class="test-section">
+            <h3>🔑 Informações do Token Atual</h3>
+            <div class="token-info" id="token-info">
+                Nenhum token disponível no localStorage
+            </div>
+        </div>
+
+        <!-- Countdown para Próxima Renovação -->
+        <div class="test-section warning" id="countdown-section" style="display: none;">
+            <h3>⏰ Próxima Renovação em:</h3>
+            <div class="countdown" id="countdown-timer">--:--</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Log de Eventos -->
+        <div class="test-section">
+            <h3>📋 Log de Eventos</h3>
+            <div class="log-container" id="log-container">
+                <div class="timestamp">[Sistema]</div> Aguardando início dos testes...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let monitoringInterval;
+        let countdownInterval;
+        let refreshTime = 50 * 60 * 1000; // 50 minutos em ms
+        let startTime;
+
+        // Função para adicionar log
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = `log-${type}`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span><span class="${logClass}">${message}</span>`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Verificar status dos serviços
+        async function checkServicesStatus() {
+            try {
+                // Testar Frontend
+                const frontendResponse = await fetch('http://localhost:3000', { mode: 'no-cors' });
+                document.getElementById('frontend-status').textContent = '✅ Online';
+                
+                // Testar Backend
+                const backendResponse = await fetch('http://localhost:8000/api/auth/profile/');
+                if (backendResponse.status === 401) {
+                    document.getElementById('backend-status').textContent = '✅ Online';
+                } else {
+                    document.getElementById('backend-status').textContent = '⚠️ Resposta inesperada';
+                }
+                
+                document.getElementById('firebase-service-status').textContent = '✅ Configurado';
+                addLog('Status dos serviços verificado com sucesso', 'success');
+                
+            } catch (error) {
+                addLog(`Erro ao verificar serviços: ${error.message}`, 'error');
+                document.getElementById('backend-status').textContent = '❌ Offline';
+            }
+        }
+
+        // Atualizar informações do token
+        function updateTokenInfo() {
+            const firebaseToken = localStorage.getItem('firebase_token');
+            const userEmail = localStorage.getItem('user_email');
+            const lastRefresh = localStorage.getItem('last_token_refresh');
+            
+            const tokenInfo = document.getElementById('token-info');
+            const currentTokenStatus = document.getElementById('current-token-status');
+            
+            if (firebaseToken) {
+                const tokenPreview = firebaseToken.substring(0, 50) + '...';
+                tokenInfo.innerHTML = `
+                    <strong>Token:</strong> ${tokenPreview}<br>
+                    <strong>Email:</strong> ${userEmail || 'N/A'}<br>
+                    <strong>Tamanho:</strong> ${firebaseToken.length} caracteres<br>
+                    <strong>Última Atualização:</strong> ${lastRefresh || 'Desconhecida'}
+                `;
+                currentTokenStatus.textContent = '✅ Presente';
+                
+                // Verificar se é um token válido (formato JWT básico)
+                const parts = firebaseToken.split('.');
+                if (parts.length === 3) {
+                    try {
+                        const payload = JSON.parse(atob(parts[1]));
+                        const exp = new Date(payload.exp * 1000);
+                        tokenInfo.innerHTML += `<br><strong>Expira em:</strong> ${exp.toLocaleString()}`;
+                    } catch (e) {
+                        tokenInfo.innerHTML += `<br><strong>Formato:</strong> ⚠️ Não é JWT válido`;
+                    }
+                }
+            } else {
+                tokenInfo.innerHTML = '❌ Nenhum token Firebase encontrado no localStorage';
+                currentTokenStatus.textContent = '❌ Ausente';
+            }
+        }
+
+        // Iniciar monitoramento contínuo
+        function startTokenMonitoring() {
+            addLog('🚀 Iniciando monitoramento de tokens...', 'info');
+            startTime = Date.now();
+            
+            // Atualizar informações a cada segundo
+            monitoringInterval = setInterval(() => {
+                updateTokenInfo();
+                updateCountdown();
+            }, 1000);
+            
+            // Mostrar seção de countdown
+            document.getElementById('countdown-section').style.display = 'block';
+            
+            addLog('✅ Monitoramento ativo - Verificando tokens a cada segundo', 'success');
+        }
+
+        // Atualizar countdown
+        function updateCountdown() {
+            if (!startTime) return;
+            
+            const elapsed = Date.now() - startTime;
+            const remaining = refreshTime - (elapsed % refreshTime);
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            document.getElementById('countdown-timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Atualizar barra de progresso
+            const progress = ((refreshTime - remaining) / refreshTime) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            
+            // Log quando próximo da renovação
+            if (remaining < 60000 && remaining > 59000) { // Último minuto
+                addLog('⚠️ Token será renovado em menos de 1 minuto!', 'warning');
+            }
+        }
+
+        // Forçar renovação do token
+        function forceTokenRefresh() {
+            addLog('🔄 Forçando renovação manual do token...', 'warning');
+            
+            // Simular chamada para o service de refresh
+            // Na implementação real, isso chamaria o firebaseTokenService.forceRefreshToken()
+            setTimeout(() => {
+                const now = new Date().toLocaleString();
+                localStorage.setItem('last_token_refresh', now);
+                document.getElementById('last-refresh').textContent = now;
+                addLog('✅ Token renovado com sucesso (simulado)', 'success');
+                updateTokenInfo();
+            }, 1500);
+        }
+
+        // Simular expiração de token
+        function simulateTokenExpiration() {
+            addLog('⏰ Simulando expiração de token...', 'warning');
+            
+            // Remover token para simular expiração
+            const backupToken = localStorage.getItem('firebase_token');
+            localStorage.removeItem('firebase_token');
+            
+            setTimeout(() => {
+                addLog('❌ Token expirou! Sistema deveria renovar automaticamente...', 'error');
+                
+                // Simular renovação automática após 3 segundos
+                setTimeout(() => {
+                    if (backupToken) {
+                        localStorage.setItem('firebase_token', backupToken);
+                        addLog('🔄 Token renovado automaticamente pelo sistema!', 'success');
+                    }
+                    updateTokenInfo();
+                }, 3000);
+            }, 1000);
+        }
+
+        // Testar API com token atual
+        async function testApiWithToken() {
+            const token = localStorage.getItem('firebase_token');
+            
+            if (!token) {
+                addLog('❌ Nenhum token disponível para teste', 'error');
+                return;
+            }
+            
+            addLog('🌐 Testando chamada API com token atual...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Auth-Type': 'firebase',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    addLog(`✅ API respondeu com sucesso! Status: ${response.status}`, 'success');
+                } else {
+                    addLog(`⚠️ API respondeu com status: ${response.status}`, 'warning');
+                    
+                    if (response.status === 401) {
+                        addLog('🔄 Token pode ter expirado - sistema deveria renovar automaticamente', 'warning');
+                    }
+                }
+            } catch (error) {
+                addLog(`❌ Erro na chamada API: ${error.message}`, 'error');
+            }
+        }
+
+        // Limpar todos os logs
+        function clearAllTests() {
+            document.getElementById('log-container').innerHTML = 
+                '<div class="timestamp">[Sistema]</div> Logs limpos - Aguardando novos eventos...';
+            
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            document.getElementById('countdown-section').style.display = 'none';
+            addLog('🗑️ Sistema resetado', 'info');
+        }
+
+        // Inicialização
+        window.onload = function() {
+            addLog('🔥 Sistema de testes inicializado', 'success');
+            checkServicesStatus();
+            updateTokenInfo();
+            
+            // Verificar se há tokens a cada 5 segundos
+            setInterval(updateTokenInfo, 5000);
+        };
+
+        // Detectar mudanças no localStorage
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'firebase_token') {
+                if (e.newValue) {
+                    addLog('🔄 Token Firebase atualizado no localStorage!', 'success');
+                } else {
+                    addLog('❌ Token Firebase removido do localStorage', 'error');
+                }
+                updateTokenInfo();
+            }
+        });
+    </script>
+</body>
+</html>

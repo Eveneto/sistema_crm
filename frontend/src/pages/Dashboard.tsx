@@ -1,7 +1,8 @@
 import React from 'react';
-import { Layout, Typography, Card, Row, Col, Avatar, Dropdown, MenuProps } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
+import { Layout, Typography, Card, Row, Col, Avatar, Dropdown, MenuProps, Button } from 'antd';
+import { UserOutlined, LogoutOutlined, SettingOutlined, FireOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -108,6 +109,14 @@ const Dashboard: React.FC = () => {
               Sistema de gestão de relacionamento com cliente. 
               Em breve você poderá gerenciar empresas, leads e ter acesso ao chat em tempo real.
             </Text>
+            
+            <div style={{ marginTop: 16 }}>
+              <Link to="/token-test">
+                <Button type="primary" icon={<FireOutlined />}>
+                  🔥 Testar Renovação de Tokens Firebase
+                </Button>
+              </Link>
+            </div>
           </Card>
         </div>
       </Content>

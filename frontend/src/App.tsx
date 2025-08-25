@@ -10,6 +10,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 import EmailVerificationNotice from './pages/auth/EmailVerificationNotice';
 import Dashboard from './pages/Dashboard';
+import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 import './App.css';
 
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
                 <Route path="/test" element={<ApiTest />} />
+                <Route path="/token-test" element={<TokenTestPage />} />
                 <Route path="/verifique-email" element={<EmailVerificationNotice />} />
                 
                 {/* Rotas protegidas */}

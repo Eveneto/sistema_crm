@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Divider, Checkbox, Alert } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 import { loginUser } from '../../redux/slices/authSlice';
 import { AppDispatch } from '../../redux/store';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,15 +18,143 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, isLoading, error } = useAuth();
   const [rememberMe, setRememberMe] = useState(false);
+  const [firebaseLoading, setFirebaseLoading] = useState(false);
+  const [firebaseError, setFirebaseError] = useState("");
+  const [form] = Form.useForm(); // Hook do Antd para acessar o formulário
 
   // Pega a rota que o usuário tentou acessar antes de ser redirecionado para login
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
+  // Login via Firebase Auth
+  const handleFirebaseLogin = async (values: { username_or_email: string; password: string }) => {
+    setFirebaseLoading(true);
+    setFirebaseError("");
+    
+    // Validar se contém @ (validação básica)
+    if (!values.username_or_email.includes('@')) {
+      setFirebaseError("Para login Firebase, use um email (deve conter @). Username não é aceito pelo Firebase.");
+      setFirebaseLoading(false);
+      return;
+    }
+    
+    console.log("Tentando login Firebase com:", values.username_or_email);
+    
+    try {
+      // Firebase Auth só aceita email, não username
+      const userCredential = await signInWithEmailAndPassword(auth, values.username_or_email, values.password);
+      const user = userCredential.user;
+      const token = await user.getIdToken();
+      console.log("Login Firebase sucesso:", user.email);
+      console.log("Token Firebase obtido:", token);
+      
+      // Opção 1: Armazenar token do Firebase no localStorage (integração simples)
+      localStorage.setItem('firebase_token', token);
+      localStorage.setItem('user_email', user.email || '');
+      
+      // Para login por email/senha, extrair nome do email ou usar nome padrão
+      const userName = user.displayName || user.email?.split('@')[0] || 'Usuário';
+      localStorage.setItem('user_name', userName);
+      localStorage.setItem('user_photo', user.photoURL || '');
+      
+      console.log("Dados salvos:", { 
+        email: user.email, 
+        name: userName, 
+        photo: user.photoURL 
+      });
+      
+      // Opção 2: Enviar token para backend Django para validação (implementação futura)
+      // await axios.post("/api/auth/firebase-login/", { token });
+      
+      // Simular o estado de autenticado no Redux
+      // Por enquanto, vamos forçar o redirecionamento
+      message.success("Login Firebase realizado com sucesso!");
+      console.log("Redirecionando para:", from);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      console.error("Erro Firebase:", err);
+      let errorMessage = "Erro ao fazer login pelo Firebase";
+      
+      switch (err.code) {
+        case 'auth/user-not-found':
+          errorMessage = "Usuário não encontrado. Verifique o email.";
+          break;
+        case 'auth/wrong-password':
+          errorMessage = "Senha incorreta.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Formato de email inválido.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "Usuário desabilitado.";
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = "Muitas tentativas. Tente novamente mais tarde.";
+          break;
+        default:
+          errorMessage = err.message || "Erro ao fazer login pelo Firebase";
+      }
+      
+      setFirebaseError(errorMessage);
+    } finally {
+      setFirebaseLoading(false);
+    }
+  };
+
+  // Login via Google
+  const handleGoogleLogin = async () => {
+    setFirebaseLoading(true);
+    setFirebaseError("");
+    
+    const provider = new GoogleAuthProvider();
+    
+    try {
+      console.log("🌐 Iniciando login com Google...");
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+      
+      console.log("✅ Login Google sucesso:", user.email);
+      console.log("Token Google obtido:", token);
+      
+      // Armazenar token e informações do usuário
+      localStorage.setItem('firebase_token', token);
+      localStorage.setItem('user_email', user.email || '');
+      localStorage.setItem('user_name', user.displayName || '');
+      localStorage.setItem('user_photo', user.photoURL || '');
+      
+      message.success("Login com Google realizado com sucesso!");
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      console.error("Erro Google:", err);
+      let errorMessage = "Erro ao fazer login com Google";
+      
+      switch (err.code) {
+        case 'auth/popup-closed-by-user':
+          errorMessage = "Login cancelado pelo usuário.";
+          break;
+        case 'auth/popup-blocked':
+          errorMessage = "Pop-up bloqueado. Permita pop-ups para este site.";
+          break;
+        case 'auth/cancelled-popup-request':
+          errorMessage = "Solicitação de login cancelada.";
+          break;
+        default:
+          errorMessage = err.message || "Erro ao fazer login com Google";
+      }
+      
+      setFirebaseError(errorMessage);
+    } finally {
+      setFirebaseLoading(false);
+    }
+  };
+
   React.useEffect(() => {
-    if (isAuthenticated) {
+    console.log("🔍 LoginPage useEffect - isAuthenticated:", isAuthenticated, "location:", location.pathname);
+    if (isAuthenticated && location.pathname === '/login') {
+      console.log("✅ Redirecionando de /login para:", from);
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, from, location.pathname]);
 
   const onFinish = async (values: { username_or_email: string; password: string }) => {
     console.log('🔐 Iniciando processo de login...', values);
@@ -64,6 +194,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         <Form
+          form={form}
           name="login"
           onFinish={onFinish}
           layout="vertical"
@@ -122,11 +253,51 @@ const LoginPage: React.FC = () => {
               loading={isLoading}
               style={{ width: '100%' }}
             >
-              Entrar
+              Entrar (Django)
             </Button>
           </Form.Item>
+          <Form.Item>
+            <Button
+              type="default"
+              style={{ width: '100%' }}
+              loading={firebaseLoading}
+              onClick={() => {
+                console.log("🔥 Botão Firebase clicado!");
+                const values = form.getFieldsValue();
+                console.log("Valores do formulário Antd:", values);
+                const email = values.username_or_email || '';
+                const password = values.password || '';
+                console.log("Valores finais - Email:", email, "Password:", password);
+                handleFirebaseLogin({ username_or_email: email, password });
+              }}
+            >
+              Entrar com Firebase
+            </Button>
+          </Form.Item>
+          {firebaseError && (
+            <Alert
+              message="Erro no login Firebase"
+              description={firebaseError}
+              type="error"
+              showIcon
+              style={{ marginBottom: 16 }}
+              closable
+            />
+          )}
 
           <Divider>ou</Divider>
+
+          <Form.Item>
+            <Button
+              icon={<GoogleOutlined />}
+              onClick={handleGoogleLogin}
+              loading={firebaseLoading}
+              style={{ width: '100%' }}
+              size="large"
+            >
+              Entrar com Google
+            </Button>
+          </Form.Item>
 
           <Form.Item>
             {/* Google OAuth temporariamente desabilitado - necessária configuração no Google Cloud Console */}

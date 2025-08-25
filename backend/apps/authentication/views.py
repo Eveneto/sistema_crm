@@ -11,6 +11,7 @@ from .serializers import (
     UserLoginSerializer,
     UserSerializer
 )
+from .firebase_service import FirebaseService
 
 # View para verificação de e-mail
 @api_view(['GET'])
@@ -123,3 +124,45 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class FirebaseTokenValidationView(generics.GenericAPIView):
+    """
+    View para validar tokens Firebase e retornar token JWT do Django
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        firebase_token = request.data.get('firebase_token')
+        
+        if not firebase_token:
+            return Response({
+                'error': 'Token Firebase é obrigatório'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Valida token Firebase
+        firebase_user_data, error = FirebaseService.verify_firebase_token(firebase_token)
+        
+        if error:
+            return Response({
+                'error': error
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Busca ou cria usuário Django
+        user, error = FirebaseService.get_or_create_user_from_firebase(firebase_user_data)
+        
+        if error:
+            return Response({
+                'error': error
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Gera tokens JWT Django
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'message': 'Token Firebase validado com sucesso',
+            'user': UserSerializer(user).data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'firebase_data': firebase_user_data
+        }, status=status.HTTP_200_OK)

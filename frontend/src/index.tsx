@@ -3,10 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { firebaseTokenService } from './services/firebaseTokenService';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+// Inicializar serviço de tokens Firebase
+firebaseTokenService.init();
 root.render(
   <React.StrictMode>
     <App />

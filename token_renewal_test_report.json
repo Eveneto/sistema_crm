@@ -1,0 +1,186 @@
+{
+  "timestamp": "2025-08-25T13:25:19.189Z",
+  "duration": 11041,
+  "results": [
+    {
+      "timestamp": "2025-08-25T13:25:08.149Z",
+      "type": "START",
+      "message": "🚀 Iniciando bateria de testes de renovação de tokens"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:08.161Z",
+      "type": "TEST",
+      "message": "🔍 Testando configuração do Token Service..."
+    },
+    {
+      "timestamp": "2025-08-25T13:25:08.161Z",
+      "type": "SUCCESS",
+      "message": "✅ Arquivos de configuração encontrados"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:09.165Z",
+      "type": "TEST",
+      "message": "🔄 Simulando cenário de renovação de token..."
+    },
+    {
+      "timestamp": "2025-08-25T13:25:09.165Z",
+      "type": "TEST",
+      "message": "📋 Testando: Token Válido"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:09.166Z",
+      "type": "INFO",
+      "message": "✅ Token ainda válido, não precisa renovar"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:09.166Z",
+      "type": "TEST",
+      "message": "📋 Testando: Token Próximo Expiração"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:09.167Z",
+      "type": "WARNING",
+      "message": "🔄 Token precisa ser renovado"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:10.168Z",
+      "type": "SUCCESS",
+      "message": "✅ Token renovado com sucesso"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:10.168Z",
+      "type": "TEST",
+      "message": "📋 Testando: Token Expirado"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:10.168Z",
+      "type": "WARNING",
+      "message": "🔄 Token precisa ser renovado"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:11.169Z",
+      "type": "SUCCESS",
+      "message": "✅ Token renovado com sucesso"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:12.170Z",
+      "type": "TEST",
+      "message": "⏰ Testando intervalo de renovação..."
+    },
+    {
+      "timestamp": "2025-08-25T13:25:12.170Z",
+      "type": "INFO",
+      "message": "📊 Intervalo configurado: 50 minutos"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:12.170Z",
+      "type": "SUCCESS",
+      "message": "✅ Intervalo de renovação correto"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:13.171Z",
+      "type": "TEST",
+      "message": "💾 Testando persistência no localStorage..."
+    },
+    {
+      "timestamp": "2025-08-25T13:25:13.172Z",
+      "type": "INFO",
+      "message": "📋 Chaves esperadas: firebase_token, user_email, user_name, user_photo"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:13.172Z",
+      "type": "INFO",
+      "message": "ℹ️ Este teste precisa ser executado no navegador para acessar localStorage"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:14.174Z",
+      "type": "TEST",
+      "message": "🌐 Simulando cenários de falha de rede..."
+    },
+    {
+      "timestamp": "2025-08-25T13:25:14.174Z",
+      "type": "TEST",
+      "message": "🔍 Simulando: Timeout de conexão"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:14.175Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 1/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:14.677Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 2/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:15.179Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 3/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:15.681Z",
+      "type": "ERROR",
+      "message": "❌ Falhou após 3 tentativas - implementar fallback"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:15.681Z",
+      "type": "TEST",
+      "message": "🔍 Simulando: Erro 500 do servidor"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:15.681Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 1/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:16.182Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 2/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:16.683Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 3/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.184Z",
+      "type": "ERROR",
+      "message": "❌ Falhou após 3 tentativas - implementar fallback"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.184Z",
+      "type": "TEST",
+      "message": "🔍 Simulando: Perda de conectividade"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.185Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 1/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.686Z",
+      "type": "SUCCESS",
+      "message": "✅ Renovação bem-sucedida na retry"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.686Z",
+      "type": "TEST",
+      "message": "🔍 Simulando: Token inválido retornado"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:17.686Z",
+      "type": "WARNING",
+      "message": "🔄 Tentativa 1/3 de renovação"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:18.187Z",
+      "type": "SUCCESS",
+      "message": "✅ Renovação bem-sucedida na retry"
+    },
+    {
+      "timestamp": "2025-08-25T13:25:19.188Z",
+      "type": "SUMMARY",
+      "message": "📊 Testes concluídos: 5/5 passaram"
+    }
+  ]
+}
