@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend API Connection</title>
+</head>
+<body>
+    <h2>Frontend API Connection Test</h2>
+    <div id="results"></div>
+    <button onclick="testCompaniesAPI()">Test Companies API</button>
+    
+    <script>
+        // Test function to replicate what the frontend is doing
+        async function testCompaniesAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Get token from localStorage (use the one from our previous test)
+                const token = localStorage.getItem('token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzA2ODc1LCJpYXQiOjE3NTYzMDMyNzUsImp0aSI6IjBiOTc2ZmYyNjhlODRjNTdiZWViOTJlZTg2NjQ3OTE5IiwidXNlcl9pZCI6IjEifQ.Q6IgiltKA-5PH0oeSc9uzOjyd_B1dFwFiqT2DGN1HdU';
+                
+                console.log('Using token:', token.substring(0, 50) + '...');
+                
+                // Replicate exact headers that frontend sends
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Auth-Type': 'django'  // This is what causes the CORS issue
+                };
+                
+                console.log('Request headers:', headers);
+                
+                const response = await fetch('http://localhost:8000/api/companies/companies/', {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        <div style="color: green;">
+                            <h3>✅ SUCCESS!</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Companies found:</strong> ${data.count}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultsDiv.innerHTML = `
+                        <div style="color: red;">
+                            <h3>❌ ERROR</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${errorText}</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Fetch error:', error);
+                resultsDiv.innerHTML = `
+                    <div style="color: red;">
+                        <h3>❌ NETWORK ERROR</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>This usually indicates CORS issues or server not running.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test without X-Auth-Type header
+        async function testWithoutCustomHeader() {
+            try {
+                const token = localStorage.getItem('token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzA2ODc1LCJpYXQiOjE3NTYzMDMyNzUsImp0aSI6IjBiOTc2ZmYyNjhlODRjNTdiZWViOTJlZTg2NjQ3OTE5IiwidXNlcl9pZCI6IjEifQ.Q6IgiltKA-5PH0oeSc9uzOjyd_B1dFwFiqT2DGN1HdU';
+                
+                const response = await fetch('http://localhost:8000/api/companies/companies/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                        // NO X-Auth-Type header
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Request WITHOUT X-Auth-Type worked!', data);
+                    return true;
+                } else {
+                    console.log('❌ Request WITHOUT X-Auth-Type failed:', response.status);
+                    return false;
+                }
+            } catch (error) {
+                console.log('❌ Network error without X-Auth-Type:', error);
+                return false;
+            }
+        }
+        
+        // Auto-test when page loads
+        window.onload = async () => {
+            console.log('=== Auto-testing API connection ===');
+            
+            // Test without custom header first
+            const simpleWorked = await testWithoutCustomHeader();
+            
+            if (simpleWorked) {
+                console.log('✅ Simple request works - problem is with X-Auth-Type header');
+            } else {
+                console.log('❌ Even simple request fails - server or token issue');
+            }
+        };
+    </script>
+    
+    <h3>Manual Tests:</h3>
+    <button onclick="testWithoutCustomHeader()">Test WITHOUT X-Auth-Type</button>
+    <br><br>
+    
+    <h3>Quick Fixes to Try:</h3>
+    <p>1. Remove X-Auth-Type header temporarily</p>
+    <p>2. Set token in localStorage: <code>localStorage.setItem('token', 'YOUR_TOKEN_HERE')</code></p>
+    <p>3. Check console for detailed logs</p>
+</body>
+</html>

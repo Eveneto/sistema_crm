@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
+import { firebaseTokenService } from '../../services/firebaseTokenService';
 
 interface User {
   id: number;
@@ -123,6 +124,10 @@ const authSlice = createSlice({
       localStorage.removeItem('refreshToken');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('refreshToken');
+      
+      // Reabilita Firebase quando Django JWT é removido
+      firebaseTokenService.resumeFirebaseServices();
+      
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
@@ -144,6 +149,9 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.access;
         state.isAuthenticated = true;
+        
+        // Pausa Firebase quando Django JWT está ativo
+        firebaseTokenService.pauseFirebaseServices();
         
         // Se rememberMe for true, salva no localStorage, senão no sessionStorage
         const storage = action.meta.arg.rememberMe ? localStorage : sessionStorage;

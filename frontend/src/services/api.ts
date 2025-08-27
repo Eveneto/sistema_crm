@@ -20,16 +20,20 @@ api.interceptors.request.use(
                              config.url?.includes('/auth/google-login/');
     
     if (!isPublicAuthRoute) {
-      // Prioridade: token Firebase > token Django
-      const firebaseToken = firebaseTokenService.getCurrentToken();
+      // PRIORIDADE: token Django JWT > token Firebase
+      // Isso evita conflitos e garante que Django JWT seja usado quando disponível
       const djangoToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const firebaseToken = firebaseTokenService.getCurrentToken();
       
-      const token = firebaseToken || djangoToken;
+      const token = djangoToken || firebaseToken;
       
       if (token) {
-        // Adiciona header específico para identificar tipo de token
         config.headers.Authorization = `Bearer ${token}`;
-        config.headers['X-Auth-Type'] = firebaseToken ? 'firebase' : 'django';
+        // Identifica o tipo de token para o backend processar corretamente
+        // config.headers['X-Auth-Type'] = djangoToken ? 'django' : 'firebase';
+        console.log(`🔐 Usando token ${djangoToken ? 'Django JWT' : 'Firebase'} para ${config.url}`);
+      } else {
+        console.log('⚠️ Nenhum token disponível para', config.url);
       }
     }
     
@@ -47,22 +51,45 @@ api.interceptors.response.use(
   },
   async (error) => {
     if (error.response?.status === 401) {
-      // Tenta renovar token Firebase se falhou
+      console.log('❌ Token inválido (401) - iniciando processo de limpeza e renovação');
+      
+      const djangoToken = localStorage.getItem('token') || sessionStorage.getItem('token');
       const firebaseToken = firebaseTokenService.getCurrentToken();
+      
+      if (djangoToken) {
+        console.log('🔄 Token Django JWT inválido - removendo e redirecionando para login');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        // Não remove Firebase token, pode ser usado para re-autenticar
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+      
       if (firebaseToken) {
-        const newToken = await firebaseTokenService.forceRefreshToken();
-        if (newToken) {
-          // Retry the original request with new token
-          const originalRequest = error.config;
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return api(originalRequest);
+        console.log('🔄 Token Firebase inválido - tentando renovar via Firebase');
+        try {
+          const newFirebaseToken = await firebaseTokenService.forceRefreshToken();
+          if (newFirebaseToken) {
+            console.log('✅ Token Firebase renovado - reenviar requisição');
+            // Reenviar a requisição original com novo token
+            error.config.headers.Authorization = `Bearer ${newFirebaseToken}`;
+            return api.request(error.config);
+          } else {
+            throw new Error('Não foi possível renovar token Firebase');
+          }
+        } catch (renewError) {
+          console.log('❌ Falha ao renovar token Firebase - limpando tudo');
+          localStorage.removeItem('firebase_token');
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/login';
+          return Promise.reject(error);
         }
       }
       
-      // Remove tokens se não conseguiu renovar
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      localStorage.removeItem('firebase_token');
+      // Se não há tokens, apenas redireciona
+      console.log('❌ Nenhum token disponível - redirecionando para login');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

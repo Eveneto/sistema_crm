@@ -46,12 +46,17 @@ class FirebaseTokenService {
       clearInterval(this.refreshInterval);
     }
 
-    // Atualiza token a cada 50 minutos (tokens Firebase expiram em 1h)
-    this.refreshInterval = setInterval(async () => {
-      if (this.currentUser) {
-        await this.updateLocalStorage(this.currentUser);
-      }
-    }, 50 * 60 * 1000); // 50 minutos
+    // MODIFICAÇÃO: Só inicia refresh se há um usuário Firebase ativo
+    // E apenas a cada 55 minutos (mais conservador para evitar quota exceeded)
+    if (this.currentUser) {
+      console.log('🔄 Iniciando refresh automático de token Firebase (cada 55min)');
+      this.refreshInterval = setInterval(async () => {
+        if (this.currentUser) {
+          console.log('⏰ Executando refresh programado do token Firebase');
+          await this.updateLocalStorage(this.currentUser);
+        }
+      }, 55 * 60 * 1000); // 55 minutos (mais conservador)
+    }
   }
 
   private stopTokenRefresh() {
@@ -64,14 +69,23 @@ class FirebaseTokenService {
   async forceRefreshToken(): Promise<string | null> {
     if (this.currentUser) {
       try {
+        console.log('🔄 Forçando refresh do token Firebase...');
         const token = await this.currentUser.getIdToken(true);
         localStorage.setItem('firebase_token', token);
+        console.log('✅ Token Firebase renovado com sucesso');
         return token;
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Erro ao forçar refresh do token:', error);
+        
+        // Se é erro de quota, para o refresh automático
+        if (error.code === 'auth/quota-exceeded') {
+          console.log('⚠️ Quota Firebase excedida - parando refresh automático');
+          this.stopTokenRefresh();
+        }
         return null;
       }
     }
+    console.log('⚠️ Nenhum usuário Firebase ativo para renovar token');
     return null;
   }
 
@@ -83,6 +97,20 @@ class FirebaseTokenService {
     // Implementar lógica para verificar se token expira em breve
     // Por enquanto, sempre retorna false
     return false;
+  }
+
+  // Novo método para desabilitar Firebase quando Django JWT está disponível
+  pauseFirebaseServices() {
+    console.log('⏸️ Pausando serviços Firebase - Django JWT ativo');
+    this.stopTokenRefresh();
+  }
+
+  // Novo método para reabilitar Firebase se necessário
+  resumeFirebaseServices() {
+    if (this.currentUser) {
+      console.log('▶️ Resumindo serviços Firebase');
+      this.startTokenRefresh();
+    }
   }
 }
 

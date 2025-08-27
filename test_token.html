@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Token Analysis</title>
+</head>
+<body>
+    <h2>JWT Token Analysis</h2>
+    <div id="results"></div>
+
+    <script>
+        function analyzeToken() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const resultsDiv = document.getElementById('results');
+            
+            if (!token) {
+                resultsDiv.innerHTML = '<p style="color: red;">No token found in localStorage or sessionStorage</p>';
+                return;
+            }
+            
+            console.log('Current token:', token);
+            console.log('Token length:', token.length);
+            
+            let html = `<p><strong>Token found:</strong> ${token.substring(0, 50)}...</p>`;
+            html += `<p><strong>Token length:</strong> ${token.length}</p>`;
+            
+            // Verificar formato JWT
+            const tokenParts = token.split('.');
+            if (tokenParts.length !== 3) {
+                html += '<p style="color: red;">Invalid JWT format - should have 3 parts separated by dots</p>';
+                resultsDiv.innerHTML = html;
+                return;
+            }
+            
+            try {
+                // Decodificar header
+                const header = JSON.parse(atob(tokenParts[0]));
+                html += `<h3>Header:</h3><pre>${JSON.stringify(header, null, 2)}</pre>`;
+                
+                // Decodificar payload
+                const payload = JSON.parse(atob(tokenParts[1]));
+                html += `<h3>Payload:</h3><pre>${JSON.stringify(payload, null, 2)}</pre>`;
+                
+                // Verificar expiração
+                if (payload.exp) {
+                    const expDate = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    const isExpired = now > expDate;
+                    
+                    html += `<h3>Expiration:</h3>`;
+                    html += `<p><strong>Expires at:</strong> ${expDate}</p>`;
+                    html += `<p><strong>Current time:</strong> ${now}</p>`;
+                    html += `<p><strong>Is expired:</strong> <span style="color: ${isExpired ? 'red' : 'green'}">${isExpired}</span></p>`;
+                    
+                    if (isExpired) {
+                        html += '<p style="color: orange;"><strong>Token is expired! You need to login again.</strong></p>';
+                    }
+                }
+                
+                // Testar o token com uma requisição
+                html += '<h3>API Test:</h3>';
+                html += '<button onclick="testAPI()">Test API with this token</button>';
+                html += '<div id="api-result"></div>';
+                
+            } catch (e) {
+                html += `<p style="color: red;">Error decoding JWT: ${e.message}</p>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function testAPI() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const resultDiv = document.getElementById('api-result');
+            
+            try {
+                resultDiv.innerHTML = '<p>Testing API...</p>';
+                
+                const response = await fetch('http://localhost:8000/api/companies/companies/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    data = responseText;
+                }
+                
+                let html = `<p><strong>Status:</strong> ${response.status} ${response.statusText}</p>`;
+                html += `<p><strong>Response:</strong></p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                if (response.ok) {
+                    html = `<div style="color: green;">${html}</div>`;
+                } else {
+                    html = `<div style="color: red;">${html}</div>`;
+                }
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Analisar automaticamente quando a página carrega
+        window.onload = analyzeToken;
+    </script>
+</body>
+</html>

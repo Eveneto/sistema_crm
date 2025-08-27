@@ -10,6 +10,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 import EmailVerificationNotice from './pages/auth/EmailVerificationNotice';
 import Dashboard from './pages/Dashboard';
+import CompaniesPage from './pages/CompaniesPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 import './App.css';
@@ -46,6 +47,14 @@ function App() {
                   element={
                     <PrivateRoute>
                       <Dashboard />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/companies" 
+                  element={
+                    <PrivateRoute>
+                      <CompaniesPage />
                     </PrivateRoute>
                   } 
                 />
