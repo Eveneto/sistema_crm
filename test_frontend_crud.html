@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Frontend Companies CRUD</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5; 
+        }
+        .container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+        .test-section { 
+            border-left: 4px solid #1890ff; 
+            padding-left: 16px; 
+            margin: 20px 0; 
+        }
+        .success { border-left-color: #52c41a; }
+        .error { border-left-color: #ff4d4f; }
+        .warning { border-left-color: #faad14; }
+        button { 
+            background: #1890ff; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 4px; 
+        }
+        button:hover { background: #40a9ff; }
+        button.danger { background: #ff4d4f; }
+        button.danger:hover { background: #ff7875; }
+        input, textarea { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 4px 0; 
+            border: 1px solid #d9d9d9; 
+            border-radius: 4px; 
+        }
+        .form-group { 
+            margin: 12px 0; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 4px; 
+            font-weight: bold; 
+        }
+        .company-card { 
+            border: 1px solid #d9d9d9; 
+            border-radius: 8px; 
+            padding: 16px; 
+            margin: 8px 0; 
+            background: #fafafa; 
+        }
+        .company-card h3 { 
+            margin: 0 0 8px 0; 
+            color: #1890ff; 
+        }
+        .company-info { 
+            margin: 4px 0; 
+            color: #666; 
+        }
+        .log { 
+            background: #f6f8fa; 
+            border: 1px solid #e1e4e8; 
+            border-radius: 6px; 
+            padding: 12px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 12px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            margin: 8px 0; 
+        }
+        .step {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Frontend - Companies CRUD</h1>
+        <p>Esta página testa o frontend diretamente com as mesmas chamadas que a aplicação React faz.</p>
+        
+        <div class="test-section">
+            <h2>🔑 1. Configuração de Token</h2>
+            <div class="step">
+                <h4>Passo 1: Configure o Token JWT</h4>
+                <p>Use o token obtido do teste backend:</p>
+                <input type="text" id="tokenInput" placeholder="Cole o token JWT aqui..." style="width: calc(100% - 100px); display: inline-block;">
+                <button onclick="setToken()" style="width: 90px; display: inline-block;">Definir</button>
+                <p id="tokenStatus" style="margin: 8px 0; font-weight: bold;"></p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 2. Listar Empresas (READ)</h2>
+            <button onclick="listCompanies()">Listar Todas as Empresas</button>
+            <div id="companiesList"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>➕ 3. Criar Empresa (CREATE)</h2>
+            <div class="form-group">
+                <label>Nome da Empresa:</label>
+                <input type="text" id="createName" value="Frontend Test Company">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="createEmail" value="frontend@test.com">
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" id="createPhone" value="(11) 99999-1234">
+            </div>
+            <div class="form-group">
+                <label>Website:</label>
+                <input type="text" id="createWebsite" value="https://frontend-test.com">
+            </div>
+            <div class="form-group">
+                <label>Setor:</label>
+                <input type="text" id="createIndustry" value="Desenvolvimento Frontend">
+            </div>
+            <div class="form-group">
+                <label>Tamanho:</label>
+                <select id="createSize">
+                    <option value="small">Small (1-50)</option>
+                    <option value="medium">Medium (51-200)</option>
+                    <option value="large">Large (200+)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Endereço:</label>
+                <textarea id="createAddress">Rua do Frontend, 123, São Paulo</textarea>
+            </div>
+            <div class="form-group">
+                <label>Notas:</label>
+                <textarea id="createNotes">Empresa criada via teste frontend</textarea>
+            </div>
+            <button onclick="createCompany()">Criar Empresa</button>
+            <div id="createResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>✏️ 4. Atualizar Empresa (UPDATE)</h2>
+            <div class="form-group">
+                <label>ID da Empresa para Atualizar:</label>
+                <input type="number" id="updateId" placeholder="Digite o ID da empresa">
+            </div>
+            <div class="form-group">
+                <label>Nome Atualizado:</label>
+                <input type="text" id="updateName" value="Frontend Test Company UPDATED">
+            </div>
+            <div class="form-group">
+                <label>Email Atualizado:</label>
+                <input type="email" id="updateEmail" value="updated@frontend-test.com">
+            </div>
+            <div class="form-group">
+                <label>Notas Atualizadas:</label>
+                <textarea id="updateNotes">Empresa atualizada via teste frontend</textarea>
+            </div>
+            <button onclick="updateCompany('PATCH')">Atualizar Parcial (PATCH)</button>
+            <button onclick="updateCompany('PUT')">Atualizar Completo (PUT)</button>
+            <div id="updateResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🗑️ 5. Deletar Empresa (DELETE)</h2>
+            <div class="form-group">
+                <label>ID da Empresa para Deletar:</label>
+                <input type="number" id="deleteId" placeholder="Digite o ID da empresa">
+            </div>
+            <button class="danger" onclick="deleteCompany()">Deletar Empresa</button>
+            <div id="deleteResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 6. Log de Requisições</h2>
+            <button onclick="clearLog()">Limpar Log</button>
+            <div id="requestLog" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let authToken = '';
+
+        function log(message) {
+            const logDiv = document.getElementById('requestLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('requestLog').innerHTML = '';
+        }
+
+        function setToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (!token) {
+                document.getElementById('tokenStatus').innerHTML = '❌ Token não informado';
+                document.getElementById('tokenStatus').className = 'error';
+                return;
+            }
+            
+            authToken = token;
+            document.getElementById('tokenStatus').innerHTML = '✅ Token configurado';
+            document.getElementById('tokenStatus').className = 'success';
+            log('🔑 Token JWT configurado');
+        }
+
+        async function makeRequest(method, url, data = null) {
+            if (!authToken) {
+                log('❌ Token não configurado');
+                return null;
+            }
+
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            log(`📡 ${method} ${url}`);
+            if (data) log(`📦 Data: ${JSON.stringify(data, null, 2)}`);
+
+            try {
+                const response = await fetch(url, options);
+                const responseData = response.status === 204 ? null : await response.json();
+
+                log(`📊 Status: ${response.status} ${response.ok ? '✅' : '❌'}`);
+                if (responseData) {
+                    log(`📋 Response: ${JSON.stringify(responseData, null, 2)}`);
+                }
+
+                return { ok: response.ok, status: response.status, data: responseData };
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`);
+                return { ok: false, error: error.message };
+            }
+        }
+
+        async function listCompanies() {
+            const result = await makeRequest('GET', `${API_BASE}/companies/companies/`);
+            
+            if (result && result.ok) {
+                const companiesDiv = document.getElementById('companiesList');
+                const companies = result.data.results || result.data;
+                
+                if (Array.isArray(companies) && companies.length > 0) {
+                    companiesDiv.innerHTML = companies.map(company => `
+                        <div class="company-card">
+                            <h3>${company.name} (ID: ${company.id})</h3>
+                            <div class="company-info">📧 ${company.email || 'N/A'}</div>
+                            <div class="company-info">📞 ${company.phone || 'N/A'}</div>
+                            <div class="company-info">🏢 ${company.industry || 'N/A'}</div>
+                            <div class="company-info">📈 ${company.size || 'N/A'}</div>
+                            <div class="company-info">👤 ${company.created_by_name}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    companiesDiv.innerHTML = '<p>Nenhuma empresa encontrada.</p>';
+                }
+            }
+        }
+
+        async function createCompany() {
+            const data = {
+                name: document.getElementById('createName').value,
+                email: document.getElementById('createEmail').value,
+                phone: document.getElementById('createPhone').value,
+                website: document.getElementById('createWebsite').value,
+                industry: document.getElementById('createIndustry').value,
+                size: document.getElementById('createSize').value,
+                address: document.getElementById('createAddress').value,
+                notes: document.getElementById('createNotes').value
+            };
+
+            const result = await makeRequest('POST', `${API_BASE}/companies/companies/`, data);
+            const resultDiv = document.getElementById('createResult');
+
+            if (result && result.ok) {
+                resultDiv.innerHTML = `<div class="success">✅ Empresa criada com sucesso! ID: ${result.data.id}</div>`;
+                // Preencher ID nos campos de update e delete
+                document.getElementById('updateId').value = result.data.id;
+                document.getElementById('deleteId').value = result.data.id;
+                // Atualizar lista
+                listCompanies();
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro ao criar empresa: ${result.error || result.data?.detail || 'Erro desconhecido'}</div>`;
+            }
+        }
+
+        async function updateCompany(method) {
+            const companyId = document.getElementById('updateId').value;
+            if (!companyId) {
+                document.getElementById('updateResult').innerHTML = '<div class="error">❌ ID da empresa é obrigatório</div>';
+                return;
+            }
+
+            let data;
+            if (method === 'PATCH') {
+                // Atualização parcial
+                data = {
+                    name: document.getElementById('updateName').value,
+                    email: document.getElementById('updateEmail').value,
+                    notes: document.getElementById('updateNotes').value
+                };
+            } else {
+                // PUT - atualização completa
+                data = {
+                    name: document.getElementById('updateName').value,
+                    email: document.getElementById('updateEmail').value,
+                    phone: document.getElementById('createPhone').value,
+                    website: document.getElementById('createWebsite').value,
+                    industry: document.getElementById('createIndustry').value,
+                    size: document.getElementById('createSize').value,
+                    address: document.getElementById('createAddress').value,
+                    notes: document.getElementById('updateNotes').value
+                };
+            }
+
+            const result = await makeRequest(method, `${API_BASE}/companies/companies/${companyId}/`, data);
+            const resultDiv = document.getElementById('updateResult');
+
+            if (result && result.ok) {
+                resultDiv.innerHTML = `<div class="success">✅ Empresa atualizada com sucesso via ${method}!</div>`;
+                // Atualizar lista
+                listCompanies();
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro ao atualizar empresa: ${result.error || result.data?.detail || 'Erro desconhecido'}</div>`;
+            }
+        }
+
+        async function deleteCompany() {
+            const companyId = document.getElementById('deleteId').value;
+            if (!companyId) {
+                document.getElementById('deleteResult').innerHTML = '<div class="error">❌ ID da empresa é obrigatório</div>';
+                return;
+            }
+
+            if (!confirm(`Tem certeza que deseja deletar a empresa com ID ${companyId}?`)) {
+                return;
+            }
+
+            const result = await makeRequest('DELETE', `${API_BASE}/companies/companies/${companyId}/`);
+            const resultDiv = document.getElementById('deleteResult');
+
+            if (result && (result.ok || result.status === 204)) {
+                resultDiv.innerHTML = `<div class="success">✅ Empresa deletada com sucesso!</div>`;
+                // Limpar campos
+                document.getElementById('deleteId').value = '';
+                document.getElementById('updateId').value = '';
+                // Atualizar lista
+                listCompanies();
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro ao deletar empresa: ${result.error || result.data?.detail || 'Erro desconhecido'}</div>`;
+            }
+        }
+
+        // Carregar empresas na inicialização
+        window.onload = function() {
+            log('🚀 Página de teste carregada');
+            log('💡 Configure primeiro o token JWT para começar os testes');
+        };
+    </script>
+</body>
+</html>

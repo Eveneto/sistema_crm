@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Frontend HttpOnly Cookies</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5; 
+        }
+        .container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+        .success { color: #52c41a; }
+        .error { color: #ff4d4f; }
+        .warning { color: #faad14; }
+        button { 
+            background: #1890ff; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 4px; 
+        }
+        button:hover { background: #40a9ff; }
+        .log { 
+            background: #f6f8fa; 
+            border: 1px solid #e1e4e8; 
+            border-radius: 6px; 
+            padding: 12px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 12px; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            margin: 8px 0; 
+        }
+        input { 
+            width: 200px; 
+            padding: 8px; 
+            margin: 4px; 
+            border: 1px solid #d9d9d9; 
+            border-radius: 4px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍪 Teste Frontend - HttpOnly Cookies</h1>
+        <p>Esta página testa o frontend usando cookies HttpOnly (sem localStorage)</p>
+    </div>
+
+    <div class="container">
+        <h2>🔐 1. Login com Cookies</h2>
+        <input type="text" id="username" placeholder="Username" value="testuser">
+        <input type="password" id="password" placeholder="Password" value="testpassword123">
+        <button onclick="login()">Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📋 2. Testar API (Companies)</h2>
+        <button onclick="testAPI()">Listar Empresas</button>
+        <div id="apiResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔄 3. Refresh Token</h2>
+        <button onclick="refreshToken()">Refresh Token</button>
+        <div id="refreshResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>🚪 4. Logout</h2>
+        <button onclick="logout()">Logout</button>
+        <div id="logoutResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📊 5. Log de Requests</h2>
+        <button onclick="clearLog()">Limpar Log</button>
+        <div id="requestLog" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        function log(message) {
+            const logDiv = document.getElementById('requestLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('requestLog').innerHTML = '';
+        }
+
+        async function makeRequest(method, url, data = null) {
+            const options = {
+                method: method,
+                credentials: 'include', // IMPORTANTE: Inclui cookies HttpOnly
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            log(`📡 ${method} ${url}`);
+            if (data) log(`📦 Data: ${JSON.stringify(data)}`);
+
+            try {
+                const response = await fetch(`${API_BASE}${url}`, options);
+                const responseData = response.status === 204 ? null : await response.json();
+
+                log(`📊 Status: ${response.status} ${response.ok ? '✅' : '❌'}`);
+                if (responseData) {
+                    log(`📋 Response: ${JSON.stringify(responseData, null, 2)}`);
+                }
+
+                return { ok: response.ok, status: response.status, data: responseData };
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`);
+                return { ok: false, error: error.message };
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const result = await makeRequest('POST', '/api/auth/login/', {
+                username_or_email: username,
+                password: password
+            });
+            
+            const resultDiv = document.getElementById('loginResult');
+            if (result.ok) {
+                resultDiv.innerHTML = '<div class="success">✅ Login realizado! Cookies HttpOnly salvos automaticamente.</div>';
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro no login: ${result.error || JSON.stringify(result.data)}</div>`;
+            }
+        }
+
+        async function testAPI() {
+            const result = await makeRequest('GET', '/api/companies/companies/');
+            
+            const resultDiv = document.getElementById('apiResult');
+            if (result.ok) {
+                const count = result.data.count || 'N/A';
+                resultDiv.innerHTML = `<div class="success">✅ API funcionando! ${count} empresas encontradas.</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro na API: ${result.error || JSON.stringify(result.data)}</div>`;
+            }
+        }
+
+        async function refreshToken() {
+            const result = await makeRequest('POST', '/api/auth/refresh/');
+            
+            const resultDiv = document.getElementById('refreshResult');
+            if (result.ok) {
+                resultDiv.innerHTML = '<div class="success">✅ Token refreshed via cookies!</div>';
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erro no refresh: ${result.error || JSON.stringify(result.data)}</div>`;
+            }
+        }
+
+        async function logout() {
+            const result = await makeRequest('POST', '/api/auth/logout/');
+            
+            const resultDiv = document.getElementById('logoutResult');
+            if (result.ok) {
+                resultDiv.innerHTML = '<div class="success">✅ Logout realizado! Cookies limpos.</div>';
+            } else {
+                resultDiv.innerHTML = `<div class="warning">⚠️ Logout: ${result.error || JSON.stringify(result.data)}</div>`;
+            }
+        }
+
+        // Inicialização
+        window.onload = function() {
+            log('🚀 Teste HttpOnly Cookies carregado');
+            log('💡 Esta página usa apenas cookies - sem localStorage');
+        };
+    </script>
+</body>
+</html>

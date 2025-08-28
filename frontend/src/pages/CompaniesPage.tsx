@@ -146,12 +146,26 @@ const CompaniesPage: React.FC = () => {
     try {
       if (editingCompany) {
         // Atualizar empresa
+        console.log('🔧 Atualizando empresa ID:', editingCompany.id);
+        console.log('📦 Dados enviados:', values);
+        
         const response = await api.patch(`/api/companies/companies/${editingCompany.id}/`, values);
-        setCompanies(companies.map(c => c.id === editingCompany.id ? response.data : c));
+        console.log('✅ Resposta do UPDATE:', response.data);
+        
+        // PROBLEMA POTENCIAL: response.data do PATCH não inclui id completo
+        // Vamos usar os dados da empresa existente + novos dados
+        const updatedCompany = { ...editingCompany, ...response.data };
+        
+        setCompanies(companies.map(c => c.id === editingCompany.id ? updatedCompany : c));
         message.success('Empresa atualizada com sucesso!');
       } else {
         // Criar nova empresa
+        console.log('➕ Criando nova empresa');
+        console.log('📦 Dados enviados:', values);
+        
         const response = await api.post('/api/companies/companies/', values);
+        console.log('✅ Resposta do CREATE:', response.data);
+        
         setCompanies([response.data, ...companies]);
         message.success('Empresa criada com sucesso!');
       }
@@ -161,7 +175,8 @@ const CompaniesPage: React.FC = () => {
       form.resetFields();
       fetchStats(); // Atualizar estatísticas
     } catch (error: any) {
-      console.error('Erro ao salvar empresa:', error);
+      console.error('❌ Erro ao salvar empresa:', error);
+      console.error('📋 Erro completo:', error.response?.data);
       if (error.response?.data) {
         const errorData = error.response.data;
         Object.keys(errorData).forEach(field => {
@@ -175,12 +190,14 @@ const CompaniesPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
+      console.log('🗑️ Deletando empresa ID:', id);
       await api.delete(`/api/companies/companies/${id}/`);
       setCompanies(companies.filter(c => c.id !== id));
       message.success('Empresa excluída com sucesso!');
       fetchStats(); // Atualizar estatísticas
+      console.log('✅ Empresa deletada com sucesso');
     } catch (error) {
-      console.error('Erro ao excluir empresa:', error);
+      console.error('❌ Erro ao excluir empresa:', error);
       message.error('Erro ao excluir empresa');
     }
   };

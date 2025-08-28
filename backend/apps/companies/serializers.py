@@ -57,6 +57,9 @@ class CompanyListSerializer(serializers.ModelSerializer):
 
 
 class CompanyCreateUpdateSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        print(f'[DEBUG][validate] Dados recebidos: {attrs}')
+        return super().validate(attrs)
     """Serializer para criação e atualização de empresas"""
     
     class Meta:
@@ -73,7 +76,23 @@ class CompanyCreateUpdateSerializer(serializers.ModelSerializer):
         return value.strip()
     
     def validate_website(self, value):
-        """Validar URL do website"""
-        if value and not value.startswith(('http://', 'https://')):
-            return f'https://{value}'
+        """Aceita entradas simples e converte para URL válido"""
+        print(f'[DEBUG][validate_website] Valor recebido: {value}')
+        if value:
+            value = value.strip()
+            print(f'[DEBUG][validate_website] Após strip: {value}')
+            # Adiciona https:// se não houver protocolo
+            if not value.startswith(('http://', 'https://')):
+                value = f'https://{value}'
+                print(f'[DEBUG][validate_website] https adicionado: {value}')
+            # Valida o URL final
+            from django.core.validators import URLValidator
+            from django.core.exceptions import ValidationError
+            validator = URLValidator()
+            try:
+                validator(value)
+            except ValidationError:
+                print(f'[DEBUG][validate_website] URL inválido: {value}')
+                raise serializers.ValidationError("Insira um URL válido.")
+        print(f'[DEBUG][validate_website] Valor final: {value}')
         return value

@@ -3,37 +3,39 @@ import { firebaseTokenService } from './firebaseTokenService';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
-// Create axios instance
+// Create axios instance with cookies support
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // IMPORTANTE: Inclui cookies HttpOnly automaticamente
 });
 
-// Add token to requests if available (but not for login/register)
+// Request interceptor - Cookies são enviados automaticamente
+// Mantemos fallback para localStorage apenas para debug/desenvolvimento
 api.interceptors.request.use(
   (config) => {
-    // Não adiciona token apenas para rotas de login/register, mas adiciona para profile
+    // Cookies HttpOnly são enviados automaticamente via withCredentials
+    // Mantém localStorage como fallback apenas para desenvolvimento/debug
     const isPublicAuthRoute = config.url?.includes('/auth/login/') || 
                              config.url?.includes('/auth/register/') || 
                              config.url?.includes('/auth/google-login/');
     
     if (!isPublicAuthRoute) {
-      // PRIORIDADE: token Django JWT > token Firebase
-      // Isso evita conflitos e garante que Django JWT seja usado quando disponível
+      // EM DESENVOLVIMENTO: Verificar se há tokens localStorage como fallback
       const djangoToken = localStorage.getItem('token') || sessionStorage.getItem('token');
       const firebaseToken = firebaseTokenService.getCurrentToken();
       
-      const token = djangoToken || firebaseToken;
-      
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        // Identifica o tipo de token para o backend processar corretamente
-        // config.headers['X-Auth-Type'] = djangoToken ? 'django' : 'firebase';
-        console.log(`🔐 Usando token ${djangoToken ? 'Django JWT' : 'Firebase'} para ${config.url}`);
+      // Apenas adiciona header se não há cookies (fallback para debug)
+      if (djangoToken && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${djangoToken}`;
+        console.log(`🔐 Fallback: Usando token Django JWT do localStorage para ${config.url}`);
+      } else if (firebaseToken && !config.headers.Authorization && !djangoToken) {
+        config.headers.Authorization = `Bearer ${firebaseToken}`;
+        console.log(`🔐 Fallback: Usando token Firebase do localStorage para ${config.url}`);
       } else {
-        console.log('⚠️ Nenhum token disponível para', config.url);
+        console.log(`🍪 Usando cookies HttpOnly para ${config.url}`);
       }
     }
     
@@ -44,52 +46,43 @@ api.interceptors.request.use(
   }
 );
 
-// Handle responses
+// Response interceptor - Com cookies, o refresh é mais simples
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
-    if (error.response?.status === 401) {
-      console.log('❌ Token inválido (401) - iniciando processo de limpeza e renovação');
+    const originalRequest = error.config;
+    
+    // Evitar loop infinito - não tentar refresh se já é uma requisição de refresh
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh/')) {
+      originalRequest._retry = true; // Marcar para evitar loops
+      console.log('❌ Token inválido (401) - tentando refresh automático via cookies');
       
-      const djangoToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const firebaseToken = firebaseTokenService.getCurrentToken();
-      
-      if (djangoToken) {
-        console.log('🔄 Token Django JWT inválido - removendo e redirecionando para login');
+      try {
+        // Tentar refresh automático via cookies - criar nova instância para evitar interceptor
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/api/auth/refresh/`,
+          {},
+          { withCredentials: true }
+        );
+        console.log('✅ Token refreshed via cookies - reenviar requisição');
+        
+        // Reenviar a requisição original
+        return api.request(originalRequest);
+        
+      } catch (refreshError) {
+        console.log('❌ Falha no refresh via cookies - limpando localStorage e redirecionando');
+        
+        // Limpar localStorage como fallback
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
-        // Não remove Firebase token, pode ser usado para re-autenticar
+        localStorage.removeItem('firebase_token');
+        
+        // Redirect para login
         window.location.href = '/login';
         return Promise.reject(error);
       }
-      
-      if (firebaseToken) {
-        console.log('🔄 Token Firebase inválido - tentando renovar via Firebase');
-        try {
-          const newFirebaseToken = await firebaseTokenService.forceRefreshToken();
-          if (newFirebaseToken) {
-            console.log('✅ Token Firebase renovado - reenviar requisição');
-            // Reenviar a requisição original com novo token
-            error.config.headers.Authorization = `Bearer ${newFirebaseToken}`;
-            return api.request(error.config);
-          } else {
-            throw new Error('Não foi possível renovar token Firebase');
-          }
-        } catch (renewError) {
-          console.log('❌ Falha ao renovar token Firebase - limpando tudo');
-          localStorage.removeItem('firebase_token');
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          window.location.href = '/login';
-          return Promise.reject(error);
-        }
-      }
-      
-      // Se não há tokens, apenas redireciona
-      console.log('❌ Nenhum token disponível - redirecionando para login');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

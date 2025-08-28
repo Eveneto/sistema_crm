@@ -66,9 +66,13 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API development
+    # CSRF disabled para desenvolvimento - habilitar em produção
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'apps.authentication.middleware.FirebaseAuthenticationMiddleware',  # Temporarily disabled for debugging
+    # Cookie authentication middleware - DEVE vir ANTES de Firebase middleware
+    'apps.authentication.cookie_middleware.CookieAuthenticationMiddleware',
+    # Firebase middleware - comentado temporariamente
+    # 'apps.authentication.middleware.FirebaseAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

@@ -7,6 +7,19 @@
 
 # testing
 /coverage
+ 
+# Cypress
+/cypress/screenshots/
+/cypress/videos/
+/cypress/downloads/
+/cypress/results/
+/cypress/report/
+/cypress/evidence/
+/cypress/.cache/
+/cypress/support/
+/cypress.env.json
+/cypress.config.js
+/cypress.config.ts
 
 # production
 /build

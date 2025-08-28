@@ -10,3 +10,28 @@ RELATORIO_*.md
 GOOGLE_CONSOLE_CONFIG.md
 PROXIMOS_PASSOS.md
 SUCESSO_*.md
+
+# Backend
+/backend/db.sqlite3
+/backend/.env
+/backend/.venv/
+/backend/venv/
+/backend/__pycache__/
+/backend/apps/*/__pycache__/
+/backend/.pytest_cache/
+
+# Frontend
+/frontend/node_modules/
+/frontend/build/
+/frontend/.env*
+/frontend/cypress/screenshots/
+/frontend/cypress/videos/
+/frontend/cypress/downloads/
+/frontend/cypress/results/
+/frontend/cypress/report/
+/frontend/cypress/evidence/
+/frontend/cypress/.cache/
+/frontend/cypress/support/
+/frontend/cypress.env.json
+/frontend/cypress.config.js
+/frontend/cypress.config.ts

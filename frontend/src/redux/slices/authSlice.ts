@@ -33,14 +33,16 @@ const isTokenValid = (token: string | null): boolean => {
   }
 };
 
+// Com cookies HttpOnly, não podemos mais verificar tokens via JavaScript
+// A autenticação será gerenciada via cookies automaticamente
 const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
 const validToken = isTokenValid(storedToken);
 
 const initialState: AuthState = {
   user: null,
-  token: validToken ? storedToken : null,
+  token: validToken ? storedToken : null, // Mantém para compatibilidade/debug
   isLoading: false,
-  isAuthenticated: validToken,
+  isAuthenticated: validToken, // Em produção, isso será determinado pelo backend
   error: null,
 };
 
@@ -120,6 +122,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      // Com cookies HttpOnly, fazemos chamada para backend para limpar
+      api.post('/api/auth/logout/').catch(() => {
+        // Se falhar, apenas continue - cookies podem já estar expirados
+        console.log('Logout backend falhou, mas continuando...');
+      });
+      
+      // Limpar localStorage como fallback/debug
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       sessionStorage.removeItem('token');
@@ -147,23 +156,24 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        state.token = action.payload.access;
         state.isAuthenticated = true;
+        
+        // Com cookies HttpOnly, não precisamos mais salvar tokens manualmente
+        // Cookies são gerenciados automaticamente pelo backend
+        console.log('✅ Login bem-sucedido - tokens salvos em cookies HttpOnly');
+        
+        // DESENVOLVIMENTO: Manter localStorage como fallback para debug
+        if (action.payload.access) {
+          state.token = action.payload.access;
+          const storage = action.meta.arg.rememberMe ? localStorage : sessionStorage;
+          storage.setItem('token', action.payload.access);
+          if (action.payload.refresh) {
+            storage.setItem('refreshToken', action.payload.refresh);
+          }
+        }
         
         // Pausa Firebase quando Django JWT está ativo
         firebaseTokenService.pauseFirebaseServices();
-        
-        // Se rememberMe for true, salva no localStorage, senão no sessionStorage
-        const storage = action.meta.arg.rememberMe ? localStorage : sessionStorage;
-        storage.setItem('token', action.payload.access);
-        if (action.payload.refresh) {
-          storage.setItem('refreshToken', action.payload.refresh);
-        }
-        
-        // Remove do outro storage para evitar conflitos
-        const otherStorage = action.meta.arg.rememberMe ? sessionStorage : localStorage;
-        otherStorage.removeItem('token');
-        otherStorage.removeItem('refreshToken');
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
