@@ -2,6 +2,9 @@ from django.http import JsonResponse
 from django.contrib.auth.models import AnonymousUser
 from .firebase_service import FirebaseService
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FirebaseAuthenticationMiddleware:
@@ -11,55 +14,33 @@ class FirebaseAuthenticationMiddleware:
     
     def __init__(self, get_response):
         self.get_response = get_response
-
+        self.firebase_service = FirebaseService()
+        try:
+            self.firebase_service.initialize()
+        except Exception as e:
+            logger.error("Falha ao inicializar Firebase no middleware")
+    
     def __call__(self, request):
-        # Processa request antes da view
-        self.process_request(request)
-        
-        # Chama próximo middleware ou view
-        response = self.get_response(request)
-        
-        return response
-
-    def process_request(self, request):
-        # Ignora para rotas que não precisam de autenticação
-        public_paths = [
-            '/auth/login/',
-            '/auth/register/', 
-            '/auth/verify-email/',
-            '/auth/firebase-validate/',
-            '/admin/',
-            '/static/',
-            '/media/'
-        ]
-        
-        # Verifica se é rota pública
-        for path in public_paths:
-            if request.path.startswith(path):
-                return
-        
-        # Verifica header de autorização
+        """Processa autenticação Firebase para cada request"""
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        auth_type = request.META.get('HTTP_X_AUTH_TYPE', 'django')  # Default Django
         
-        if not auth_header.startswith('Bearer '):
-            return
-            
-        token = auth_header[7:]  # Remove 'Bearer '
+        # Log para debug
+        logger.info(f"🔍 Verificando autenticação para: {request.path}")
+        logger.info(f"🔍 Authorization header: {auth_header[:50]}..." if auth_header else "🔍 Nenhum Authorization header")
         
-        # Se é token Firebase, valida
-        if auth_type == 'firebase':
-            firebase_user_data, error = FirebaseService.verify_firebase_token(token)
-            
-            if not error and firebase_user_data:
-                # Busca ou cria usuário Django
-                user, user_error = FirebaseService.get_or_create_user_from_firebase(firebase_user_data)
-                
-                if user and not user_error:
-                    # Adiciona usuário ao request
-                    request.user = user
-                    request.firebase_user_data = firebase_user_data
-                    return
+        if auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            try:
+                logger.info(f"🔐 Verificando token Firebase...")
+                decoded_token = self.firebase_service.verify_token(token)
+                user = self.firebase_service.create_or_update_user(decoded_token)
+                request.user = user
+                logger.info(f"✅ Autenticação Firebase bem-sucedida: {user.email}")
+            except Exception as e:
+                logger.error(f"❌ Erro na autenticação Firebase: {e}")
+                request.user = AnonymousUser()
+        else:
+            logger.info("👤 Usuário anônimo (sem token)")
+            request.user = AnonymousUser()
         
-        # Se chegou aqui, deixa Django lidar com autenticação normal
-        return
+        return self.get_response(request)

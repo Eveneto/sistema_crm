@@ -66,7 +66,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       icon: <ProjectOutlined />,
       label: 'Pipeline',
       onClick: () => navigate('/kanban'),
-      disabled: true, // Temporariamente desabilitado
+      disabled: false, // Agora habilitado!
     },
     {
       key: '/chat',

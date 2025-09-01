@@ -28,7 +28,7 @@ print_error() {
 
 # 1. Verificar se arquivo de credenciais existe
 echo "1. Verificando credenciais Firebase..."
-CRED_FILE=$(find /home/dev_pc/Documentos/crm_freela -name "client_secret_254673637981-*.json" | head -1)
+CRED_FILE=$(find /home/dev_pc/Documentos/crm_freela -name "client_secret_254673637981-*.json" -o -name "crm-system-ff0eb-firebase-adminsdk-fbsvc-bc12dede9b.json" | head -1)
 
 if [ -z "$CRED_FILE" ]; then
     print_error "Arquivo de credenciais Firebase não encontrado!"

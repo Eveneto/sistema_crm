@@ -1,24 +1,48 @@
 # Arquivos sensíveis e temporários
 *.pem
 *.key
+*secret*.json
+*-adminsdk-*.json
 client_secret*.json
+crm-system-*.json
+.env*
+!.env.example
+config.json
+firebase-config.json
+serviceAccountKey.json
 test_*oauth*.html
 test_*oauth*.py
-diagnose_oauth.sh
+test_*.html
+test_*.sh
+test_*.py
+diagnose_*.sh
+debug_*.sh
 https_server.py
+*.log
+.DS_Store
+Thumbs.db
 RELATORIO_*.md
 GOOGLE_CONSOLE_CONFIG.md
 PROXIMOS_PASSOS.md
 SUCESSO_*.md
+FIREBASE_*.md
+CLAUDE.md
+STATUS_*.md
+UPDATE_NOTES.md
+KANBAN_TESTING_GUIDE.md
+SEGURANCA_AUTENTICACAO.md
+RESOLUCAO_FIREBASE_JWT.md
 
 # Backend
 /backend/db.sqlite3
-/backend/.env
+/backend/.env*
 /backend/.venv/
 /backend/venv/
 /backend/__pycache__/
-/backend/apps/*/__pycache__/
+/backend/**/__pycache__/
 /backend/.pytest_cache/
+*.sqlite3
+*.db
 
 # Frontend
 /frontend/node_modules/

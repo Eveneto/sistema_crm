@@ -11,6 +11,7 @@ import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 import EmailVerificationNotice from './pages/auth/EmailVerificationNotice';
 import Dashboard from './pages/Dashboard';
 import CompaniesPage from './pages/CompaniesPage';
+import KanbanPage from './pages/KanbanPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 import './App.css';
@@ -55,6 +56,14 @@ function App() {
                   element={
                     <PrivateRoute>
                       <CompaniesPage />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/kanban" 
+                  element={
+                    <PrivateRoute>
+                      <KanbanPage />
                     </PrivateRoute>
                   } 
                 />

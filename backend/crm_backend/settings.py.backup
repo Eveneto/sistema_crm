@@ -7,6 +7,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
+    # CSRF disabled para desenvolvimento - habilitar em produção
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Cookie authentication middleware - DESABILITADO para Firebase
+    # 'apps.authentication.cookie_middleware.CookieAuthenticationMiddleware',
+    # Firebase middleware - HABILITADO
+    'apps.authentication.middleware.FirebaseAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]om dotenv import load_dotenv
+import os
+from datetime import timedelta
 
 # Email settings (configure via .env)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -125,9 +137,9 @@ DATABASES = {
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'apps.authentication.firebase_drf_auth.FirebaseAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
@@ -227,9 +239,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Firebase Configuration
-FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR.parent, 'crm-system-ff0eb-firebase-adminsdk-fbsvc-bc12dede9b.json')
 
 # Swagger Configuration
 SWAGGER_SETTINGS = {
