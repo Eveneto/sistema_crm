@@ -41,8 +41,11 @@ RESOLUCAO_FIREBASE_JWT.md
 /backend/__pycache__/
 /backend/**/__pycache__/
 /backend/.pytest_cache/
+/backend/apps/**/__pycache__/
 *.sqlite3
 *.db
+*.pyc
+__pycache__/
 
 # Frontend
 /frontend/node_modules/
@@ -59,3 +62,34 @@ RESOLUCAO_FIREBASE_JWT.md
 /frontend/cypress.env.json
 /frontend/cypress.config.js
 /frontend/cypress.config.ts
+
+# Desenvolvimento e Debug
+analyze_token.js
+debug_*.js
+debug_*.sh
+*test*.sh
+*test*.py
+*test*.html
+*test*.js
+test_*
+teste_*
+*.log
+**/logs/
+*.tmp
+*.temp
+.vscode/settings.json
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Certificados e arquivos binários
+*.pem
+*.key
+*.p12
+*.pfx
+bfg.jar
