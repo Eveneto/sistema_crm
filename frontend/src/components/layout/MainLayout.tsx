@@ -7,7 +7,8 @@ import {
   DashboardOutlined,
   BuildOutlined,
   ProjectOutlined,
-  MessageOutlined
+  MessageOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -67,6 +68,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       label: 'Pipeline',
       onClick: () => navigate('/kanban'),
       disabled: false, // Agora habilitado!
+    },
+    {
+      key: '/communities',
+      icon: <TeamOutlined />,
+      label: 'Comunidades',
+      onClick: () => navigate('/communities'),
+      disabled: false,
     },
     {
       key: '/chat',

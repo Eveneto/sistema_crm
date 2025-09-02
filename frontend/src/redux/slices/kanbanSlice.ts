@@ -114,7 +114,11 @@ const kanbanSlice = createSlice({
   reducers: {
     setCurrentBoard: (state, action: PayloadAction<Board>) => {
       state.currentBoard = action.payload;
-      state.columns = action.payload.columns || [];
+      // Ensure all columns have tasks array initialized
+      state.columns = (action.payload.columns || []).map(col => ({
+        ...col,
+        tasks: col.tasks || []
+      }));
     },
     clearError: (state) => {
       state.error = null;
@@ -173,7 +177,11 @@ const kanbanSlice = createSlice({
       .addCase(fetchBoardById.fulfilled, (state, action) => {
         state.loading = false;
         state.currentBoard = action.payload;
-        state.columns = action.payload.columns || [];
+        // Ensure all columns have tasks array initialized
+        state.columns = (action.payload.columns || []).map(col => ({
+          ...col,
+          tasks: col.tasks || []
+        }));
       })
       .addCase(fetchBoardById.rejected, (state, action) => {
         state.loading = false;
@@ -207,7 +215,9 @@ const kanbanSlice = createSlice({
       
       // Create column
       .addCase(createColumn.fulfilled, (state, action) => {
-        state.columns.push(action.payload);
+        // Ensure the new column has an empty tasks array
+        const newColumn = { ...action.payload, tasks: action.payload.tasks || [] };
+        state.columns.push(newColumn);
       })
       
       // Update column

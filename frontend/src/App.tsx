@@ -12,6 +12,9 @@ import EmailVerificationNotice from './pages/auth/EmailVerificationNotice';
 import Dashboard from './pages/Dashboard';
 import CompaniesPage from './pages/CompaniesPage';
 import KanbanPage from './pages/KanbanPage';
+import CommunitiesPage from './pages/CommunitiesPage';
+import CommunityDetailsPage from './pages/CommunityDetailsPage';
+import TestingToolsPage from './pages/TestingToolsPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 import './App.css';
@@ -40,6 +43,7 @@ function App() {
                 <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
                 <Route path="/test" element={<ApiTest />} />
                 <Route path="/token-test" element={<TokenTestPage />} />
+                <Route path="/testing-tools" element={<TestingToolsPage />} />
                 <Route path="/verifique-email" element={<EmailVerificationNotice />} />
                 
                 {/* Rotas protegidas */}
@@ -64,6 +68,22 @@ function App() {
                   element={
                     <PrivateRoute>
                       <KanbanPage />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/communities" 
+                  element={
+                    <PrivateRoute>
+                      <CommunitiesPage />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/communities/:id" 
+                  element={
+                    <PrivateRoute>
+                      <CommunityDetailsPage />
                     </PrivateRoute>
                   } 
                 />

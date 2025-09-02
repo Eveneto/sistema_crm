@@ -105,9 +105,15 @@ class ColumnViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         board = get_object_or_404(Board, id=self.kwargs['board_pk'])
-        # Auto-increment position
-        last_position = board.columns.aggregate(max_pos=Max('position'))['max_pos'] or -1
-        serializer.save(board=board, position=last_position + 1)
+        try:
+            # Auto-increment position
+            last_position = board.columns.aggregate(max_pos=Max('position'))['max_pos'] or -1
+            logger.info(f"Creating column for board {board.id}, position: {last_position + 1}")
+            logger.info(f"Column data: {serializer.validated_data}")
+            serializer.save(board=board, position=last_position + 1)
+        except Exception as e:
+            logger.error(f"Error creating column: {str(e)}")
+            raise ValidationError(f"Erro ao criar coluna: {str(e)}")
 
     @action(detail=False, methods=['patch'])
     def reorder(self, request, board_pk=None):

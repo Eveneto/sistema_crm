@@ -38,7 +38,7 @@ class Column(models.Model):
     name = models.CharField(max_length=100)
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='columns')
     position = models.IntegerField(default=0)
-    color = models.CharField(max_length=7, choices=COLUMN_COLORS, default='#e6f3ff')
+    color = models.CharField(max_length=7, default='#e6f3ff', help_text="Cor em formato hex (#ffffff)")
     max_tasks = models.IntegerField(null=True, blank=True, help_text="Limite de tasks (opcional)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

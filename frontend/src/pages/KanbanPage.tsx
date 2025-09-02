@@ -26,6 +26,7 @@ import {
   fetchBoardById,
   createBoard,
   createColumn,
+  updateColumn,
   createTask,
   updateTask,
   deleteColumn,
@@ -44,7 +45,9 @@ const KanbanPage: React.FC = () => {
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedColumn, setSelectedColumn] = useState<Column | null>(null);
   const [currentColumnId, setCurrentColumnId] = useState<string>('');
+  const [isEditingColumn, setIsEditingColumn] = useState(false);
 
   // Forms
   const [boardForm] = Form.useForm();
@@ -82,18 +85,32 @@ const KanbanPage: React.FC = () => {
     if (!currentBoard) return;
     
     try {
-      await dispatch(createColumn({ 
-        boardId: currentBoard.id, 
-        data: values 
-      })).unwrap();
-      message.success('Coluna criada com sucesso!');
+      if (isEditingColumn && selectedColumn) {
+        // Editar coluna existente
+        await dispatch(updateColumn({ 
+          boardId: currentBoard.id, 
+          columnId: selectedColumn.id,
+          data: values 
+        })).unwrap();
+        message.success('Coluna atualizada com sucesso!');
+      } else {
+        // Criar nova coluna
+        await dispatch(createColumn({ 
+          boardId: currentBoard.id, 
+          data: values 
+        })).unwrap();
+        message.success('Coluna criada com sucesso!');
+      }
+      
       setColumnModalOpen(false);
       columnForm.resetFields();
+      setSelectedColumn(null);
+      setIsEditingColumn(false);
       // Recarregar o board atual
       dispatch(fetchBoardById(currentBoard.id));
     } catch (error) {
-      message.error('Erro ao criar coluna');
-      console.error(error);
+      const errorMessage = isEditingColumn ? 'Erro ao atualizar coluna' : 'Erro ao criar coluna';
+      message.error(errorMessage);
     }
   };
 
@@ -145,9 +162,22 @@ const KanbanPage: React.FC = () => {
     }
   };
 
+  const handleCloseColumnModal = () => {
+    setColumnModalOpen(false);
+    setSelectedColumn(null);
+    setIsEditingColumn(false);
+    columnForm.resetFields();
+  };
+
   const handleEditColumn = (column: Column) => {
-    // Implementar edição de coluna
-    console.log('Edit column:', column);
+    setSelectedColumn(column);
+    setIsEditingColumn(true);
+    columnForm.setFieldsValue({
+      name: column.name,
+      color: column.color,
+      max_tasks: column.max_tasks
+    });
+    setColumnModalOpen(true);
   };
 
   const handleDeleteColumn = async (columnId: string) => {
@@ -170,13 +200,13 @@ const KanbanPage: React.FC = () => {
 
   // Estatísticas do board atual
   const getBoardStats = () => {
-    if (!columns) return { totalTasks: 0, completedTasks: 0, overdueTasks: 0 };
+    if (!columns || columns.length === 0) return { totalTasks: 0, completedTasks: 0, overdueTasks: 0 };
 
-    const allTasks = columns.flatMap(col => col.tasks);
+    const allTasks = columns.flatMap(col => col.tasks || []).filter(task => task != null);
     const totalTasks = allTasks.length;
-    const completedTasks = allTasks.filter(task => task.status === 'completed').length;
+    const completedTasks = allTasks.filter(task => task && task.status === 'completed').length;
     const overdueTasks = allTasks.filter(task => 
-      task.due_date && new Date(task.due_date) < new Date()
+      task && task.due_date && new Date(task.due_date) < new Date()
     ).length;
 
     return { totalTasks, completedTasks, overdueTasks };
@@ -326,9 +356,9 @@ const KanbanPage: React.FC = () => {
         </Modal>
 
         <Modal
-          title="Criar Nova Coluna"
+          title={isEditingColumn ? "Editar Coluna" : "Criar Nova Coluna"}
           open={columnModalOpen}
-          onCancel={() => setColumnModalOpen(false)}
+          onCancel={handleCloseColumnModal}
           footer={null}
           destroyOnClose
         >
@@ -343,7 +373,7 @@ const KanbanPage: React.FC = () => {
             <Form.Item
               name="color"
               label="Cor"
-              initialValue="#1890ff"
+              initialValue="#e6f3ff"
             >
               <Input type="color" />
             </Form.Item>
@@ -352,11 +382,11 @@ const KanbanPage: React.FC = () => {
             </Form.Item>
             <div style={{ textAlign: 'right' }}>
               <Space>
-                <Button onClick={() => setColumnModalOpen(false)}>
+                <Button onClick={handleCloseColumnModal}>
                   Cancelar
                 </Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
-                  Criar Coluna
+                  {isEditingColumn ? "Salvar Alterações" : "Criar Coluna"}
                 </Button>
               </Space>
             </div>

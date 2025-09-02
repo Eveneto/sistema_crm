@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/auth/', include('apps.authentication.urls')),
     path('api/companies/', include('apps.companies.urls')),
     path('api/kanban/', include('apps.kanban.urls')),
+    path('api/communities/', include('apps.communities.urls')),
     path('api/chat/', include('apps.chat.urls')),
     path('api/dashboard/', include('apps.dashboard.urls')),
     

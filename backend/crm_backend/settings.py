@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.authentication',
     'apps.companies',
     'apps.kanban',
+    'apps.communities',
     'apps.chat',
     'apps.dashboard',
 ]
@@ -127,6 +128,7 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'apps.authentication.firebase_drf_auth.FirebaseAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Suporte a JWT Django
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

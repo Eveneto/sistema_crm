@@ -28,9 +28,59 @@ class FirebaseTokenService {
       localStorage.setItem('user_photo', user.photoURL || '');
       
       console.log('🔄 Token Firebase atualizado:', new Date().toLocaleTimeString());
+      console.log('🔐 Token válido até:', new Date(Date.now() + 60 * 60 * 1000).toLocaleTimeString());
     } catch (error) {
       console.error('❌ Erro ao atualizar token Firebase:', error);
+      localStorage.removeItem('firebase_token');
     }
+  }
+
+  // Método público para forçar renovação do token
+  async refreshToken(): Promise<string | null> {
+    if (!this.currentUser) {
+      console.warn('⚠️ Usuário não autenticado, não é possível renovar token');
+      return null;
+    }
+
+    try {
+      console.log('🔄 Forçando renovação do token Firebase...');
+      
+      // Limpar token corrompido do localStorage primeiro
+      localStorage.removeItem('firebase_token');
+      
+      // Forçar renovação completa com cache bypass
+      const token = await this.currentUser.getIdToken(true);
+      
+      if (!token) {
+        throw new Error('Token renovado está vazio');
+      }
+      
+      // Salvar novo token
+      localStorage.setItem('firebase_token', token);
+      console.log('✅ Token Firebase renovado manualmente com sucesso');
+      console.log('🔐 Novo token length:', token.length);
+      
+      return token;
+    } catch (error: any) {
+      console.error('❌ Erro ao renovar token Firebase:', error);
+      
+      // Se é erro de quota, parar refresh automático
+      if (error.code === 'auth/quota-exceeded') {
+        console.log('⚠️ Quota Firebase excedida - pausando serviços');
+        this.stopTokenRefresh();
+      }
+      
+      // Limpar token corrompido
+      localStorage.removeItem('firebase_token');
+      return null;
+    }
+  }
+
+  // Método para limpar completamente o estado de autenticação
+  clearAuthState() {
+    console.log('🧹 Limpando estado de autenticação Firebase');
+    this.stopTokenRefresh();
+    this.clearLocalStorage();
   }
 
   private clearLocalStorage() {
@@ -41,13 +91,10 @@ class FirebaseTokenService {
   }
 
   private startTokenRefresh() {
-    // Limpa intervalo anterior se existir
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
 
-    // MODIFICAÇÃO: Só inicia refresh se há um usuário Firebase ativo
-    // E apenas a cada 55 minutos (mais conservador para evitar quota exceeded)
     if (this.currentUser) {
       console.log('🔄 Iniciando refresh automático de token Firebase (cada 55min)');
       this.refreshInterval = setInterval(async () => {
@@ -55,7 +102,7 @@ class FirebaseTokenService {
           console.log('⏰ Executando refresh programado do token Firebase');
           await this.updateLocalStorage(this.currentUser);
         }
-      }, 55 * 60 * 1000); // 55 minutos (mais conservador)
+      }, 55 * 60 * 1000);
     }
   }
 
@@ -77,7 +124,6 @@ class FirebaseTokenService {
       } catch (error: any) {
         console.error('❌ Erro ao forçar refresh do token:', error);
         
-        // Se é erro de quota, para o refresh automático
         if (error.code === 'auth/quota-exceeded') {
           console.log('⚠️ Quota Firebase excedida - parando refresh automático');
           this.stopTokenRefresh();
@@ -94,18 +140,14 @@ class FirebaseTokenService {
   }
 
   isTokenExpiringSoon(): boolean {
-    // Implementar lógica para verificar se token expira em breve
-    // Por enquanto, sempre retorna false
     return false;
   }
 
-  // Novo método para desabilitar Firebase quando Django JWT está disponível
   pauseFirebaseServices() {
     console.log('⏸️ Pausando serviços Firebase - Django JWT ativo');
     this.stopTokenRefresh();
   }
 
-  // Novo método para reabilitar Firebase se necessário
   resumeFirebaseServices() {
     if (this.currentUser) {
       console.log('▶️ Resumindo serviços Firebase');
