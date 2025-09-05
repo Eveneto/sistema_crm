@@ -8,10 +8,10 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, token } = useAuth(); // Usar o hook que reconhece Firebase
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
-  console.log("🔒 PrivateRoute - isAuthenticated:", isAuthenticated, "token:", !!token, "isLoading:", isLoading);
+  console.log("🔒 PrivateRoute - isAuthenticated:", isAuthenticated, "user:", !!user, "isLoading:", isLoading);
 
   // Se está carregando, mostra spinner
   if (isLoading) {
@@ -27,8 +27,8 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     );
   }
 
-  // Se não está autenticado (sem token), redireciona para login
-  if (!isAuthenticated || !token) {
+  // Com cookies HTTP-Only, verificamos apenas isAuthenticated (não token)
+  if (!isAuthenticated) {
     // Salva a rota atual para redirecionar após login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

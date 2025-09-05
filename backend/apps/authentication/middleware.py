@@ -22,6 +22,12 @@ class FirebaseAuthenticationMiddleware:
     
     def __call__(self, request):
         """Processa autenticação Firebase para cada request"""
+        
+        # Excluir Django admin da autenticação Firebase
+        if request.path.startswith('/admin'):
+            logger.info(f"🔍 Django admin path detected: {request.path} - skipping Firebase auth")
+            return self.get_response(request)
+        
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         
         # Log para debug
@@ -37,10 +43,13 @@ class FirebaseAuthenticationMiddleware:
                 request.user = user
                 logger.info(f"✅ Autenticação Firebase bem-sucedida: {user.email}")
             except Exception as e:
-                logger.error(f"❌ Erro na autenticação Firebase: {e}")
+                # Log detalhado apenas para debug, não como erro
+                logger.warning(f"⚠️ Token Firebase inválido ou expirado: {str(e)[:100]}")
+                # Para API requests, retorna usuário anônimo
                 request.user = AnonymousUser()
         else:
-            logger.info("👤 Usuário anônimo (sem token)")
-            request.user = AnonymousUser()
+            # Para requests sem token, deixa o Django lidar com a autenticação padrão
+            if not hasattr(request, 'user'):
+                request.user = AnonymousUser()
         
         return self.get_response(request)

@@ -31,15 +31,31 @@ class CommunityMemberSerializer(serializers.ModelSerializer):
 
 class CommunityMemberCreateSerializer(serializers.ModelSerializer):
     """Serializer para criar/convidar membros"""
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField(required=False)
+    user_email = serializers.EmailField(required=False)
     
     class Meta:
         model = CommunityMember
-        fields = ['user_id', 'role']
+        fields = ['user_id', 'user_email', 'role']
+
+    def validate(self, data):
+        """Validar que temos user_id OU user_email"""
+        if not data.get('user_id') and not data.get('user_email'):
+            raise serializers.ValidationError("É necessário fornecer user_id ou user_email")
+        
+        if data.get('user_id') and data.get('user_email'):
+            raise serializers.ValidationError("Forneça apenas user_id OU user_email, não ambos")
+        
+        return data
 
     def validate_user_id(self, value):
-        if not User.objects.filter(id=value).exists():
+        if value and not User.objects.filter(id=value).exists():
             raise serializers.ValidationError("Usuário não encontrado")
+        return value
+        
+    def validate_user_email(self, value):
+        if value and not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Usuário com este email não encontrado")
         return value
 
 

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Login - Detectar Logouts Inesperados</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .status-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .log-container {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .btn:hover { background: #0056b3; }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+        .warning { color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Login - Detectar Logouts Inesperados</h1>
+        
+        <div class="status-box">
+            <h3>📊 Status Atual</h3>
+            <div id="currentStatus">Carregando...</div>
+        </div>
+        
+        <div class="status-box">
+            <h3>🧪 Teste com Nova Senha Forte</h3>
+            <p><strong>Nova senha:</strong> Admin123!@# (sem alertas do navegador)</p>
+            <button class="btn" onclick="testStrongPassword()">🔐 Testar Login Forte</button>
+            <div id="strongPasswordResult"></div>
+        </div>
+        
+        <div class="status-box">
+            <h3>🕵️ Monitor de Eventos</h3>
+            <button class="btn" onclick="startMonitoring()">▶️ Iniciar Monitoramento</button>
+            <button class="btn" onclick="stopMonitoring()">⏹️ Parar</button>
+            <button class="btn" onclick="clearLogs()">🗑️ Limpar Logs</button>
+            <div class="log-container" id="eventLog"></div>
+        </div>
+        
+        <div class="status-box">
+            <h3>🌐 Abrir Frontend</h3>
+            <button class="btn" onclick="openFrontend()">🚀 Abrir http://localhost:3000</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let monitoringInterval;
+        let requestCount = 0;
+        
+        // Monitor de eventos
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Interceptar requisições fetch globalmente
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const url = args[0];
+            requestCount++;
+            
+            if (typeof url === 'string') {
+                if (url.includes('/logout/')) {
+                    log(`🚪 LOGOUT detectado! Requisição #${requestCount}`, 'warning');
+                } else if (url.includes('/login/')) {
+                    log(`🔑 LOGIN detectado! Requisição #${requestCount}`, 'success');
+                } else if (url.includes('/auth/')) {
+                    log(`🔐 Auth API: ${url.split('/').pop()} #${requestCount}`, 'info');
+                }
+            }
+            
+            return originalFetch.apply(this, args).then(response => {
+                if (url && typeof url === 'string' && url.includes('/auth/')) {
+                    log(`📡 Resposta: ${response.status} ${response.statusText}`, 
+                        response.ok ? 'success' : 'error');
+                }
+                return response;
+            }).catch(error => {
+                log(`❌ Erro de rede: ${error.message}`, 'error');
+                throw error;
+            });
+        };
+        
+        // Monitor de storage events (logouts síncronos)
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'auth_logout_event') {
+                log(`🔄 Evento de storage detectado: ${event.key} = ${event.newValue}`, 'warning');
+            }
+        });
+        
+        // Monitor de mudança de visibilidade
+        document.addEventListener('visibilitychange', () => {
+            log(`👁️ Visibilidade mudou: ${document.visibilityState}`, 'info');
+        });
+        
+        async function checkCurrentStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/companies/`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    document.getElementById('currentStatus').innerHTML = 
+                        '<span class="success">✅ AUTENTICADO - Cookies válidos</span>';
+                } else {
+                    document.getElementById('currentStatus').innerHTML = 
+                        '<span class="error">❌ NÃO AUTENTICADO</span>';
+                }
+            } catch (error) {
+                document.getElementById('currentStatus').innerHTML = 
+                    '<span class="error">❌ ERRO DE CONEXÃO</span>';
+            }
+        }
+        
+        async function testStrongPassword() {
+            const resultDiv = document.getElementById('strongPasswordResult');
+            resultDiv.innerHTML = '<div>🔄 Testando login com senha forte...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username_or_email: 'admin@example.com',
+                        password: 'Admin123!@#'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = 
+                        '<div class="success">✅ Login bem-sucedido! Usuário: ' + data.user.email + '</div>';
+                    log('🎉 Login com senha forte realizado com sucesso!', 'success');
+                    
+                    // Verificar se continua autenticado após 5 segundos
+                    setTimeout(async () => {
+                        const checkResponse = await fetch(`${API_BASE}/api/companies/`, {
+                            credentials: 'include'
+                        });
+                        
+                        if (checkResponse.ok) {
+                            log('✅ Ainda autenticado após 5 segundos', 'success');
+                        } else {
+                            log('❌ LOGOUT INESPERADO detectado após 5 segundos!', 'error');
+                        }
+                    }, 5000);
+                    
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = 
+                        '<div class="error">❌ Erro: ' + (errorData.error || response.statusText) + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Erro: ' + error.message + '</div>';
+            }
+        }
+        
+        function startMonitoring() {
+            log('🔍 Iniciando monitoramento intensivo...', 'success');
+            
+            monitoringInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/companies/`, {
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok && response.status === 401) {
+                        log('🚨 LOGOUT INESPERADO DETECTADO!', 'error');
+                        stopMonitoring();
+                    }
+                } catch (error) {
+                    log(`⚠️ Erro no monitoramento: ${error.message}`, 'warning');
+                }
+            }, 2000); // Verificar a cada 2 segundos
+        }
+        
+        function stopMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                log('⏹️ Monitoramento interrompido', 'warning');
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('eventLog').innerHTML = '';
+            log('🗑️ Logs limpos', 'info');
+        }
+        
+        function openFrontend() {
+            log('🌐 Abrindo frontend...', 'info');
+            window.open('http://localhost:3000/login', '_blank');
+        }
+        
+        // Inicialização
+        window.addEventListener('load', () => {
+            log('🚀 Debug monitor inicializado', 'success');
+            checkCurrentStatus();
+        });
+    </script>
+</body>
+</html>

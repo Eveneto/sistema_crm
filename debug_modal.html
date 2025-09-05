@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Modal - CRM System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .debug-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1890ff;
+        }
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #096dd9;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 4px solid #52c41a;
+            background-color: #f6ffed;
+        }
+        .error {
+            border-left-color: #ff4d4f;
+            background-color: #fff2f0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Modal de Membros</h1>
+        
+        <div class="debug-section">
+            <div class="debug-title">1. Verificar LocalStorage</div>
+            <button onclick="checkLocalStorage()">Verificar dados salvos</button>
+            <div id="localStorage-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">2. Buscar Membros da Comunidade</div>
+            <button onclick="fetchMembers()">Buscar membros</button>
+            <div id="members-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">3. Verificar Permissões de Admin</div>
+            <button onclick="checkAdminPermissions()">Verificar se é admin</button>
+            <div id="admin-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">4. Testar API Add Member</div>
+            <button onclick="testAddMember()">Testar adicionar membro</button>
+            <div id="add-member-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const COMMUNITY_ID = '3804b23a-b142-49e7-96b8-125f01c7b8bf';
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('jwt_token');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function checkLocalStorage() {
+            const resultDiv = document.getElementById('localStorage-result');
+            
+            try {
+                const data = {
+                    jwt_token: localStorage.getItem('jwt_token'),
+                    user_email: localStorage.getItem('user_email'),
+                    user_name: localStorage.getItem('user_name'),
+                    firebase_uid: localStorage.getItem('firebase_uid')
+                };
+
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>📦 Dados do LocalStorage:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchMembers() {
+            const resultDiv = document.getElementById('members-result');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/communities/communities/${COMMUNITY_ID}/members/`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>👥 Membros encontrados (${data.results?.length || 0}):</h4>
+                        <pre>${JSON.stringify(data.results, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro ao buscar membros:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function checkAdminPermissions() {
+            const resultDiv = document.getElementById('admin-result');
+            
+            try {
+                // Buscar membros primeiro
+                const response = await fetch(`${API_BASE_URL}/communities/communities/${COMMUNITY_ID}/members/`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const members = data.results || [];
+                const currentUserEmail = localStorage.getItem('user_email');
+                
+                // Verificar se usuário atual é admin
+                const currentUserMember = members.find(m => m.user.email === currentUserEmail);
+                const isAdmin = currentUserMember?.role === 'admin';
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>🔐 Verificação de Permissões:</h4>
+                        <p><strong>Email atual:</strong> ${currentUserEmail}</p>
+                        <p><strong>Membro encontrado:</strong> ${currentUserMember ? 'Sim' : 'Não'}</p>
+                        <p><strong>Função:</strong> ${currentUserMember?.role || 'N/A'}</p>
+                        <p><strong>É Admin:</strong> ${isAdmin ? '✅ SIM' : '❌ NÃO'}</p>
+                        <h5>Todos os membros:</h5>
+                        <pre>${JSON.stringify(members.map(m => ({email: m.user.email, role: m.role})), null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro ao verificar permissões:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAddMember() {
+            const resultDiv = document.getElementById('add-member-result');
+            
+            try {
+                const testData = {
+                    user_email: 'newmember@test.com',
+                    role: 'member'
+                };
+
+                const response = await fetch(`${API_BASE_URL}/communities/communities/${COMMUNITY_ID}/add_member/`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(testData)
+                });
+
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(responseData)}`);
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>✅ Teste Add Member Sucesso:</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro no teste Add Member:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-executar verificação do localStorage ao carregar
+        window.onload = function() {
+            checkLocalStorage();
+        };
+    </script>
+</body>
+</html>

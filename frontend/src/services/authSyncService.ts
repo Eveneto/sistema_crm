@@ -38,14 +38,21 @@ class AuthSyncService {
 
   // Verifica se ainda está autenticado quando a aba fica ativa
   private checkAuthStatus() {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
-    const currentState = store.getState().auth;
-
-    // Se não há token mas o Redux pensa que está autenticado, faz logout
-    if (!token && !refreshToken && currentState.isAuthenticated) {
-      store.dispatch(logout());
+    // COM COOKIES HTTP-ONLY: Não verificamos tokens no localStorage
+    // Os cookies são gerenciados automaticamente pelo navegador
+    
+    // Apenas verificar se há evento de logout em outra aba
+    const logoutEvent = localStorage.getItem(this.storageKey);
+    if (logoutEvent === 'logout') {
+      const currentState = store.getState().auth;
+      if (currentState.isAuthenticated) {
+        console.log('🔄 Logout detectado em outra aba, sincronizando...');
+        store.dispatch(logout());
+      }
     }
+    
+    // NÃO fazer verificação de tokens, pois usamos cookies HTTP-Only
+    // que são gerenciados automaticamente pelo navegador
   }
 
   // Inicia logout global em todas as abas

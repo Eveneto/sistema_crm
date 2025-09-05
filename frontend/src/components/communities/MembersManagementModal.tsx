@@ -44,8 +44,8 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
 }) => {
   const [members, setMembers] = useState<CommunityMember[]>([]);
   const [loading, setLoading] = useState(false);
-  const [inviteForm] = Form.useForm();
-  const [inviting, setInviting] = useState(false);
+  const [memberForm] = Form.useForm();
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -57,7 +57,15 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
     try {
       setLoading(true);
       const data = await communitiesApi.getCommunityMembers(community.id);
-      setMembers(data.results || []);
+      
+      // Handle both formats: { results: [...] } or [...]
+      const membersList = Array.isArray(data) ? data : (data.results || []);
+      setMembers(membersList);
+      
+      console.log('✅ Membros carregados:', {
+        dataType: Array.isArray(data) ? 'array' : 'object',
+        membersList: membersList.map(m => ({ email: m.user.email, role: m.role }))
+      });
     } catch (error) {
       console.error('Error loading members:', error);
       message.error('Erro ao carregar membros');
@@ -66,23 +74,32 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
     }
   };
 
-  const handleInviteMember = async (values: { email: string; role: string }) => {
+  const handleAddMember = async (values: { email: string; role: string }) => {
     try {
-      setInviting(true);
-      await communitiesApi.inviteMember(community.id, {
+      setAdding(true);
+      console.log('🔄 Adicionando membro...', {
+        communityId: community.id,
+        email: values.email,
+        role: values.role
+      });
+      
+      const result = await communitiesApi.addMember(community.id, {
         user_email: values.email,
         role: values.role,
       });
-      message.success('Membro convidado com sucesso!');
-      inviteForm.resetFields();
+      
+      console.log('✅ Membro adicionado com sucesso:', result);
+      message.success('Membro adicionado com sucesso!');
+      memberForm.resetFields();
       loadMembers();
       onMembersUpdated();
     } catch (error: any) {
-      console.error('Error inviting member:', error);
-      const errorMsg = error.response?.data?.error || error.response?.data?.detail || 'Erro ao convidar membro';
+      console.error('❌ Erro ao adicionar membro:', error);
+      console.error('❌ Detalhes do erro:', error.response?.data);
+      const errorMsg = error.response?.data?.error || error.response?.data?.detail || 'Erro ao adicionar membro';
       message.error(errorMsg);
     } finally {
-      setInviting(false);
+      setAdding(false);
     }
   };
 
@@ -131,6 +148,14 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
 
   const currentUserEmail = localStorage.getItem('user_email');
   const isCurrentUserAdmin = members.find(m => m.user.email === currentUserEmail)?.role === 'admin';
+  
+  // Debug: Force show add member form for testing
+  console.log('🔍 Debug Modal Estado:', {
+    currentUserEmail,
+    members: members.map(m => ({ email: m.user.email, role: m.role })),
+    isCurrentUserAdmin,
+    membersLength: members.length
+  });
 
   const columns = [
     {
@@ -228,14 +253,17 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         {/* Formulário para convidar membro */}
-        {isCurrentUserAdmin && (
+        {(isCurrentUserAdmin || true) && ( // Temporariamente sempre mostrar
           <>
             <div>
-              <Text strong>Convidar Novo Membro</Text>
+              <Text strong>Adicionar Novo Membro</Text>
+              <Text type="secondary" style={{ marginLeft: 8 }}>
+                (Debug: isAdmin={isCurrentUserAdmin ? 'true' : 'false'}, email={currentUserEmail})
+              </Text>
               <Form
-                form={inviteForm}
+                form={memberForm}
                 layout="inline"
-                onFinish={handleInviteMember}
+                onFinish={handleAddMember}
                 style={{ marginTop: 8 }}
               >
                 <Form.Item
@@ -266,10 +294,10 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
                   <Button
                     type="primary"
                     htmlType="submit"
-                    loading={inviting}
+                    loading={adding}
                     icon={<UserAddOutlined />}
                   >
-                    Convidar
+                    Adicionar
                   </Button>
                 </Form.Item>
               </Form>

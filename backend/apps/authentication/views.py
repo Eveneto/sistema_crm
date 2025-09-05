@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.conf import settings
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -104,18 +105,9 @@ class LoginView(generics.GenericAPIView):
             'message': 'Login successful'
         }
         
-        # Em desenvolvimento, também incluir tokens na resposta para debug
-        from django.conf import settings
-        if settings.DEBUG:
-            response_data.update({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'debug_note': 'Tokens também enviados via HttpOnly cookies'
-            })
-        
         response = Response(response_data)
         
-        # Configurar cookies HttpOnly para tokens
+        # Configurar cookies HttpOnly para tokens (SEGURANÇA MÁXIMA)
         # Access token (1 hora)
         response.set_cookie(
             'access_token',
@@ -141,83 +133,126 @@ class LoginView(generics.GenericAPIView):
         return response
 
 
-class LogoutView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        try:
-            # Tentar obter refresh token do corpo da requisição ou cookie
-            refresh_token = request.data.get("refresh") or request.COOKIES.get('refresh_token')
-            
-            if refresh_token:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
-            
-            # Criar resposta de sucesso
-            response = Response({
-                'message': 'Logout successful'
-            }, status=status.HTTP_200_OK)
-            
-            # Limpar cookies HttpOnly
-            response.delete_cookie('access_token', path='/')
-            response.delete_cookie('refresh_token', path='/')
-            
-            return response
-            
-        except Exception as e:
-            # Mesmo se houver erro no blacklist, limpa os cookies
-            response = Response({
-                'message': 'Logout completed (cookies cleared)'
-            }, status=status.HTTP_200_OK)
-            
-            response.delete_cookie('access_token', path='/')
-            response.delete_cookie('refresh_token', path='/')
-            
-            return response
-
-
-class TokenRefreshView(generics.GenericAPIView):
+class GoogleLoginView(generics.GenericAPIView):
     """
-    View para refresh automático usando cookies HttpOnly
+    Login via Google usando Firebase como ponte
+    Firebase é usado APENAS para obter token Google, depois descartado
     """
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        # Obter refresh token do cookie
+    def post(self, request, *args, **kwargs):
+        firebase_token = request.data.get('firebase_token')
+        
+        if not firebase_token:
+            return Response(
+                {'error': 'Token Firebase é obrigatório'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validar token Firebase (APENAS UMA VEZ)
+        firebase_user_data, error = FirebaseService.verify_firebase_token(firebase_token)
+        
+        if error:
+            return Response(
+                {'error': f'Token Firebase inválido: {error}'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Criar/buscar usuário Django baseado nos dados do Google
+        user, error = FirebaseService.get_or_create_user_from_firebase(firebase_user_data)
+        
+        if error:
+            return Response(
+                {'error': f'Erro ao criar usuário: {error}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Gerar tokens Django JWT
+        refresh = RefreshToken.for_user(user)
+        
+        print(f"[DEBUG][GOOGLE_LOGIN] Login Google bem-sucedido para: {user.email}")
+        
+        # Resposta apenas com dados do usuário (SEM TOKENS)
+        response_data = {
+            'user': UserSerializer(user).data,
+            'message': 'Login Google realizado com sucesso'
+        }
+        
+        response = Response(response_data)
+        
+        # Configurar cookies HttpOnly seguros
+        response.set_cookie(
+            'access_token',
+            str(refresh.access_token),
+            max_age=60 * 60,  # 1 hora
+            httponly=True,
+            secure=False,  # False para desenvolvimento, True para produção
+            samesite='Lax'
+        )
+        
+        response.set_cookie(
+            'refresh_token',
+            str(refresh),
+            max_age=60 * 60 * 24 * 7,  # 7 dias
+            httponly=True,
+            secure=False,  # False para desenvolvimento, True para produção
+            samesite='Lax'
+        )
+        
+        return response
+
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({'message': 'Logout realizado com sucesso'})
+        
+        # Limpar cookies HttpOnly
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        
+        print(f"[DEBUG][LOGOUT] Logout realizado para usuário: {request.user.email if request.user.is_authenticated else 'Anônimo'}")
+        
+        return response
+
+
+class TokenRefreshView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        # Tentar pegar refresh token do cookie
         refresh_token = request.COOKIES.get('refresh_token')
         
         if not refresh_token:
-            return Response({
-                'error': 'Refresh token not found in cookies'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {'error': 'Refresh token não encontrado'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         
         try:
-            # Validar e criar novo access token
             refresh = RefreshToken(refresh_token)
             new_access_token = str(refresh.access_token)
             
-            response = Response({
-                'message': 'Token refreshed successfully'
-            })
+            response = Response({'message': 'Token renovado com sucesso'})
             
-            # Atualizar cookie com novo access token
-            from django.conf import settings
+            # Atualizar cookie de access token
             response.set_cookie(
                 'access_token',
                 new_access_token,
-                max_age=3600,  # 1 hora
+                max_age=60 * 60,  # 1 hora
                 httponly=True,
-                secure=not settings.DEBUG,
-                samesite='Lax',
-                path='/'
+                secure=False,  # False para desenvolvimento
+                samesite='Lax'
             )
             
             return response
             
         except Exception as e:
-            return Response({
-                'error': 'Invalid refresh token'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {'error': 'Refresh token inválido'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Divider, Checkbox, Alert } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Divider, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
 import { loginUser } from '../../redux/slices/authSlice';
 import { AppDispatch } from '../../redux/store';
 import { useAuth } from '../../hooks/useAuth';
-import GoogleLoginButton from '../../components/auth/GoogleLoginButton';
+import googleLoginService from '../../services/googleLoginService';
 
 const { Title } = Typography;
 
@@ -16,180 +14,76 @@ const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isLoading, error } = useAuth();
+  const { isAuthenticated, isLoading, error, user } = useAuth();
   const [rememberMe, setRememberMe] = useState(false);
-  const [firebaseLoading, setFirebaseLoading] = useState(false);
-  const [firebaseError, setFirebaseError] = useState("");
-  const [form] = Form.useForm(); // Hook do Antd para acessar o formulário
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [form] = Form.useForm();
 
   // Pega a rota que o usuário tentou acessar antes de ser redirecionado para login
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
-  // Login via Firebase Auth
-  const handleFirebaseLogin = async (values: { username_or_email: string; password: string }) => {
-    setFirebaseLoading(true);
-    setFirebaseError("");
-    
-    // Validar se contém @ (validação básica)
-    if (!values.username_or_email.includes('@')) {
-      setFirebaseError("Para login Firebase, use um email (deve conter @). Username não é aceito pelo Firebase.");
-      setFirebaseLoading(false);
-      return;
-    }
-    
-    console.log("Tentando login Firebase com:", values.username_or_email);
-    
-    try {
-      // Firebase Auth só aceita email, não username
-      const userCredential = await signInWithEmailAndPassword(auth, values.username_or_email, values.password);
-      const user = userCredential.user;
-      const token = await user.getIdToken();
-      console.log("Login Firebase sucesso:", user.email);
-      console.log("Token Firebase obtido:", token);
-      
-      // Opção 1: Armazenar token do Firebase no localStorage (integração simples)
-      localStorage.setItem('firebase_token', token);
-      localStorage.setItem('user_email', user.email || '');
-      
-      // Para login por email/senha, extrair nome do email ou usar nome padrão
-      const userName = user.displayName || user.email?.split('@')[0] || 'Usuário';
-      localStorage.setItem('user_name', userName);
-      localStorage.setItem('user_photo', user.photoURL || '');
-      
-      console.log("Dados salvos:", { 
-        email: user.email, 
-        name: userName, 
-        photo: user.photoURL 
-      });
-      
-      // Opção 2: Enviar token para backend Django para validação (implementação futura)
-      // await axios.post("/api/auth/firebase-login/", { token });
-      
-      // Simular o estado de autenticado no Redux
-      // Por enquanto, vamos forçar o redirecionamento
-      message.success("Login Firebase realizado com sucesso!");
-      console.log("Redirecionando para:", from);
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      console.error("Erro Firebase:", err);
-      let errorMessage = "Erro ao fazer login pelo Firebase";
-      
-      switch (err.code) {
-        case 'auth/user-not-found':
-          errorMessage = "Usuário não encontrado. Verifique o email.";
-          break;
-        case 'auth/wrong-password':
-          errorMessage = "Senha incorreta.";
-          break;
-        case 'auth/invalid-email':
-          errorMessage = "Formato de email inválido.";
-          break;
-        case 'auth/user-disabled':
-          errorMessage = "Usuário desabilitado.";
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = "Muitas tentativas. Tente novamente mais tarde.";
-          break;
-        default:
-          errorMessage = err.message || "Erro ao fazer login pelo Firebase";
-      }
-      
-      setFirebaseError(errorMessage);
-    } finally {
-      setFirebaseLoading(false);
-    }
-  };
-
-  // Login via Google
-  const handleGoogleLogin = async () => {
-    setFirebaseLoading(true);
-    setFirebaseError("");
-    
-    const provider = new GoogleAuthProvider();
-    
-    try {
-      console.log("🌐 Iniciando login com Google...");
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const token = await user.getIdToken();
-      
-      console.log("✅ Login Google sucesso:", user.email);
-      console.log("Token Google obtido:", token);
-      
-      // Armazenar token e informações do usuário
-      localStorage.setItem('firebase_token', token);
-      localStorage.setItem('user_email', user.email || '');
-      localStorage.setItem('user_name', user.displayName || '');
-      localStorage.setItem('user_photo', user.photoURL || '');
-      
-      message.success("Login com Google realizado com sucesso!");
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      console.error("Erro Google:", err);
-      let errorMessage = "Erro ao fazer login com Google";
-      
-      switch (err.code) {
-        case 'auth/popup-closed-by-user':
-          errorMessage = "Login cancelado pelo usuário.";
-          break;
-        case 'auth/popup-blocked':
-          errorMessage = "Pop-up bloqueado. Permita pop-ups para este site.";
-          break;
-        case 'auth/cancelled-popup-request':
-          errorMessage = "Solicitação de login cancelada.";
-          break;
-        default:
-          errorMessage = err.message || "Erro ao fazer login com Google";
-      }
-      
-      setFirebaseError(errorMessage);
-    } finally {
-      setFirebaseLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    console.log("🔍 LoginPage useEffect - isAuthenticated:", isAuthenticated, "location:", location.pathname);
-    if (isAuthenticated && location.pathname === '/login') {
-      console.log("✅ Redirecionando de /login para:", from);
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, from, location.pathname]);
-
+  // Login tradicional (email/senha) via Django
   const onFinish = async (values: { username_or_email: string; password: string }) => {
-    console.log('🔐 Iniciando processo de login...', values);
     try {
-      const result = await dispatch(loginUser({ ...values, rememberMe })).unwrap();
-      console.log('✅ Login bem-sucedido!', result);
+      console.log('🔑 Tentando login tradicional:', values.username_or_email);
+      
+      const result = await dispatch(loginUser({
+        username_or_email: values.username_or_email,
+        password: values.password,
+        rememberMe
+      })).unwrap();
+      
+      console.log('✅ Login tradicional sucesso:', result.user.email);
       message.success('Login realizado com sucesso!');
       navigate(from, { replace: true });
+      
     } catch (error: any) {
-      console.error('❌ Erro no login:', error);
-      if (error.response?.status === 401) {
-        message.error('Credenciais inválidas. Verifique seu usuário, e-mail ou senha.');
-      } else if (error.response?.data?.detail) {
-        message.error(error.response.data.detail);
-      } else {
-        message.error('Falha no login. Tente novamente.');
-      }
+      console.error('❌ Erro no login tradicional:', error);
+      message.error(error || 'Erro no login');
     }
+  };
+
+  // Login com Google usando novo serviço simplificado
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      console.log('🔍 Iniciando login Google...');
+      
+      const result = await googleLoginService.loginWithGoogle();
+      
+      console.log('✅ Login Google sucesso:', result.user.email);
+      message.success('Login com Google realizado com sucesso!');
+      navigate(from, { replace: true });
+      
+    } catch (error: any) {
+      console.error('❌ Erro no login Google:', error);
+      message.error(error.message || 'Erro no login com Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // Se já está autenticado, redirecionar
+  if (isAuthenticated) {
+    navigate(from, { replace: true });
+    return null;
   }
 
   return (
     <div style={{ 
+      minHeight: '100vh', 
       display: 'flex', 
       justifyContent: 'center', 
-      alignItems: 'center', 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1890ff 0%, #722ed1 100%)'
+      alignItems: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     }}>
-      <Card style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+      <Card style={{ width: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Title level={2} style={{ color: '#1890ff', marginBottom: 8 }}>
-            🏢 CRM System
+            CRM System
           </Title>
           <Typography.Text type="secondary">
-            Entre na sua conta
+            Faça login para continuar
           </Typography.Text>
         </div>
 
@@ -197,119 +91,84 @@ const LoginPage: React.FC = () => {
           form={form}
           name="login"
           onFinish={onFinish}
-          layout="vertical"
+          autoComplete="off"
           size="large"
         >
           <Form.Item
             name="username_or_email"
-            rules={[{ required: true, message: 'Por favor, insira seu usuário ou e-mail!' }]}
+            rules={[
+              { required: true, message: 'Digite seu email ou nome de usuário' }
+            ]}
           >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="Usuário ou E-mail"
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Email ou nome de usuário" 
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}
+            rules={[
+              { required: true, message: 'Digite sua senha' }
+            ]}
           >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Senha"
+            <Input.Password 
+              prefix={<LockOutlined />} 
+              placeholder="Senha" 
             />
           </Form.Item>
 
           <Form.Item>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Checkbox 
-                checked={rememberMe} 
+                checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={isLoading}
               >
                 Lembrar-me
               </Checkbox>
-              <Typography.Link style={{ color: '#1890ff', fontSize: '14px' }}>
-                Esqueceu a senha?
-              </Typography.Link>
+              <Link to="/forgot-password">Esqueceu a senha?</Link>
             </div>
           </Form.Item>
 
           {error && (
-            <Alert
-              message="Erro no login"
-              description={error}
-              type="error"
-              showIcon
-              style={{ marginBottom: 16 }}
-              closable
-            />
+            <Form.Item>
+              <div style={{ color: '#ff4d4f', marginBottom: 16 }}>
+                {error}
+              </div>
+            </Form.Item>
           )}
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
+            <Button 
+              type="primary" 
+              htmlType="submit" 
               loading={isLoading}
-              style={{ width: '100%' }}
-            >
-              Entrar (Django)
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="default"
-              style={{ width: '100%' }}
-              loading={firebaseLoading}
-              onClick={() => {
-                console.log("🔥 Botão Firebase clicado!");
-                const values = form.getFieldsValue();
-                console.log("Valores do formulário Antd:", values);
-                const email = values.username_or_email || '';
-                const password = values.password || '';
-                console.log("Valores finais - Email:", email, "Password:", password);
-                handleFirebaseLogin({ username_or_email: email, password });
-              }}
-            >
-              Entrar com Firebase
-            </Button>
-          </Form.Item>
-          {firebaseError && (
-            <Alert
-              message="Erro no login Firebase"
-              description={firebaseError}
-              type="error"
-              showIcon
-              style={{ marginBottom: 16 }}
-              closable
-            />
-          )}
-
-          <Divider>ou</Divider>
-
-          <Form.Item>
-            <Button
-              icon={<GoogleOutlined />}
-              onClick={handleGoogleLogin}
-              loading={firebaseLoading}
-              style={{ width: '100%' }}
+              block
               size="large"
             >
-              Entrar com Google
+              Entrar
             </Button>
           </Form.Item>
-
-          <Form.Item>
-            {/* Google OAuth temporariamente desabilitado - necessária configuração no Google Cloud Console */}
-            {/* <GoogleLoginButton disabled={isLoading} loading={isLoading} /> */}
-          </Form.Item>
-
-          <div style={{ textAlign: 'center' }}>
-            <Typography.Text type="secondary">
-              Não tem uma conta? <Link to="/register">Registre-se</Link>
-            </Typography.Text>
-          </div>
         </Form>
+
+        <Divider plain>ou</Divider>
+
+        <Button
+          icon={<GoogleOutlined />}
+          onClick={handleGoogleLogin}
+          loading={googleLoading}
+          block
+          size="large"
+          style={{ marginBottom: 16 }}
+        >
+          Continuar com Google
+        </Button>
+
+        <div style={{ textAlign: 'center' }}>
+          <Typography.Text type="secondary">
+            Não tem uma conta? <Link to="/register">Cadastre-se</Link>
+          </Typography.Text>
+        </div>
       </Card>
     </div>
   );

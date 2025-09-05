@@ -3,14 +3,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { firebaseTokenService } from './services/firebaseTokenService';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-// Inicializar serviço de tokens Firebase
-firebaseTokenService.init();
+// Com nossa nova arquitetura de cookies HttpOnly, não precisamos mais do Firebase Token Service
 root.render(
   <React.StrictMode>
     <App />

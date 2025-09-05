@@ -10,26 +10,30 @@ interface AuthProviderProps {
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { token, isLoading } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
   const [isInitializing, setIsInitializing] = React.useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (token) {
-        try {
-          await dispatch(verifyToken()).unwrap();
-        } catch (error) {
-          console.log('Token inválido, usuário será redirecionado para login');
-        }
+      // Fazer verificação apenas UMA VEZ ao inicializar a aplicação
+      try {
+        console.log('🔍 Verificando autenticação inicial via cookies...');
+        await dispatch(verifyToken()).unwrap();
+        console.log('✅ Usuário já estava autenticado via cookies');
+      } catch (error) {
+        console.log('ℹ️ Usuário não autenticado - redirecionando para login');
+      } finally {
+        // SEMPRE finalizar o loading, independente do resultado
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     };
 
+    // Executar apenas na inicialização da aplicação
     initializeAuth();
-  }, [dispatch, token]);
+  }, [dispatch]); // Remover isAuthenticated das dependências para evitar loops!
 
-  // Mostra loading enquanto verifica a autenticação
-  if (isInitializing || isLoading) {
+  // Mostra loading apenas durante a inicialização, não durante operações subsequentes
+  if (isInitializing) {
     return <LoadingScreen message="Verificando autenticação..." />;
   }
 

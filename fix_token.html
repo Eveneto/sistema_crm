@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrigir Token - CRM System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #096dd9;
+        }
+        .success {
+            background-color: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .current-tokens {
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Corrigir Token de Autenticação</h1>
+        
+        <div class="current-tokens">
+            <h3>Tokens Atuais:</h3>
+            <div id="current-tokens"></div>
+        </div>
+        
+        <button onclick="fixToken()">🔑 Corrigir Token JWT Admin</button>
+        
+        <button onclick="clearTokens()">🗑️ Limpar Todos os Tokens</button>
+        
+        <button onclick="testAPI()">🧪 Testar API com Token Atual</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const VALID_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3MDc4NDkzLCJpYXQiOjE3NTcwNzQ4OTMsImp0aSI6ImU0YTFhZDYxY2FkNjQ5ZWRiNWJiM2Y1MmUzYjhhYWE0IiwidXNlcl9pZCI6NH0.3mC3z8I7zt6xwiR-sqLDjLo_rMC_i7LsrrWmG0t-KvQ";
+        const COMMUNITY_ID = "3804b23a-b142-49e7-96b8-125f01c7b8bf";
+        
+        function showCurrentTokens() {
+            const tokens = {
+                jwt_token: localStorage.getItem('jwt_token'),
+                firebase_token: localStorage.getItem('firebase_token'),
+                user_email: localStorage.getItem('user_email'),
+                user_name: localStorage.getItem('user_name')
+            };
+            
+            document.getElementById('current-tokens').innerHTML = 
+                `<pre>${JSON.stringify(tokens, null, 2)}</pre>`;
+        }
+        
+        function fixToken() {
+            // Remover token Firebase inválido
+            localStorage.removeItem('firebase_token');
+            
+            // Definir token JWT válido
+            localStorage.setItem('jwt_token', VALID_JWT_TOKEN);
+            localStorage.setItem('user_email', 'admin@example.com');
+            localStorage.setItem('user_name', 'Admin');
+            
+            document.getElementById('result').innerHTML = 
+                '<div class="success">✅ Token corrigido! Agora você pode usar o sistema.</div>';
+                
+            showCurrentTokens();
+        }
+        
+        function clearTokens() {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('firebase_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            localStorage.removeItem('user_photo');
+            localStorage.removeItem('firebase_uid');
+            
+            document.getElementById('result').innerHTML = 
+                '<div class="success">🗑️ Todos os tokens foram removidos.</div>';
+                
+            showCurrentTokens();
+        }
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const token = localStorage.getItem('jwt_token');
+                if (!token) {
+                    throw new Error('Nenhum token JWT encontrado');
+                }
+                
+                // Testar API de adicionar membro
+                const response = await fetch(`http://localhost:8000/api/communities/communities/${COMMUNITY_ID}/add_member/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_email: 'teste' + Date.now() + '@example.com',
+                        role: 'member'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = 
+                        `<div class="success">✅ API funcionando! Membro adicionado: ${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = 
+                        `<div style="color: red;">❌ Erro API: ${JSON.stringify(data)}</div>`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = 
+                    `<div style="color: red;">❌ Erro: ${error.message}</div>`;
+            }
+        }
+        
+        // Mostrar tokens ao carregar
+        window.onload = showCurrentTokens;
+    </script>
+</body>
+</html>

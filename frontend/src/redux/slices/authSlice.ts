@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
-import { firebaseTokenService } from '../../services/firebaseTokenService';
 
 interface User {
   id: number;
@@ -12,37 +11,19 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  token: string | null; // Mantido para compatibilidade, mas não usado
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
 }
 
-// Função para verificar se o token é válido
-const isTokenValid = (token: string | null): boolean => {
-  if (!token) return false;
-  
-  try {
-    // Decodifica o JWT para verificar se não expirou
-    const tokenData = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Date.now() / 1000;
-    
-    return tokenData.exp > currentTime;
-  } catch {
-    return false;
-  }
-};
-
-// Com cookies HttpOnly, não podemos mais verificar tokens via JavaScript
-// A autenticação será gerenciada via cookies automaticamente
-const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-const validToken = isTokenValid(storedToken);
-
+// Com cookies HttpOnly, a autenticação é automática via cookies
+// Não podemos verificar tokens via JavaScript (isso é BOM para segurança)
 const initialState: AuthState = {
   user: null,
-  token: validToken ? storedToken : null, // Mantém para compatibilidade/debug
+  token: null, // Não usado mais, cookies fazem tudo
   isLoading: false,
-  isAuthenticated: validToken, // Em produção, isso será determinado pelo backend
+  isAuthenticated: false, // Será determinado por tentativa de API protegida
   error: null,
 };
 
@@ -88,31 +69,23 @@ export const googleLogin = createAsyncThunk(
   }
 );
 
-// Verificar token e recuperar dados do usuário
+// Verificar autenticação atual (via cookies HttpOnly) - SEM rejeições
 export const verifyToken = createAsyncThunk(
   'auth/verifyToken',
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      console.log('🔍 Verificando token:', token ? 'Token encontrado' : 'Token não encontrado');
+      console.log('🔍 Verificando autenticação via cookies...');
       
-      if (!token || !isTokenValid(token)) {
-        console.log('❌ Token inválido ou expirado');
-        throw new Error('Token inválido');
-      }
-      
-      console.log('🚀 Fazendo chamada para profile com token:', token.substring(0, 20) + '...');
-      
-      // A instância API automaticamente adiciona o token via interceptador
+      // Tentar fazer uma requisição protegida para verificar se está autenticado
       const response = await api.get('/api/auth/profile/');
+      console.log('✅ Usuário autenticado via cookies:', response.data.email);
       
-      console.log('✅ Profile recuperado com sucesso:', response.data);
-      return { user: response.data, token };
+      return response.data;
+      
     } catch (error: any) {
-      console.log('❌ Erro ao verificar token:', error.response?.status, error.response?.data);
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      return rejectWithValue('Token inválido');
+      console.log('ℹ️ Não autenticado - estado inicial normal');
+      // NÃO rejeitar para evitar loops - apenas retornar dados vazios
+      return null;
     }
   }
 );
@@ -122,20 +95,16 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      // Com cookies HttpOnly, fazemos chamada para backend para limpar
+      // Fazer logout no backend para limpar cookies
       api.post('/api/auth/logout/').catch(() => {
-        // Se falhar, apenas continue - cookies podem já estar expirados
         console.log('Logout backend falhou, mas continuando...');
       });
       
-      // Limpar localStorage como fallback/debug
+      // Limpar localStorage como fallback
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('refreshToken');
-      
-      // Reabilita Firebase quando Django JWT é removido
-      firebaseTokenService.resumeFirebaseServices();
       
       state.user = null;
       state.token = null;
@@ -158,22 +127,8 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.isAuthenticated = true;
         
-        // Com cookies HttpOnly, não precisamos mais salvar tokens manualmente
-        // Cookies são gerenciados automaticamente pelo backend
-        console.log('✅ Login bem-sucedido - tokens salvos em cookies HttpOnly');
-        
-        // DESENVOLVIMENTO: Manter localStorage como fallback para debug
-        if (action.payload.access) {
-          state.token = action.payload.access;
-          const storage = action.meta.arg.rememberMe ? localStorage : sessionStorage;
-          storage.setItem('token', action.payload.access);
-          if (action.payload.refresh) {
-            storage.setItem('refreshToken', action.payload.refresh);
-          }
-        }
-        
-        // Pausa Firebase quando Django JWT está ativo
-        firebaseTokenService.pauseFirebaseServices();
+        // Com cookies HttpOnly, a autenticação é automática
+        console.log('✅ Login bem-sucedido - autenticação via cookies HttpOnly');
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -203,30 +158,31 @@ const authSlice = createSlice({
       .addCase(googleLogin.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        state.token = action.payload.access;
         state.isAuthenticated = true;
-        localStorage.setItem('token', action.payload.access);
+        // Com cookies HttpOnly, não precisamos gerenciar tokens manualmente
+        console.log('✅ Login Google bem-sucedido - autenticação via cookies HttpOnly');
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Google Login failed';
       })
-      // Verify Token
+      // Verify Token - SEM rejeição
       .addCase(verifyToken.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(verifyToken.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-        state.error = null;
-      })
-      .addCase(verifyToken.rejected, (state) => {
-        state.isLoading = false;
-        state.user = null;
-        state.token = null;
-        state.isAuthenticated = false;
+        
+        if (action.payload) {
+          // Usuário autenticado
+          state.user = action.payload;
+          state.isAuthenticated = true;
+        } else {
+          // Usuário não autenticado (normal)
+          state.user = null;
+          state.isAuthenticated = false;
+        }
+        
         state.error = null;
       });
   },

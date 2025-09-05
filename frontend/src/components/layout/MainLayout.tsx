@@ -21,9 +21,15 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { user, handleLogout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Função de logout simplificada
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   // Menu do dropdown do usuário
   const userMenuItems: MenuProps['items'] = [

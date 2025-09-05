@@ -58,6 +58,11 @@ export const communitiesApi = {
     return response.data;
   },
 
+  async addMember(id: string, data: { user_email: string; role?: string }): Promise<{ message: string; membership: CommunityMember }> {
+    const response = await api.post(`${COMMUNITIES_BASE_URL}/communities/${id}/add_member/`, data);
+    return response.data;
+  },
+
   async getCommunityStatistics(id: string): Promise<CommunityStatistics> {
     const response = await api.get(`${COMMUNITIES_BASE_URL}/communities/${id}/statistics/`);
     return response.data;
@@ -72,7 +77,7 @@ export const communitiesApi = {
       role?: string;
       is_active?: boolean;
     }
-  ): Promise<CommunityMemberListResponse> {
+  ): Promise<CommunityMemberListResponse | CommunityMember[]> {
     const response = await api.get(`${COMMUNITIES_BASE_URL}/communities/${communityId}/members/`, { params });
     return response.data;
   },

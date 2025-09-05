@@ -166,7 +166,15 @@ class CommunityViewSet(viewsets.ModelViewSet):
 
         serializer = CommunityMemberCreateSerializer(data=request.data)
         if serializer.is_valid():
-            user_to_invite = User.objects.get(id=serializer.validated_data['user_id'])
+            # Obter usuário por ID ou email
+            user_to_invite = None
+            if serializer.validated_data.get('user_id'):
+                user_to_invite = User.objects.get(id=serializer.validated_data['user_id'])
+            elif serializer.validated_data.get('user_email'):
+                user_to_invite = User.objects.get(email=serializer.validated_data['user_email'])
+            
+            if not user_to_invite:
+                return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_400_BAD_REQUEST)
             
             # Verificar se pode se juntar
             can_join, message = community.can_join(user_to_invite)
@@ -186,6 +194,67 @@ class CommunityViewSet(viewsets.ModelViewSet):
             if created:
                 logger.info(f"User {user_to_invite.username} invited to community {community.name} by {request.user.username}")
                 return Response({'message': f'Usuário {user_to_invite.username} foi convidado com sucesso!'})
+            else:
+                return Response({'error': 'Usuário já é membro desta comunidade'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def add_member(self, request, pk=None):
+        """Adiciona um membro diretamente à comunidade (sem convite)"""
+        community = self.get_object()
+        
+        # Verificar se o usuário atual pode adicionar membros
+        try:
+            current_membership = CommunityMember.objects.get(
+                community=community, 
+                user=request.user, 
+                is_active=True
+            )
+            if not current_membership.can_invite_members():
+                return Response(
+                    {'error': 'Você não tem permissão para adicionar membros'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except CommunityMember.DoesNotExist:
+            return Response(
+                {'error': 'Você não é membro desta comunidade'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = CommunityMemberCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # Obter usuário por ID ou email
+            user_to_add = None
+            if serializer.validated_data.get('user_id'):
+                user_to_add = User.objects.get(id=serializer.validated_data['user_id'])
+            elif serializer.validated_data.get('user_email'):
+                user_to_add = User.objects.get(email=serializer.validated_data['user_email'])
+            
+            if not user_to_add:
+                return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verificar se pode se juntar
+            can_join, message = community.can_join(user_to_add)
+            if not can_join:
+                return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Adicionar membro diretamente
+            membership, created = CommunityMember.objects.get_or_create(
+                community=community,
+                user=user_to_add,
+                defaults={
+                    'role': serializer.validated_data.get('role', 'member'),
+                    'invited_by': request.user
+                }
+            )
+
+            if created:
+                logger.info(f"User {user_to_add.username} added to community {community.name} by {request.user.username}")
+                return Response({
+                    'message': f'Usuário {user_to_add.username} foi adicionado com sucesso!',
+                    'membership': CommunityMemberSerializer(membership).data
+                })
             else:
                 return Response({'error': 'Usuário já é membro desta comunidade'}, status=status.HTTP_400_BAD_REQUEST)
 

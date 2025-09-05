@@ -70,10 +70,10 @@ MIDDLEWARE = [
     # CSRF disabled para desenvolvimento - habilitar em produção
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # Cookie authentication middleware - DESABILITADO para Firebase
-    # 'apps.authentication.cookie_middleware.CookieAuthenticationMiddleware',
-    # Firebase middleware - HABILITADO
-    'apps.authentication.middleware.FirebaseAuthenticationMiddleware',
+    # NOVO: Cookie JWT authentication middleware - HABILITADO
+    'apps.authentication.jwt_cookie_middleware.CookieJWTAuthenticationMiddleware',
+    # ANTIGO: Firebase middleware - DESABILITADO
+    # 'apps.authentication.middleware.FirebaseAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

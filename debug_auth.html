@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Auth - CRM System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .debug-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1890ff;
+        }
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #096dd9;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 4px solid #52c41a;
+            background-color: #f6ffed;
+        }
+        .error {
+            border-left-color: #ff4d4f;
+            background-color: #fff2f0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .warning {
+            border-left-color: #faad14;
+            background-color: #fffbe6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Autenticação - CRM System</h1>
+        
+        <div class="debug-section">
+            <div class="debug-title">1. Estado do LocalStorage</div>
+            <button onclick="checkLocalStorage()">Verificar LocalStorage</button>
+            <div id="localStorage-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">2. Cookies e Sessão</div>
+            <button onclick="checkCookies()">Verificar Cookies</button>
+            <div id="cookies-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">3. Teste Auth API</div>
+            <button onclick="testAuthAPI()">Testar /api/auth/me/</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">4. Fazer Login de Teste</div>
+            <button onclick="performTestLogin()">Login com admin@example.com</button>
+            <div id="login-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-title">5. Buscar Membros da Comunidade</div>
+            <button onclick="testMembersAPI()">Testar API Members</button>
+            <div id="members-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const COMMUNITY_ID = '3804b23a-b142-49e7-96b8-125f01c7b8bf';
+
+        function checkLocalStorage() {
+            const resultDiv = document.getElementById('localStorage-result');
+            
+            const data = {
+                firebase_token: localStorage.getItem('firebase_token'),
+                jwt_token: localStorage.getItem('jwt_token'),
+                user_email: localStorage.getItem('user_email'),
+                user_name: localStorage.getItem('user_name'),
+                user_photo: localStorage.getItem('user_photo'),
+                firebase_uid: localStorage.getItem('firebase_uid'),
+                hasAuth: localStorage.getItem('firebase_token') || localStorage.getItem('jwt_token') ? 'SIM' : 'NÃO'
+            };
+
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h4>📦 LocalStorage Status:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function checkCookies() {
+            const resultDiv = document.getElementById('cookies-result');
+            
+            const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+                const [key, value] = cookie.trim().split('=');
+                if (key) acc[key] = value;
+                return acc;
+            }, {});
+
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h4>🍪 Cookies Disponíveis:</h4>
+                    <pre>${JSON.stringify(cookies, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        async function testAuthAPI() {
+            const resultDiv = document.getElementById('auth-result');
+            
+            try {
+                // Testar sem headers primeiro
+                const response = await fetch(`${API_BASE_URL}/auth/me/`, {
+                    credentials: 'include' // Importante para cookies
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>✅ API Auth /me/ Sucesso:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro API Auth /me/:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function performTestLogin() {
+            const resultDiv = document.getElementById('login-result');
+            
+            try {
+                const loginData = {
+                    email: 'admin@example.com',
+                    password: 'admin123'
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+
+                // Salvar dados no localStorage se sucesso
+                if (data.access) {
+                    localStorage.setItem('jwt_token', data.access);
+                    localStorage.setItem('user_email', 'admin@example.com');
+                    localStorage.setItem('user_name', 'Admin');
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>✅ Login realizado com sucesso:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Token salvo no localStorage!</strong></p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro no login:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMembersAPI() {
+            const resultDiv = document.getElementById('members-result');
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+
+                // Adicionar token se disponível
+                const token = localStorage.getItem('jwt_token') || localStorage.getItem('firebase_token');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/communities/communities/${COMMUNITY_ID}/members/`, {
+                    headers: headers,
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h4>✅ Members API Sucesso:</h4>
+                        <p><strong>Total de membros:</strong> ${data.results?.length || 0}</p>
+                        <pre>${JSON.stringify(data.results, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Erro Members API:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-executar verificações ao carregar
+        window.onload = function() {
+            checkLocalStorage();
+            checkCookies();
+        };
+    </script>
+</body>
+</html>
