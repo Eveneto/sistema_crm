@@ -87,7 +87,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       icon: <MessageOutlined />,
       label: 'Chat',
       onClick: () => navigate('/chat'),
-      disabled: true, // Temporariamente desabilitado
+      disabled: false, // Agora habilitado!
     },
   ];
 

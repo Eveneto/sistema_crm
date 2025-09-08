@@ -49,8 +49,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
+    'channels',  # WebSocket support para chat
     # TODO: Enable when packages are installed
-    # 'channels',
     # 'drf_yasg',
     
     # Local apps
@@ -96,6 +96,26 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'crm_backend.wsgi.application'
+ASGI_APPLICATION = 'crm_backend.asgi.application'
+
+# Channels configuration for WebSocket
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+# Fallback para desenvolvimento sem Redis
+import os
+if os.getenv('USE_REDIS_CHANNELS', 'false').lower() != 'true':
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        }
+    }
 
 
 # Database - Using SQLite for development

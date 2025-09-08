@@ -14,6 +14,7 @@ import CompaniesPage from './pages/CompaniesPage';
 import KanbanPage from './pages/KanbanPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CommunityDetailsPage from './pages/CommunityDetailsPage';
+import ChatPage from './pages/ChatPage';
 import TestingToolsPage from './pages/TestingToolsPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
@@ -84,6 +85,22 @@ function App() {
                   element={
                     <PrivateRoute>
                       <CommunityDetailsPage />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat" 
+                  element={
+                    <PrivateRoute>
+                      <ChatPage />
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat/:roomId" 
+                  element={
+                    <PrivateRoute>
+                      <ChatPage />
                     </PrivateRoute>
                   } 
                 />
