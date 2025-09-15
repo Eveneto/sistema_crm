@@ -3,20 +3,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 from .models import Company, CompanyContact
 from .serializers import (
     CompanySerializer, 
     CompanyListSerializer,
-    CompanyCreateUpdateSerializer,
+    CompanyDetailSerializer,
+    CompanyCreateSerializer,
     CompanyContactSerializer
 )
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
-    def create(self, request, *args, **kwargs):
-        print(f'[DEBUG][ViewSet][create] Dados recebidos: {request.data}')
-        return super().create(request, *args, **kwargs)
     """
     ViewSet para gerenciamento de empresas
     
@@ -27,28 +28,175 @@ class CompanyViewSet(viewsets.ModelViewSet):
     - PUT /api/companies/{id}/ - Atualiza empresa completa
     - PATCH /api/companies/{id}/ - Atualiza empresa parcial
     - DELETE /api/companies/{id}/ - Remove empresa
-    - GET /api/companies/search/?q=termo - Busca empresas
+    - GET /api/companies/statistics/ - Estatísticas das empresas
     - GET /api/companies/{id}/contacts/ - Lista contatos da empresa
     - POST /api/companies/{id}/add_contact/ - Adiciona contato à empresa
     """
     queryset = Company.objects.all()
+    serializer_class = CompanySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['industry', 'size']
-    search_fields = ['name', 'email', 'website', 'industry']
+    filterset_fields = ['industry', 'size', 'is_active', 'is_client']
+    search_fields = ['name', 'email', 'website', 'industry', 'cnpj']
     ordering_fields = ['name', 'created_at', 'updated_at']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        """Otimizar queries com select_related"""
+        return Company.objects.select_related('created_by').prefetch_related('contacts')
 
     def get_serializer_class(self):
         """Retorna serializer apropriado para cada ação"""
         if self.action == 'list':
             return CompanyListSerializer
-        elif self.action in ['create', 'update', 'partial_update']:
-            # Para create/update, usar serializer correto para entrada
-            return CompanyCreateUpdateSerializer
+        elif self.action == 'create':
+            return CompanyCreateSerializer
+        elif self.action == 'retrieve':
+            return CompanyDetailSerializer
         else:
-            # Para retrieve, usar CompanySerializer que inclui campos extras
             return CompanySerializer
+
+    def perform_create(self, serializer):
+        """Salvar empresa com usuário atual como criador"""
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    @method_decorator(cache_page(60 * 5))  # Cache por 5 minutos
+    def statistics(self, request):
+        """
+        Endpoint para estatísticas das empresas
+        GET /api/companies/statistics/
+        """
+        cache_key = f'companies_stats_{request.user.id}'
+        stats = cache.get(cache_key)
+        
+        if not stats:
+            total_companies = Company.objects.count()
+            active_companies = Company.objects.filter(is_active=True).count()
+            clients = Company.objects.filter(is_client=True).count()
+            
+            # Estatísticas por tamanho
+            size_stats = (
+                Company.objects
+                .values('size')
+                .annotate(count=Count('size'))
+                .order_by('-count')
+            )
+            
+            # Estatísticas por indústria
+            industry_stats = (
+                Company.objects
+                .exclude(industry__isnull=True)
+                .exclude(industry='')
+                .values('industry')
+                .annotate(count=Count('industry'))
+                .order_by('-count')[:10]  # Top 10
+            )
+            
+            stats = {
+                'total_companies': total_companies,
+                'active_companies': active_companies,
+                'clients': clients,
+                'inactive_companies': total_companies - active_companies,
+                'size_distribution': list(size_stats),
+                'top_industries': list(industry_stats),
+                'conversion_rate': round((clients / total_companies * 100), 2) if total_companies > 0 else 0
+            }
+            
+            # Cache por 5 minutos
+            cache.set(cache_key, stats, 60 * 5)
+        
+        return Response(stats)
+
+    @action(detail=True, methods=['get'])
+    def contacts(self, request, pk=None):
+        """
+        Lista contatos de uma empresa
+        GET /api/companies/{id}/contacts/
+        """
+        company = self.get_object()
+        contacts = company.contacts.all()
+        serializer = CompanyContactSerializer(contacts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def add_contact(self, request, pk=None):
+        """
+        Adiciona contato a uma empresa
+        POST /api/companies/{id}/add_contact/
+        """
+        company = self.get_object()
+        serializer = CompanyContactSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save(company=company)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        """
+        Busca avançada de empresas
+        GET /api/companies/search/?q=termo&industry=tech&size=small
+        """
+        query = request.query_params.get('q', '')
+        industry = request.query_params.get('industry', '')
+        size = request.query_params.get('size', '')
+        is_client = request.query_params.get('is_client', '')
+        
+        queryset = self.get_queryset()
+        
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) |
+                Q(email__icontains=query) |
+                Q(website__icontains=query) |
+                Q(industry__icontains=query) |
+                Q(cnpj__icontains=query)
+            )
+        
+        if industry:
+            queryset = queryset.filter(industry__icontains=industry)
+        
+        if size:
+            queryset = queryset.filter(size=size)
+        
+        if is_client:
+            queryset = queryset.filter(is_client=is_client.lower() == 'true')
+        
+        # Paginação
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = CompanyListSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = CompanyListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Soft delete - marca como inativo ao invés de deletar
+        """
+        company = self.get_object()
+        company.is_active = False
+        company.save()
+        
+        return Response(
+            {'message': 'Empresa marcada como inativa'}, 
+            status=status.HTTP_200_OK
+        )
+
+    def create(self, request, *args, **kwargs):
+        """Override create para logging"""
+        print(f'[DEBUG][CompanyViewSet][create] Dados recebidos: {request.data}')
+        response = super().create(request, *args, **kwargs)
+        
+        # Limpar cache de estatísticas após criação
+        cache_key = f'companies_stats_{request.user.id}'
+        cache.delete(cache_key)
+        
+        return response
 
     def get_queryset(self):
         """Filtrar empresas por usuário se necessário"""

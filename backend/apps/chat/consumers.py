@@ -436,3 +436,75 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         serializer = ChatMessageSerializer(message, context={'request': request})
         return serializer.data
+
+
+class TestChatConsumer(AsyncWebsocketConsumer):
+    """
+    Consumer simples para testes de WebSocket sem autenticação
+    """
+    
+    async def connect(self):
+        """Conecta usuário ao WebSocket (sem autenticação para testes)"""
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.room_group_name = f'test_chat_{self.room_id}'
+        
+        # Entrar no grupo do chat
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        
+        await self.accept()
+        
+        # Enviar mensagem de boas-vindas
+        await self.send(text_data=json.dumps({
+            'type': 'system_message',
+            'message': f'✅ Conectado ao chat de teste: {self.room_id}',
+            'timestamp': timezone.now().isoformat()
+        }))
+        
+        logger.info(f"Test connection to chat {self.room_id}")
+    
+    async def disconnect(self, close_code):
+        """Desconecta usuário do WebSocket"""
+        if hasattr(self, 'room_group_name'):
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+            logger.info(f"Test disconnection from chat {self.room_id}")
+    
+    async def receive(self, text_data):
+        """Recebe mensagem do WebSocket"""
+        try:
+            data = json.loads(text_data)
+            message = data.get('message', '')
+            user = data.get('user', 'Usuário Teste')
+            
+            if message.strip():
+                # Reenviar mensagem para todos no grupo
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_message',
+                        'message': message,
+                        'user': user,
+                        'timestamp': timezone.now().isoformat()
+                    }
+                )
+                
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({
+                'error': 'Invalid JSON format'
+            }))
+        except Exception as e:
+            logger.error(f"Error in test chat: {e}")
+    
+    async def chat_message(self, event):
+        """Envia mensagem para o WebSocket"""
+        await self.send(text_data=json.dumps({
+            'type': 'new_message',
+            'message': event['message'],
+            'user': event['user'],
+            'timestamp': event['timestamp']
+        }))

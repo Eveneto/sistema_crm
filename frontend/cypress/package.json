@@ -1,0 +1,19 @@
+{
+  "name": "crm-e2e-tests",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:chrome": "cypress run --browser chrome",
+    "cypress:run:firefox": "cypress run --browser firefox",
+    "cypress:run:edge": "cypress run --browser edge",
+    "cypress:run:all-browsers": "npm run cypress:run:chrome && npm run cypress:run:firefox && npm run cypress:run:edge",
+    "cypress:run:headless": "cypress run --headless",
+    "cypress:run:record": "cypress run --record --key $CYPRESS_RECORD_KEY",
+    "test:e2e": "start-server-and-test dev 3000 cypress:run",
+    "test:e2e:all": "start-server-and-test dev 3000 cypress:run:all-browsers",
+    "test:e2e:smoke": "cypress run --spec 'cypress/e2e/auth/authentication.spec.js'",
+    "test:e2e:companies": "cypress run --spec 'cypress/e2e/companies*.spec.js'",
+    "test:e2e:kanban": "cypress run --spec 'cypress/e2e/kanban/*.spec.js'",
+    "test:e2e:chat": "cypress run --spec 'cypress/e2e/chat/*.spec.js'"
+  }
+}

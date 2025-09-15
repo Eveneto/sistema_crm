@@ -1,0 +1,140 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@test.com",
+      "password": "admin123",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "email": "user@test.com", 
+      "password": "user123",
+      "name": "Test User",
+      "role": "user"
+    },
+    {
+      "id": 3,
+      "email": "manager@test.com",
+      "password": "manager123", 
+      "name": "Manager User",
+      "role": "manager"
+    }
+  ],
+  "companies": [
+    {
+      "id": 1,
+      "name": "Tech Company Alpha",
+      "email": "contact@techcompany.com",
+      "phone": "+5511999888777",
+      "website": "https://techcompany.com",
+      "industry": "Technology",
+      "size": "large",
+      "is_active": true,
+      "is_client": true
+    },
+    {
+      "id": 2,
+      "name": "Finance Corp Beta", 
+      "email": "info@financecorp.com",
+      "phone": "+5511888777666",
+      "website": "https://financecorp.com",
+      "industry": "Finance",
+      "size": "medium",
+      "is_active": true,
+      "is_client": false
+    },
+    {
+      "id": 3,
+      "name": "Healthcare Solutions",
+      "email": "contact@healthcare.com", 
+      "phone": "+5511777666555",
+      "website": "https://healthcare.com",
+      "industry": "Healthcare",
+      "size": "small",
+      "is_active": false,
+      "is_client": true
+    }
+  ],
+  "conversations": [
+    {
+      "id": 1,
+      "participant": "João Silva",
+      "lastMessage": "Olá, como você está?",
+      "timestamp": "2025-09-10T10:30:00Z",
+      "unread": 2,
+      "online": true
+    },
+    {
+      "id": 2,
+      "participant": "Maria Santos",
+      "lastMessage": "Vamos agendar uma reunião",
+      "timestamp": "2025-09-10T09:15:00Z", 
+      "unread": 0,
+      "online": false
+    },
+    {
+      "id": 3,
+      "participant": "Pedro Costa",
+      "lastMessage": "Obrigado pelo suporte!",
+      "timestamp": "2025-09-09T16:45:00Z",
+      "unread": 1,
+      "online": true
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "conversationId": 1,
+      "sender": "João Silva",
+      "message": "Olá, como você está?",
+      "timestamp": "2025-09-10T10:30:00Z",
+      "status": "read"
+    },
+    {
+      "id": 2,
+      "conversationId": 1,
+      "sender": "me",
+      "message": "Oi João! Estou bem, obrigado. E você?",
+      "timestamp": "2025-09-10T10:31:00Z",
+      "status": "delivered"
+    },
+    {
+      "id": 3,
+      "conversationId": 2,
+      "sender": "Maria Santos",
+      "message": "Vamos agendar uma reunião",
+      "timestamp": "2025-09-10T09:15:00Z",
+      "status": "read"
+    }
+  ],
+  "dashboard": {
+    "metrics": {
+      "totalCompanies": 25,
+      "activeClients": 18,
+      "prospects": 7, 
+      "totalRevenue": 150000,
+      "monthlyGrowth": 12.5
+    },
+    "charts": {
+      "companiesGrowth": [10, 15, 18, 22, 25],
+      "revenue": [50000, 75000, 100000, 125000, 150000],
+      "conversionRate": [15, 18, 22, 20, 25]
+    },
+    "recentActivities": [
+      {
+        "id": 1,
+        "type": "company_created",
+        "description": "Nova empresa criada: Tech Solutions",
+        "timestamp": "2025-09-10T11:00:00Z"
+      },
+      {
+        "id": 2,
+        "type": "deal_closed",
+        "description": "Negócio fechado com ABC Corp",
+        "timestamp": "2025-09-10T10:30:00Z"
+      }
+    ]
+  }
+}

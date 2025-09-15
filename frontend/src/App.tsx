@@ -18,7 +18,13 @@ import ChatPage from './pages/ChatPage';
 import TestingToolsPage from './pages/TestingToolsPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
+
+// Estilos principais
 import './App.css';
+
+// Novos estilos melhorados
+import './styles/toastStyles.css';
+import './styles/responsiveBreakpoints.css';
 
 // Importa os services para inicializar
 // import './services/tokenService';

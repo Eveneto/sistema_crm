@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Login - Debug Cypress</title>
+</head>
+<body>
+    <h1>🔍 Debug dos Seletores da Página de Login</h1>
+    
+    <div id="results"></div>
+
+    <script>
+        // Fazer uma requisição para a página de login e analisar os seletores
+        fetch('http://localhost:3000/login')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const results = [];
+                
+                // Verificar seletores que o Cypress está procurando
+                const selectors = [
+                    'form[name="login"]',
+                    'input[placeholder="Email ou nome de usuário"]',
+                    'input[placeholder="Senha"]',
+                    'button[type="submit"]'
+                ];
+                
+                selectors.forEach(selector => {
+                    const elements = doc.querySelectorAll(selector);
+                    results.push(`${selector}: ${elements.length} elemento(s) encontrado(s)`);
+                });
+                
+                document.getElementById('results').innerHTML = 
+                    '<h3>Resultados:</h3>' + 
+                    results.map(r => `<p>✓ ${r}</p>`).join('');
+            })
+            .catch(error => {
+                document.getElementById('results').innerHTML = 
+                    `<p>❌ Erro: ${error.message}</p>
+                     <p>Certifique-se de que o frontend está rodando em localhost:3000</p>`;
+            });
+    </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Company, CompanyContact
+from django.core.validators import validate_email
+from .models import Company, CompanyContact, validate_cnpj
+import re
 
 
 class CompanyContactSerializer(serializers.ModelSerializer):
@@ -12,22 +14,112 @@ class CompanyContactSerializer(serializers.ModelSerializer):
             'is_primary', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
+    
+    def validate_email(self, value):
+        """Validate email format"""
+        if value:
+            validate_email(value)
+        return value
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    """Serializer para empresas"""
-    contacts = CompanyContactSerializer(many=True, read_only=True)
+class CompanyListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for company lists"""
     created_by_name = serializers.CharField(source='created_by.username', read_only=True)
-    contact_count = serializers.SerializerMethodField()
+    contact_count = serializers.IntegerField(source='contacts.count', read_only=True)
+    formatted_cnpj = serializers.ReadOnlyField()
     
     class Meta:
         model = Company
         fields = [
-            'id', 'name', 'email', 'phone', 'website', 'industry', 
-            'size', 'address', 'notes', 'contacts', 'contact_count',
+            'id', 'name', 'email', 'phone', 'website', 'industry',
+            'size', 'formatted_cnpj', 'is_active', 'is_client',
+            'contact_count', 'created_by_name', 'created_at'
+        ]
+
+
+class CompanyDetailSerializer(serializers.ModelSerializer):
+    """Detailed serializer for single company view"""
+    contacts = CompanyContactSerializer(many=True, read_only=True)
+    created_by_name = serializers.CharField(source='created_by.username', read_only=True)
+    contact_count = serializers.IntegerField(source='contacts.count', read_only=True)
+    formatted_cnpj = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = Company
+        fields = [
+            'id', 'name', 'cnpj', 'formatted_cnpj', 'email', 'phone', 
+            'website', 'industry', 'size', 'address', 'notes', 
+            'is_active', 'is_client', 'contacts', 'contact_count',
             'created_by', 'created_by_name', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_by', 'formatted_cnpj', 'created_at', 'updated_at']
+    
+    def validate_cnpj(self, value):
+        """Validate CNPJ format and digits"""
+        if value:
+            # Clean CNPJ for validation
+            cleaned_cnpj = re.sub(r'[^\d]', '', value)
+            validate_cnpj(cleaned_cnpj)
+            # Store in clean format for consistent storage
+            return cleaned_cnpj
+        return value
+    
+    def validate_email(self, value):
+        """Validate email format"""
+        if value:
+            validate_email(value)
+        return value
+    
+    def validate_website(self, value):
+        """Validate website URL"""
+        if value and not value.startswith(('http://', 'https://')):
+            value = f"https://{value}"
+        return value
+
+
+class CompanySerializer(CompanyDetailSerializer):
+    """Default company serializer - alias for detail serializer"""
+    pass
+
+
+class CompanyCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating companies"""
+    
+    class Meta:
+        model = Company
+        fields = [
+            'name', 'cnpj', 'email', 'phone', 'website', 
+            'industry', 'size', 'address', 'notes',
+            'is_active', 'is_client'
+        ]
+    
+    def validate_cnpj(self, value):
+        """Validate CNPJ format and digits"""
+        if value:
+            # Clean CNPJ for validation
+            cleaned_cnpj = re.sub(r'[^\d]', '', value)
+            validate_cnpj(cleaned_cnpj)
+            return cleaned_cnpj
+        return value
+    
+    def validate_name(self, value):
+        """Validate company name"""
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Nome da empresa deve ter pelo menos 2 caracteres")
+        return value.strip()
+    
+    def validate_email(self, value):
+        """Validate email format"""
+        if value:
+            validate_email(value)
+        return value
+    
+    def create(self, validated_data):
+        """Create company with current user as creator"""
+        request = self.context.get('request')
+        if request and request.user:
+            validated_data['created_by'] = request.user
+        return super().create(validated_data)
     
     def get_contact_count(self, obj):
         """Retorna o número de contatos da empresa"""

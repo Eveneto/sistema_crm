@@ -1,0 +1,354 @@
+name: 🧪 E2E Tests - CRM System
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  # ========================================
+  # SMOKE TESTS (Quick validation)
+  # ========================================
+  smoke-tests:
+    name: 🚨 Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: 🏗️ Build application
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: 🧪 Run smoke tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: frontend
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/auth/authentication.spec.js
+          browser: chrome
+          headless: true
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+  # ========================================
+  # CROSS-BROWSER TESTING
+  # ========================================
+  cross-browser-tests:
+    name: 🌐 Cross-Browser Tests
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    timeout-minutes: 45
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, edge]
+        spec-group: [auth, companies, kanban, chat]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: 🏗️ Build application
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: 🧪 Run E2E tests - ${{ matrix.browser }} - ${{ matrix.spec-group }}
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: frontend
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/${{ matrix.spec-group }}/**/*.spec.js
+          browser: ${{ matrix.browser }}
+          headless: true
+          record: true
+          group: '${{ matrix.browser }}-${{ matrix.spec-group }}'
+          tag: ${{ github.event_name }}
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📸 Upload screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ matrix.browser }}-${{ matrix.spec-group }}
+          path: frontend/cypress/screenshots
+          retention-days: 7
+      
+      - name: 🎥 Upload videos on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos-${{ matrix.browser }}-${{ matrix.spec-group }}
+          path: frontend/cypress/videos
+          retention-days: 7
+
+  # ========================================
+  # MOBILE RESPONSIVE TESTING
+  # ========================================
+  mobile-tests:
+    name: 📱 Mobile Responsive Tests
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        viewport: 
+          - { width: 375, height: 667, name: 'iphone-se' }
+          - { width: 414, height: 896, name: 'iphone-xr' }
+          - { width: 768, height: 1024, name: 'ipad' }
+          - { width: 1024, height: 1366, name: 'ipad-pro' }
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: 🏗️ Build application
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: 🧪 Run mobile tests - ${{ matrix.viewport.name }}
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: frontend
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/auth/authentication.spec.js,cypress/e2e/companies_crud.spec.js
+          browser: chrome
+          headless: true
+          config: viewportWidth=${{ matrix.viewport.width }},viewportHeight=${{ matrix.viewport.height }}
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+  # ========================================
+  # PERFORMANCE TESTING
+  # ========================================
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    timeout-minutes: 20
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: 🏗️ Build application (production)
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: 🧪 Run performance tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: frontend
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/auth/authentication.spec.js
+          browser: chrome
+          headless: true
+          config: defaultCommandTimeout=5000,requestTimeout=5000,responseTimeout=5000
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+  # ========================================
+  # ACCESSIBILITY TESTING
+  # ========================================
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    timeout-minutes: 25
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          npm install --save-dev cypress-axe
+      
+      - name: 🏗️ Build application
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: 🧪 Run accessibility tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: frontend
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/accessibility/*.spec.js
+          browser: chrome
+          headless: true
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+  # ========================================
+  # INTEGRATION TESTING VALIDATION
+  # ========================================
+  integration-tests-validation:
+    name: 🔗 Integration Tests Validation
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    timeout-minutes: 15
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: 🧪 Run Integration Tests (Jest)
+        run: |
+          cd frontend
+          npm test -- --watchAll=false --testPathPattern="integration" --coverage
+      
+      - name: 📊 Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: frontend/coverage/lcov.info
+          flags: integration-tests
+          name: integration-tests-coverage
+
+  # ========================================
+  # TEST RESULTS SUMMARY
+  # ========================================
+  test-summary:
+    name: 📋 Test Results Summary
+    runs-on: ubuntu-latest
+    needs: [smoke-tests, cross-browser-tests, mobile-tests, performance-tests, accessibility-tests, integration-tests-validation]
+    if: always()
+    
+    steps:
+      - name: 📊 Generate test summary
+        run: |
+          echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚨 Smoke Tests | ${{ needs.smoke-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌐 Cross-Browser | ${{ needs.cross-browser-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📱 Mobile | ${{ needs.mobile-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚡ Performance | ${{ needs.performance-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ♿ Accessibility | ${{ needs.accessibility-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔗 Integration | ${{ needs.integration-tests-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: 🔔 Notify on failure
+        if: failure() || needs.smoke-tests.result == 'failure' || needs.cross-browser-tests.result == 'failure'
+        run: |
+          echo "❌ Some tests failed! Check the logs for details."
+          exit 1
+      
+      - name: 🎉 Notify on success
+        if: success() && needs.smoke-tests.result == 'success' && needs.cross-browser-tests.result == 'success'
+        run: |
+          echo "✅ All E2E tests passed successfully!"
+
+# ========================================
+# ENVIRONMENT VARIABLES
+# ========================================
+env:
+  # Backend API URL for E2E tests
+  REACT_APP_API_URL: http://localhost:8000/api
+  
+  # WebSocket URL for chat tests
+  REACT_APP_WS_URL: ws://localhost:8000/ws
+  
+  # Test environment
+  NODE_ENV: test
+  
+  # Cypress configuration
+  CYPRESS_baseUrl: http://localhost:3000
+  CYPRESS_video: true
+  CYPRESS_screenshotOnRunFailure: true
+  
+  # Performance thresholds
+  CYPRESS_defaultCommandTimeout: 10000
+  CYPRESS_requestTimeout: 10000
+  CYPRESS_responseTimeout: 10000
