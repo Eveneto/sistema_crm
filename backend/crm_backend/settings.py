@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
+# Load environment variables FIRST
+load_dotenv()
+
 # Email settings (configure via .env)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
@@ -20,9 +23,6 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 # Frontend URL for verification link
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
-# Load environment variables
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'  # Default: False for security
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
+    # 'django_ratelimit',  # Temporariamente desabilitado - requer Redis para produção
     'channels',  # WebSocket support para chat
     # TODO: Enable when packages are installed
     # 'drf_yasg',
@@ -65,15 +66,32 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # CORS Security Enhancement
+    'apps.authentication.cors_security_middleware.CORSSecurityMiddleware',
+    # Middleware de segurança avançado para produção
+    'apps.authentication.security_middleware.SecurityMiddleware',
+    'apps.authentication.security_middleware.RequestLoggingMiddleware',
+    # Rate Limiting Protection
+    'apps.authentication.rate_limit_middleware.RateLimitMiddleware',
+    'apps.authentication.rate_limit_middleware.APIRateLimitMiddleware',
+    # Directory Traversal Protection
+    'apps.authentication.directory_traversal_middleware.DirectoryTraversalProtectionMiddleware',
+    # Security Audit and API Protection
+    'apps.authentication.security_audit_middleware.SecurityAuditMiddleware',
+    'apps.authentication.security_audit_middleware.APISecurityMiddleware',
+    # XSS Protection
+    'apps.authentication.xss_protection_middleware.XSSProtectionMiddleware',
+    'apps.authentication.xss_protection_middleware.CSPMiddleware',
+    # SQL Injection Protection
+    'apps.authentication.sql_injection_middleware.SQLInjectionProtectionMiddleware',
+    'apps.authentication.sql_injection_middleware.QueryParameterValidationMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # CSRF disabled para desenvolvimento - habilitar em produção
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # CSRF habilitado para produção
+    'django.middleware.csrf.CsrfViewMiddleware' if not DEBUG else 'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # NOVO: Cookie JWT authentication middleware - HABILITADO
+    # Cookie JWT authentication middleware
     'apps.authentication.jwt_cookie_middleware.CookieJWTAuthenticationMiddleware',
-    # ANTIGO: Firebase middleware - DESABILITADO
-    # 'apps.authentication.middleware.FirebaseAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -172,15 +190,19 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001').split(',')
+
+# CORS Settings dinâmicos por ambiente
+if DEBUG:
+    # Desenvolvimento: mais permissivo
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_ALL_HEADERS = True
+else:
+    # Produção: restritivo
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_ALL_HEADERS = False
+
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development
-CORS_ALLOW_ALL_HEADERS = True  # Allow all headers in development
 CORS_ALLOWED_HEADERS = [
     'accept',
     'accept-encoding',
@@ -221,15 +243,27 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
+# SSL/HTTPS Security (Produção)
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if not DEBUG else None
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 ano
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+
+# Content Security Policy
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 # Session security
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 3600  # 1 hora
 
 # CSRF settings
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',') if not DEBUG else []
 
 # ===== CACHING =====
 CACHES = {
@@ -256,7 +290,7 @@ except ImportError:
     # django_redis não está instalado, usar cache local
     pass
 
-# ===== LOGGING =====
+# ===== LOGGING CONFIGURATION =====
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -269,6 +303,10 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        'security': {
+            'format': 'SECURITY {levelname} {asctime} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'file': {
@@ -277,22 +315,44 @@ LOGGING = {
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
         },
+        'security_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'security.log',
+            'formatter': 'security',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'error.log',
+            'formatter': 'verbose',
+        },
         'console': {
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['file', 'console', 'error_file'],
             'level': 'INFO',
             'propagate': True,
         },
         'apps': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
+        },
+        'security': {
+            'handlers': ['security_file', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_file', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
         },
     },
 }
@@ -362,3 +422,46 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
+# ============================================================================
+# CONFIGURAÇÕES DE SEGURANÇA AVANÇADAS
+# ============================================================================
+
+# Rate Limiting Configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+# Cache simples para rate limiting - usando filebased para compatibilidade
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': BASE_DIR / 'cache',
+    }
+}
+
+# Headers de Segurança
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Security Headers para HTTPS em produção
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Content Security Policy
+CSP_DEFAULT_SRC = "'self'"
+CSP_SCRIPT_SRC = "'self' 'unsafe-inline'"
+CSP_STYLE_SRC = "'self' 'unsafe-inline'"
+
+# Rate Limiting Settings
+RATE_LIMIT_REQUESTS_PER_MINUTE = 30  # 30 requests per minute
+RATE_LIMIT_REQUESTS_PER_HOUR = 500   # 500 requests per hour
+RATE_LIMIT_BLOCK_DURATION = 300      # Block for 5 minutes
+
+# API Rate Limiting (more restrictive)
+API_RATE_LIMIT_REQUESTS_PER_MINUTE = 20  # 20 API requests per minute
+API_RATE_LIMIT_REQUESTS_PER_HOUR = 300   # 300 API requests per hour

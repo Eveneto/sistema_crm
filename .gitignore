@@ -93,3 +93,9 @@ Thumbs.db
 *.p12
 *.pfx
 bfg.jar
+
+# Cache e arquivos temporários de segurança
+backend/cache/
+backend/staticfiles/
+security_*_report_*.txt
+frontend/security-test-reports/

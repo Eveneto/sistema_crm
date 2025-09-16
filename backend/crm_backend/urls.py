@@ -27,13 +27,15 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     
+    # Health checks and dashboard
+    path('api/health/', include('apps.dashboard.urls')),
+    
     # API routes
     path('api/auth/', include('apps.authentication.urls')),
     path('api/companies/', include('apps.companies.urls')),
     path('api/kanban/', include('apps.kanban.urls')),
     path('api/communities/', include('apps.communities.urls')),
     path('api/chat/', include('apps.chat.urls')),
-    path('api/dashboard/', include('apps.dashboard.urls')),
     
     # TODO: Enable API Documentation when drf_yasg is installed
     # path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

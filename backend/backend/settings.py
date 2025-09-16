@@ -8,6 +8,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
+    'django_ratelimit',  # Rate limiting
     'apps.authentication',
     'apps.companies',
     'apps.kanban',  # Adicionar o app kanban

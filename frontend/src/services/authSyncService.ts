@@ -71,10 +71,41 @@ class AuthSyncService {
 
   // Limpa todos os dados de autenticação
   clearAllAuthData() {
+    // Limpar tokens específicos
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('refreshToken');
+    
+    // Limpar possíveis dados de usuário em cache
+    localStorage.removeItem('user');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userProfile');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('userProfile');
+    
+    // Limpar dados específicos do CRM
+    localStorage.removeItem('companies');
+    localStorage.removeItem('kanbanData');
+    localStorage.removeItem('dashboardData');
+    sessionStorage.removeItem('companies');
+    sessionStorage.removeItem('kanbanData');
+    sessionStorage.removeItem('dashboardData');
+    
+    // Limpar qualquer dado de autenticação temporário
+    localStorage.removeItem('auth_state');
+    localStorage.removeItem('temp_auth');
+    sessionStorage.removeItem('auth_state');
+    sessionStorage.removeItem('temp_auth');
+    
+    // Limpar dados do Firebase se existirem
+    localStorage.removeItem('firebase:authUser');
+    localStorage.removeItem('firebase:host');
+    sessionStorage.removeItem('firebase:authUser');
+    sessionStorage.removeItem('firebase:host');
+    
+    console.log('🧹 Todos os dados de autenticação foram limpos');
   }
 }
 

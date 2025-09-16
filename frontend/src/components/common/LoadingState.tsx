@@ -49,7 +49,11 @@ const LoadingState: React.FC<LoadingStateProps> = ({
       default:
         return (
           <div className={`loading-spinner ${className}`}>
-            <Spin size={size} tip={text} />
+            <Spin size={size}>
+              <div style={{ padding: '20px' }}>
+                <span className="loading-text">{text}</span>
+              </div>
+            </Spin>
           </div>
         );
     }

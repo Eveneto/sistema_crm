@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.conf import settings
+# from django_ratelimit.decorators import ratelimit
+# from django.utils.decorators import method_decorator
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -36,6 +38,7 @@ def verify_email(request, token):
 
 
 
+# @method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='create')
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
@@ -73,6 +76,7 @@ class RegisterView(generics.CreateAPIView):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
+# @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='post')
 class LoginView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
@@ -133,6 +137,7 @@ class LoginView(generics.GenericAPIView):
         return response
 
 
+# @method_decorator(ratelimit(key='ip', rate='10/m', method='POST', block=True), name='post')
 class GoogleLoginView(generics.GenericAPIView):
     """
     Login via Google usando Firebase como ponte

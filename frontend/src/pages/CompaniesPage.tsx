@@ -388,6 +388,7 @@ const CompaniesPage: React.FC = () => {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => showModal()}
+              data-testid="add-company-btn"
             >
               Nova Empresa
             </Button>
@@ -436,7 +437,7 @@ const CompaniesPage: React.FC = () => {
                   { min: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
                 ]}
               >
-                <Input placeholder="Ex: Acme Corporation" />
+                <Input placeholder="Ex: Acme Corporation" data-testid="company-name-input" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -458,7 +459,7 @@ const CompaniesPage: React.FC = () => {
                   { type: 'email', message: 'Email inválido' }
                 ]}
               >
-                <Input placeholder="contato@empresa.com" />
+                <Input placeholder="contato@empresa.com" data-testid="company-email-input" />
               </Form.Item>
             </Col>
             <Col span={12}>

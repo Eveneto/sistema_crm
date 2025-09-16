@@ -100,11 +100,10 @@ const authSlice = createSlice({
         console.log('Logout backend falhou, mas continuando...');
       });
       
-      // Limpar localStorage como fallback
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('refreshToken');
+      // Usar authSyncService para limpeza completa
+      import('../../services/authSyncService').then(({ authSyncService }) => {
+        authSyncService.clearAllAuthData();
+      });
       
       state.user = null;
       state.token = null;
