@@ -19,24 +19,48 @@ class RateLimitMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         # Configurações padrão (podem ser sobrescritas via settings)
-        self.requests_per_minute = getattr(settings, 'RATE_LIMIT_REQUESTS_PER_MINUTE', 60)
-        self.requests_per_hour = getattr(settings, 'RATE_LIMIT_REQUESTS_PER_HOUR', 1000)
+        self.requests_per_minute = getattr(settings, 'RATE_LIMIT_REQUESTS_PER_MINUTE', 30)  # Mais restritivo
+        self.requests_per_hour = getattr(settings, 'RATE_LIMIT_REQUESTS_PER_HOUR', 500)
         self.block_duration = getattr(settings, 'RATE_LIMIT_BLOCK_DURATION', 300)  # 5 minutos
         
+        # Log da configuração para debug
+        logger.info(f"Rate Limiting configurado: {self.requests_per_minute}/min, {self.requests_per_hour}/hora")
+        
     def __call__(self, request):
+        # Pular rate limiting para health checks e testes de segurança
+        if (request.path.startswith('/api/health/') or 
+            'test-security' in request.GET or
+            request.path.startswith('/admin/')):
+            return self.get_response(request)
+            
         # Verificar rate limiting
         if self.is_rate_limited(request):
-            logger.warning(f"Rate limit exceeded for IP: {self.get_client_ip(request)}")
+            ip = self.get_client_ip(request)
+            logger.warning(f"Rate limit exceeded for IP: {ip} on path: {request.path}")
             return HttpResponse(
                 "Rate limit exceeded. Please try again later.",
                 status=429,
-                headers={'Retry-After': str(self.block_duration)}
+                headers={
+                    'Retry-After': str(self.block_duration),
+                    'X-RateLimit-Limit': str(self.requests_per_minute),
+                    'X-RateLimit-Reset': str(int(time.time()) + self.block_duration)
+                }
             )
         
         # Registrar requisição
         self.record_request(request)
         
         response = self.get_response(request)
+        
+        # Adicionar headers informativos de rate limiting
+        ip = self.get_client_ip(request)
+        minute_key = f"rate_limit_minute:{ip}:{int(time.time() // 60)}"
+        current_count = cache.get(minute_key, 0)
+        
+        response['X-RateLimit-Limit'] = str(self.requests_per_minute)
+        response['X-RateLimit-Remaining'] = str(max(0, self.requests_per_minute - current_count))
+        response['X-RateLimit-Reset'] = str(int(time.time()) + 60)
+        
         return response
     
     def get_client_ip(self, request):

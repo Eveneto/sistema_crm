@@ -7,6 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 # from django_ratelimit.decorators import ratelimit
 # from django.utils.decorators import method_decorator
 from .serializers import (
@@ -308,3 +311,14 @@ class FirebaseTokenValidationView(generics.GenericAPIView):
             'access': str(refresh.access_token),
             'firebase_data': firebase_user_data
         }, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "HEAD"])
+def health_check(request):
+    """Endpoint de health check para monitoramento"""
+    return JsonResponse({
+        'status': 'healthy',
+        'debug': settings.DEBUG,
+        'environment': 'development' if settings.DEBUG else 'production'
+    })
