@@ -27,9 +27,7 @@ class CORSSecurityMiddleware:
             r'.*hack.*',
             r'.*attack.*',
             r'.*exploit.*',
-            r'.*\d+\.\d+\.\d+\.\d+.*',  # IPs diretos suspeitos
             r'.*ngrok.*',  # Túneis temporários
-            r'.*localhost.*(?<!http://localhost:3000|http://localhost:3001)',  # Localhost suspeito
         ]
         
         # Domínios de desenvolvimento permitidos

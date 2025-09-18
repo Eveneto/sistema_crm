@@ -43,6 +43,10 @@ class XSSProtectionMiddleware:
         self.compiled_patterns = [re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in self.xss_patterns]
     
     def __call__(self, request):
+        # Permitir usuários autenticados
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            return self.get_response(request)
+            
         # Verificar XSS nos parâmetros da requisição
         if self.contains_xss(request):
             logger.warning(f"XSS attempt detected from IP: {self.get_client_ip(request)}")

@@ -45,6 +45,10 @@ class SecurityMiddleware(MiddlewareMixin):
         start_time = time.time()
         request._security_start_time = start_time
         
+        # Permitir usuários autenticados passarem
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            return None
+            
         # 1. Rate limiting básico
         if self._check_rate_limit(request):
             logger.warning(f"Rate limit exceeded for IP: {self._get_client_ip(request)}")

@@ -81,6 +81,10 @@ class SQLInjectionProtectionMiddleware:
         ]
     
     def __call__(self, request):
+        # Permitir usuários autenticados
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            return self.get_response(request)
+            
         # Verificar SQL injection nos parâmetros
         if self.contains_sql_injection(request):
             client_ip = self.get_client_ip(request)

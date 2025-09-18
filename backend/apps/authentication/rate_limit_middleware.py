@@ -27,6 +27,10 @@ class RateLimitMiddleware:
         logger.info(f"Rate Limiting configurado: {self.requests_per_minute}/min, {self.requests_per_hour}/hora")
         
     def __call__(self, request):
+        # Permitir usuários autenticados
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            return self.get_response(request)
+            
         # Pular rate limiting para health checks e testes de segurança
         if (request.path.startswith('/api/health/') or 
             'test-security' in request.GET or

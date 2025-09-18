@@ -30,8 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Force DEBUG=False for production security
-DEBUG = False  # Forced to False for security
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -67,35 +66,44 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # CORS Security Enhancement
-    'apps.authentication.cors_security_middleware.CORSSecurityMiddleware',
-    # Middleware de segurança avançado para produção
-    'apps.authentication.security_middleware.SecurityMiddleware',
-    'apps.authentication.security_middleware.RequestLoggingMiddleware',
-    # Rate Limiting Protection
-    'apps.authentication.rate_limit_middleware.RateLimitMiddleware',
-    'apps.authentication.rate_limit_middleware.APIRateLimitMiddleware',
-    # Directory Traversal Protection
-    'apps.authentication.directory_traversal_middleware.DirectoryTraversalProtectionMiddleware',
-    # Security Audit and API Protection
-    'apps.authentication.security_audit_middleware.SecurityAuditMiddleware',
-    'apps.authentication.security_audit_middleware.APISecurityMiddleware',
-    # XSS Protection
-    'apps.authentication.xss_protection_middleware.XSSProtectionMiddleware',
-    'apps.authentication.xss_protection_middleware.CSPMiddleware',
-    # SQL Injection Protection
-    'apps.authentication.sql_injection_middleware.SQLInjectionProtectionMiddleware',
-    'apps.authentication.sql_injection_middleware.QueryParameterValidationMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # CSRF habilitado para produção
     'django.middleware.csrf.CsrfViewMiddleware' if not DEBUG else 'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # Cookie JWT authentication middleware
+    # Cookie JWT authentication middleware (DEVE vir após AuthenticationMiddleware)
     'apps.authentication.jwt_cookie_middleware.CookieJWTAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Adicionar middlewares de segurança apenas em PRODUÇÃO
+if not DEBUG:
+    SECURITY_MIDDLEWARE = [
+        # CORS Security Enhancement
+        'apps.authentication.cors_security_middleware.CORSSecurityMiddleware',
+        # Middleware de segurança avançado para produção
+        'apps.authentication.security_middleware.SecurityMiddleware',
+        'apps.authentication.security_middleware.RequestLoggingMiddleware',
+        # Rate Limiting Protection
+        'apps.authentication.rate_limit_middleware.RateLimitMiddleware',
+        'apps.authentication.rate_limit_middleware.APIRateLimitMiddleware',
+        # Directory Traversal Protection
+        'apps.authentication.directory_traversal_middleware.DirectoryTraversalProtectionMiddleware',
+        # Security Audit and API Protection
+        'apps.authentication.security_audit_middleware.SecurityAuditMiddleware',
+        'apps.authentication.security_audit_middleware.APISecurityMiddleware',
+        # XSS Protection
+        'apps.authentication.xss_protection_middleware.XSSProtectionMiddleware',
+        'apps.authentication.xss_protection_middleware.CSPMiddleware',
+        # SQL Injection Protection
+        'apps.authentication.sql_injection_middleware.SQLInjectionProtectionMiddleware',
+        'apps.authentication.sql_injection_middleware.QueryParameterValidationMiddleware',
+    ]
+    
+    # Inserir middlewares de segurança após autenticação
+    auth_index = MIDDLEWARE.index('apps.authentication.jwt_cookie_middleware.CookieJWTAuthenticationMiddleware')
+    MIDDLEWARE = MIDDLEWARE[:auth_index+1] + SECURITY_MIDDLEWARE + MIDDLEWARE[auth_index+1:]
 
 ROOT_URLCONF = 'crm_backend.urls'
 
@@ -245,7 +253,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
 # SSL/HTTPS Security (Produção) - Desabilitado para testes
-SECURE_SSL_REDIRECT = False  # Temporariamente desabilitado para testes
+# Desabilitar redirect HTTPS para desenvolvimento
+SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if not DEBUG else None
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 ano
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
