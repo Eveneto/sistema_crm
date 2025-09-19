@@ -89,17 +89,18 @@ const CompaniesPage: React.FC = () => {
       
       const response = await api.get(endpoint);
       
+      let companiesData = [];
       if (search && response.data.results) {
-        setCompanies(response.data.results);
+        companiesData = response.data.results;
       } else if (response.data.results) {
-        setCompanies(response.data.results);
+        companiesData = response.data.results;
       } else {
-        setCompanies(Array.isArray(response.data) ? response.data : []);
+        companiesData = Array.isArray(response.data) ? response.data : [];
       }
+      
+      setCompanies(companiesData);
     } catch (error) {
       console.error('Erro ao carregar empresas:', error);
-      // Use console.error instead of message.error for initial debug
-      console.error('Response error details:', error);
       setCompanies([]);
     } finally {
       setLoading(false);
@@ -190,14 +191,18 @@ const CompaniesPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      console.log('🗑️ Deletando empresa ID:', id);
+      // Validação importante para evitar IDs inválidos
+      if (!id || id === undefined || id === null) {
+        message.error('ID da empresa é inválido');
+        return;
+      }
+      
       await api.delete(`/api/companies/companies/${id}/`);
       setCompanies(companies.filter(c => c.id !== id));
       message.success('Empresa excluída com sucesso!');
       fetchStats(); // Atualizar estatísticas
-      console.log('✅ Empresa deletada com sucesso');
     } catch (error) {
-      console.error('❌ Erro ao excluir empresa:', error);
+      console.error('Erro ao excluir empresa:', error);
       message.error('Erro ao excluir empresa');
     }
   };
