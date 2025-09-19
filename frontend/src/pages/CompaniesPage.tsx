@@ -219,6 +219,7 @@ const CompaniesPage: React.FC = () => {
   };
 
   const getSizeLabel = (size?: string) => {
+    if (!size) return '-';
     const sizeObj = COMPANY_SIZES.find(s => s.value === size);
     return sizeObj?.label || size;
   };
@@ -309,6 +310,7 @@ const CompaniesPage: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => showModal(record)}
             size="small"
+            data-testid={`edit-company-${record.id}`}
           />
           <Popconfirm
             title="Excluir empresa"
@@ -316,12 +318,14 @@ const CompaniesPage: React.FC = () => {
             onConfirm={() => handleDelete(record.id)}
             okText="Sim"
             cancelText="Não"
+            data-testid={`delete-confirm-${record.id}`}
           >
             <Button
               type="text"
               danger
               icon={<DeleteOutlined />}
               size="small"
+              data-testid={`delete-company-${record.id}`}
             />
           </Popconfirm>
         </Space>
@@ -331,7 +335,7 @@ const CompaniesPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <Title level={2}>Empresas</Title>
+      <Title level={2} data-testid="companies-page-title">Empresas</Title>
 
       {/* Estatísticas */}
       {stats && (
@@ -342,6 +346,7 @@ const CompaniesPage: React.FC = () => {
                 title="Total de Empresas"
                 value={stats.total_companies}
                 prefix={<BuildOutlined />}
+                data-testid="total-companies"
               />
             </Card>
           </Col>
@@ -349,7 +354,7 @@ const CompaniesPage: React.FC = () => {
             <Card>
               <Statistic
                 title="Pequenas"
-                value={stats.by_size.small?.count || 0}
+                value={stats.by_size?.small?.count || 0}
                 prefix={<BuildOutlined />}
               />
             </Card>
@@ -358,7 +363,7 @@ const CompaniesPage: React.FC = () => {
             <Card>
               <Statistic
                 title="Médias"
-                value={stats.by_size.medium?.count || 0}
+                value={stats.by_size?.medium?.count || 0}
                 prefix={<BuildOutlined />}
               />
             </Card>
@@ -367,7 +372,7 @@ const CompaniesPage: React.FC = () => {
             <Card>
               <Statistic
                 title="Grandes"
-                value={(stats.by_size.large?.count || 0) + (stats.by_size.enterprise?.count || 0)}
+                value={(stats.by_size?.large?.count || 0) + (stats.by_size?.enterprise?.count || 0)}
                 prefix={<BuildOutlined />}
               />
             </Card>
@@ -386,6 +391,7 @@ const CompaniesPage: React.FC = () => {
               onChange={(e) => !e.target.value && handleSearch('')}
               style={{ maxWidth: 400 }}
               prefix={<SearchOutlined />}
+              data-testid="companies-search-input"
             />
           </Col>
           <Col>
@@ -393,7 +399,7 @@ const CompaniesPage: React.FC = () => {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => showModal()}
-              data-testid="add-company-btn"
+              data-testid="new-company-button"
             >
               Nova Empresa
             </Button>
@@ -408,6 +414,7 @@ const CompaniesPage: React.FC = () => {
           dataSource={companies}
           rowKey="id"
           loading={loading}
+          data-testid="companies-table"
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -426,11 +433,13 @@ const CompaniesPage: React.FC = () => {
         okText="Salvar"
         cancelText="Cancelar"
         width={600}
+        data-testid="company-modal"
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          data-testid="company-form"
         >
           <Row gutter={16}>
             <Col span={12}>
@@ -450,7 +459,7 @@ const CompaniesPage: React.FC = () => {
                 name="industry"
                 label="Setor"
               >
-                <Input placeholder="Ex: Tecnologia, Saúde, Educação" />
+                <Input placeholder="Ex: Tecnologia, Saúde, Educação" data-testid="company-industry-input" />
               </Form.Item>
             </Col>
           </Row>
@@ -472,7 +481,7 @@ const CompaniesPage: React.FC = () => {
                 name="phone"
                 label="Telefone"
               >
-                <Input placeholder="(11) 99999-9999" />
+                <Input placeholder="(11) 99999-9999" data-testid="company-phone-input" />
               </Form.Item>
             </Col>
           </Row>
@@ -483,7 +492,7 @@ const CompaniesPage: React.FC = () => {
                 name="website"
                 label="Website"
               >
-                <Input placeholder="https://empresa.com" />
+                <Input placeholder="https://empresa.com" data-testid="company-website-input" />
               </Form.Item>
             </Col>
             <Col span={12}>
