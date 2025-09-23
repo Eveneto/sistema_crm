@@ -46,7 +46,16 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   const taskIds = column.tasks.map(task => task.id);
 
   return (
-    <div style={{ width: 300, marginRight: 16 }}>
+    <div
+      className="kanban-column-responsive"
+      style={{
+        minWidth: 300,
+        maxWidth: 340,
+        flex: '0 0 auto',
+        marginRight: 0,
+        width: '100%',
+      }}
+    >
       <Card
         size="small"
         style={{

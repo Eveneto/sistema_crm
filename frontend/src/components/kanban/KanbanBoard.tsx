@@ -1,4 +1,5 @@
 import React from 'react';
+import './kanban-responsive.css';
 import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card, Empty, Spin } from 'antd';
@@ -146,12 +147,19 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div style={{ 
-        display: 'flex', 
-        overflowX: 'auto', 
-        paddingBottom: 16,
-        minHeight: 'calc(100vh - 200px)'
-      }}>
+      <div
+        className="kanban-board-responsive"
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 16,
+          overflowX: 'auto',
+          paddingBottom: 16,
+          minHeight: 'calc(100vh - 200px)',
+          scrollbarWidth: 'thin',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
           {columns.map((column) => (
             <KanbanColumn

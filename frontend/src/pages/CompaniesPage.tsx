@@ -407,22 +407,65 @@ const CompaniesPage: React.FC = () => {
         </Row>
       </Card>
 
-      {/* Tabela */}
-      <Card>
-        <Table
-          columns={columns}
-          dataSource={companies}
-          rowKey="id"
-          loading={loading}
-          data-testid="companies-table"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `Total: ${total} empresas`,
-          }}
-        />
-      </Card>
+      {/* Tabela ou Cards (responsivo) */}
+      {window.innerWidth > 700 ? (
+        <Card>
+          <Table
+            columns={columns}
+            dataSource={companies}
+            rowKey="id"
+            loading={loading}
+            data-testid="companies-table"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total) => `Total: ${total} empresas`,
+            }}
+          />
+        </Card>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {companies.map(company => (
+            <Card key={company.id} style={{ marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size="large" icon={<BuildOutlined />} />
+                <div>
+                  <Text strong>{company.name}</Text>
+                  {company.industry && (
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block' }}>{company.industry}</Text>
+                  )}
+                </div>
+              </div>
+              <div style={{ marginTop: 8 }}>
+                {company.email && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <MailOutlined style={{ fontSize: 12 }} />
+                    <Text style={{ fontSize: 12 }}>{company.email}</Text>
+                  </div>
+                )}
+                {company.phone && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <PhoneOutlined style={{ fontSize: 12 }} />
+                    <Text style={{ fontSize: 12 }}>{company.phone}</Text>
+                  </div>
+                )}
+                {company.website && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <GlobalOutlined style={{ fontSize: 12 }} />
+                    <Text style={{ fontSize: 12 }}>{company.website}</Text>
+                  </div>
+                )}
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Tag color={getSizeColor(company.size)}>{getSizeLabel(company.size)}</Tag>
+                <span><UserOutlined /> {company.contact_count}</span>
+                <span>{company.created_by_name || '-'}</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Modal de Criar/Editar */}
       <Modal

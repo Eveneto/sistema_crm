@@ -1,0 +1,79 @@
+/* Responsividade global para CRM System */
+
+/* Containers principais */
+.main-container, .ant-layout-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Grid e flexbox */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Cards e modais */
+.ant-card {
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+/* Menus e headers */
+.ant-layout-sider {
+  min-width: 220px;
+  max-width: 260px;
+}
+.ant-layout-header {
+  padding: 0 16px;
+}
+
+/* Botões e inputs */
+.ant-btn, .ant-input {
+  font-size: 16px;
+  padding: 8px 16px;
+}
+
+@media (max-width: 900px) {
+  .main-container, .ant-layout-content {
+    padding: 0 8px;
+  }
+  .ant-layout-sider {
+    min-width: 120px;
+    max-width: 160px;
+  }
+  .ant-card {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-container, .ant-layout-content {
+    padding: 0 2px;
+  }
+  .flex-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ant-layout-sider {
+    display: none !important;
+  }
+  .ant-layout-header {
+    padding: 0 4px;
+    font-size: 16px;
+  }
+  .ant-card {
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .ant-btn, .ant-input {
+    font-size: 18px;
+    padding: 12px 0;
+  }
+}

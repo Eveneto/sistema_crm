@@ -17,6 +17,7 @@ import {
   Statistic,
   Tooltip,
 } from 'antd';
+import './communities-responsive.css';
 import {
   PlusOutlined,
   SearchOutlined,
@@ -205,29 +206,93 @@ const CommunitiesPage: React.FC = () => {
       <div style={{ padding: '24px' }}>
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div>
-              <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Header e Stats Cards - responsivo */}
+          {window.innerWidth > 700 ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <TeamOutlined />
+                  Comunidades
+                </Title>
+                <Text type="secondary">
+                  Conecte-se com outros usuários em comunidades de interesse
+                </Text>
+              </div>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={openCreateModal}
+                size="large"
+              >
+                Criar Comunidade
+              </Button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+              <Title level={2} style={{ margin: 0, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <TeamOutlined />
                 Comunidades
               </Title>
-              <Text type="secondary">
+              <Text type="secondary" style={{ marginBottom: 8 }}>
                 Conecte-se com outros usuários em comunidades de interesse
               </Text>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={openCreateModal}
+                size="large"
+                style={{ width: '100%' }}
+              >
+                Criar Comunidade
+              </Button>
             </div>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={openCreateModal}
-              size="large"
-            >
-              Criar Comunidade
-            </Button>
-          </div>
+          )}
 
-          {/* Stats Cards */}
-          <Row gutter={16} style={{ marginBottom: 24 }}>
-            <Col xs={24} sm={6}>
+          {window.innerWidth > 700 ? (
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+              <Col xs={24} sm={6}>
+                <Card size="small">
+                  <Statistic
+                    title="Total"
+                    value={stats.total}
+                    prefix={<TeamOutlined />}
+                    valueStyle={{ color: '#1890ff' }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={6}>
+                <Card size="small">
+                  <Statistic
+                    title="Minhas Comunidades"
+                    value={stats.myCommunitiesCount}
+                    prefix={<UserOutlined />}
+                    valueStyle={{ color: '#52c41a' }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={6}>
+                <Card size="small">
+                  <Statistic
+                    title="Públicas"
+                    value={stats.publicCount}
+                    prefix={<GlobalOutlined />}
+                    valueStyle={{ color: '#52c41a' }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={6}>
+                <Card size="small">
+                  <Statistic
+                    title="Privadas"
+                    value={stats.privateCount}
+                    prefix={<LockOutlined />}
+                    valueStyle={{ color: '#faad14' }}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
               <Card size="small">
                 <Statistic
                   title="Total"
@@ -236,8 +301,6 @@ const CommunitiesPage: React.FC = () => {
                   valueStyle={{ color: '#1890ff' }}
                 />
               </Card>
-            </Col>
-            <Col xs={24} sm={6}>
               <Card size="small">
                 <Statistic
                   title="Minhas Comunidades"
@@ -246,8 +309,6 @@ const CommunitiesPage: React.FC = () => {
                   valueStyle={{ color: '#52c41a' }}
                 />
               </Card>
-            </Col>
-            <Col xs={24} sm={6}>
               <Card size="small">
                 <Statistic
                   title="Públicas"
@@ -256,8 +317,6 @@ const CommunitiesPage: React.FC = () => {
                   valueStyle={{ color: '#52c41a' }}
                 />
               </Card>
-            </Col>
-            <Col xs={24} sm={6}>
               <Card size="small">
                 <Statistic
                   title="Privadas"
@@ -266,8 +325,8 @@ const CommunitiesPage: React.FC = () => {
                   valueStyle={{ color: '#faad14' }}
                 />
               </Card>
-            </Col>
-          </Row>
+            </div>
+          )}
 
           {/* Filters */}
           <Card size="small" style={{ marginBottom: 24 }}>
@@ -389,9 +448,28 @@ const CommunitiesPage: React.FC = () => {
               )}
             </Empty>
           ) : (
-            <Row gutter={[16, 16]}>
+            <div
+              className="communities-board-responsive"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 16,
+                overflowX: 'auto',
+                paddingBottom: 8,
+                scrollbarWidth: 'thin',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
               {communities.map((community) => (
-                <Col xs={24} sm={12} lg={8} xl={6} key={community.id}>
+                <div
+                  key={community.id}
+                  className="community-card-responsive"
+                  style={{
+                    minWidth: 300,
+                    maxWidth: 340,
+                    flex: '0 0 auto',
+                  }}
+                >
                   <CommunityCard
                     community={community}
                     onJoin={handleJoinCommunity}
@@ -399,9 +477,9 @@ const CommunitiesPage: React.FC = () => {
                     onEdit={openEditModal}
                     onView={handleViewCommunity}
                   />
-                </Col>
+                </div>
               ))}
-            </Row>
+            </div>
           )}
         </div>
 

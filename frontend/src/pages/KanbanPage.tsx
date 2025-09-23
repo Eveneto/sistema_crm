@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons';
 import MainLayout from '../components/layout/MainLayout';
 import KanbanBoard from '../components/kanban/KanbanBoard';
+import './kanban-responsive.css';
 import TaskModal from '../components/kanban/TaskModal';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import {
@@ -219,14 +220,25 @@ const KanbanPage: React.FC = () => {
       <div style={{ padding: '24px' }}>
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Title level={2} style={{ margin: 0 }}>
+          <div
+            className="kanban-header-responsive"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
+              flexWrap: 'wrap',
+              gap: 12,
+            }}
+          >
+            <Title level={2} style={{ margin: 0, fontSize: window.innerWidth < 600 ? 22 : undefined }}>
               📋 Pipeline Kanban
             </Title>
-            <Space>
+            <Space direction={window.innerWidth < 600 ? 'vertical' : 'horizontal'} size={window.innerWidth < 600 ? 8 : 16}>
               <Button 
                 icon={<ReloadOutlined />} 
                 onClick={() => currentBoard && dispatch(fetchBoardById(currentBoard.id))}
+                style={window.innerWidth < 600 ? { width: '100%' } : {}}
               >
                 Atualizar
               </Button>
@@ -234,22 +246,77 @@ const KanbanPage: React.FC = () => {
                 type="primary" 
                 icon={<PlusOutlined />}
                 onClick={() => setBoardModalOpen(true)}
+                style={window.innerWidth < 600 ? { width: '100%' } : {}}
               >
                 Novo Board
               </Button>
             </Space>
           </div>
 
-          {/* Seletor de Board e Estatísticas */}
-          <Row gutter={16} style={{ marginBottom: 16 }}>
-            <Col span={12}>
+          {/* Seletor de Board e Estatísticas - responsivo */}
+          {window.innerWidth > 700 ? (
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col span={12}>
+                <Card size="small">
+                  <Space>
+                    <Text>Board atual:</Text>
+                    <Select
+                      value={currentBoard?.id}
+                      onChange={handleBoardChange}
+                      style={{ minWidth: 200 }}
+                      loading={loading}
+                      placeholder="Selecione um board"
+                    >
+                      {(boards || []).map(board => (
+                        <Option key={board.id} value={board.id}>
+                          {board.name}
+                        </Option>
+                      ))}
+                    </Select>
+                    <Button 
+                      type="dashed" 
+                      icon={<PlusOutlined />}
+                      onClick={() => setColumnModalOpen(true)}
+                      disabled={!currentBoard}
+                    >
+                      Nova Coluna
+                    </Button>
+                  </Space>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card size="small">
+                  <Row gutter={16}>
+                    <Col span={8}>
+                      <Statistic title="Total Tasks" value={stats.totalTasks} />
+                    </Col>
+                    <Col span={8}>
+                      <Statistic 
+                        title="Concluídas" 
+                        value={stats.completedTasks} 
+                        valueStyle={{ color: '#3f8600' }}
+                      />
+                    </Col>
+                    <Col span={8}>
+                      <Statistic 
+                        title="Atrasadas" 
+                        value={stats.overdueTasks} 
+                        valueStyle={{ color: '#cf1322' }}
+                      />
+                    </Col>
+                  </Row>
+                </Card>
+              </Col>
+            </Row>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
               <Card size="small">
-                <Space>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <Text>Board atual:</Text>
                   <Select
                     value={currentBoard?.id}
                     onChange={handleBoardChange}
-                    style={{ minWidth: 200 }}
+                    style={{ width: '100%' }}
                     loading={loading}
                     placeholder="Selecione um board"
                   >
@@ -264,36 +331,29 @@ const KanbanPage: React.FC = () => {
                     icon={<PlusOutlined />}
                     onClick={() => setColumnModalOpen(true)}
                     disabled={!currentBoard}
+                    style={{ width: '100%' }}
                   >
                     Nova Coluna
                   </Button>
-                </Space>
+                </div>
               </Card>
-            </Col>
-            <Col span={12}>
               <Card size="small">
-                <Row gutter={16}>
-                  <Col span={8}>
-                    <Statistic title="Total Tasks" value={stats.totalTasks} />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic 
-                      title="Concluídas" 
-                      value={stats.completedTasks} 
-                      valueStyle={{ color: '#3f8600' }}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic 
-                      title="Atrasadas" 
-                      value={stats.overdueTasks}
-                      valueStyle={{ color: '#cf1322' }}
-                    />
-                  </Col>
-                </Row>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 8, justifyContent: 'space-between' }}>
+                  <Statistic title="Total Tasks" value={stats.totalTasks} />
+                  <Statistic 
+                    title="Concluídas" 
+                    value={stats.completedTasks} 
+                    valueStyle={{ color: '#3f8600' }}
+                  />
+                  <Statistic 
+                    title="Atrasadas" 
+                    value={stats.overdueTasks} 
+                    valueStyle={{ color: '#cf1322' }}
+                  />
+                </div>
               </Card>
-            </Col>
-          </Row>
+            </div>
+          )}
         </div>
 
         {/* Board atual */}

@@ -184,13 +184,23 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
             </Text>
             
             <Space split={<Text type="secondary">•</Text>}>
-              <Space>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: 120,
+                }}
+              >
                 <TeamOutlined />
                 <Text strong>{community.member_count}</Text>
                 <Text type="secondary">
                   {community.member_count === 1 ? 'membro' : 'membros'}
                 </Text>
-              </Space>
+              </span>
               
               <Text type="secondary">
                 Criada {formatTimeAgo(community.created_at)}

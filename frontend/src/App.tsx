@@ -25,6 +25,7 @@ import './App.css';
 // Novos estilos melhorados
 import './styles/toastStyles.css';
 import './styles/responsiveBreakpoints.css';
+import './styles/global-responsive.css';
 
 // Importa os services para inicializar
 // import './services/tokenService';

@@ -1,0 +1,31 @@
+.kanban-board-responsive {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  min-height: calc(100vh - 200px);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 600px) {
+  .kanban-board-responsive {
+    flex-direction: column;
+    gap: 12px;
+    overflow-x: unset;
+    min-height: unset;
+    padding-bottom: 0;
+  }
+  .kanban-column-responsive {
+    min-width: unset !important;
+    max-width: unset !important;
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px;
+  }
+  .ant-btn {
+    font-size: 18px !important;
+    padding: 12px 0 !important;
+  }
+}
