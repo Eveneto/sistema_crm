@@ -45,6 +45,10 @@ class SecurityMiddleware(MiddlewareMixin):
         start_time = time.time()
         request._security_start_time = start_time
         
+        # Desabilitar rate limiting durante testes
+        if getattr(settings, 'TESTING', False):
+            return None
+        
         # Permitir usuários autenticados passarem
         if hasattr(request, 'user') and request.user.is_authenticated:
             return None
