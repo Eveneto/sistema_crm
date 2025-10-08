@@ -59,6 +59,17 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         """Cria chat room com o usuário atual como criador"""
         serializer.save(created_by=self.request.user)
     
+    def create(self, request, *args, **kwargs):
+        """Cria chat room e retorna com serializer detalhado"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Usar ChatRoomDetailSerializer para a resposta
+        instance = serializer.instance
+        response_serializer = ChatRoomDetailSerializer(instance, context={'request': request})
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         """Permite usuário entrar no chat"""
