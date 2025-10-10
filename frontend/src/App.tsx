@@ -19,8 +19,20 @@ import TestingToolsPage from './pages/TestingToolsPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 
+// Tema RD Station
+import rdstationTheme from './theme/rdstationTheme';
+
 // Estilos principais
 import './App.css';
+
+// Tema RD Station CSS
+import './styles/rdstation-theme.css';
+
+// Layout Enhancements
+import './components/layout/LayoutEnhancements.css';
+
+// Navigation styles
+import './styles/navigation.css';
 
 // Novos estilos melhorados
 import './styles/toastStyles.css';
@@ -34,13 +46,7 @@ import './services/authSyncService';
 function App() {
   return (
     <Provider store={store}>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#1890ff',
-          },
-        }}
-      >
+      <ConfigProvider theme={rdstationTheme}>
         <div className="App">
           <Router>
             <AuthProvider>
