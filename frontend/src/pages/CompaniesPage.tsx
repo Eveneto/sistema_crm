@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import MainLayout from '../components/layout/MainLayout';
+import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
 
 const { Title, Text } = Typography;
@@ -335,7 +336,21 @@ const CompaniesPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <Title level={2} data-testid="companies-page-title">Empresas</Title>
+      <PageHeader
+        title="Empresas"
+        subtitle="Gerencie sua carteira de clientes e prospects"
+        actions={[
+          <Button
+            key="new-company"
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => showModal()}
+            data-testid="new-company-button"
+          >
+            Nova Empresa
+          </Button>
+        ]}
+      />
 
       {/* Estatísticas */}
       {stats && (
@@ -393,16 +408,6 @@ const CompaniesPage: React.FC = () => {
               prefix={<SearchOutlined />}
               data-testid="companies-search-input"
             />
-          </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => showModal()}
-              data-testid="new-company-button"
-            >
-              Nova Empresa
-            </Button>
           </Col>
         </Row>
       </Card>

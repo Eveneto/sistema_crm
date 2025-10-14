@@ -17,6 +17,7 @@ import {
 } from '@ant-design/icons';
 import { RootState } from '../../redux/store';
 import { logout } from '../../redux/slices/authSlice';
+import ThemeToggle from '../theme/ThemeToggle';
 import './SidebarResponsive.css';
 
 const { Sider } = Layout;
@@ -230,7 +231,7 @@ const settingsItems = [
               size={40} 
               icon={<UserOutlined />}
               style={{ 
-                backgroundColor: '#1890ff',
+                backgroundColor: 'var(--primary-color)',
                 marginBottom: 8 
               }}
             />
@@ -251,7 +252,7 @@ const settingsItems = [
               <Avatar 
                 size={32} 
                 icon={<UserOutlined />}
-                style={{ backgroundColor: '#1890ff' }}
+                style={{ backgroundColor: 'var(--primary-color)' }}
               />
             </Tooltip>
           </div>
@@ -298,6 +299,16 @@ const settingsItems = [
               onClick: item.onClick,
             }))}
           />
+
+          {/* Theme Toggle */}
+          <div className="theme-toggle-section-responsive">
+            <ThemeToggle 
+              iconOnly={collapsed} 
+              size="small"
+            />
+          </div>
+
+          <Divider style={{ margin: '8px 0' }} />
 
           {/* Logout button */}
           <div className="logout-section-responsive">

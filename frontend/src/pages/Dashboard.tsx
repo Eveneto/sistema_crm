@@ -23,6 +23,7 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import MainLayout from '../components/layout/MainLayout';
+import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
 
 // Registrar componentes do Chart.js
@@ -219,24 +220,18 @@ const Dashboard: React.FC = () => {
   };
   return (
     <MainLayout>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <Title level={2} style={{ margin: 0, color: '#1890ff' }}>
-            <TrophyOutlined style={{ marginRight: 8 }} />
-            Dashboard CRM
-          </Title>
-          <Text type="secondary" style={{ fontSize: 16 }}>
-            Visão geral do seu sistema de gestão
-          </Text>
-        </div>
+      <PageHeader
+        title="Dashboard"
+        subtitle="Visão geral do seu sistema de gestão"
+      />
 
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '100px 0' }}>
-            <Spin size="large" />
-            <div style={{ marginTop: 16 }}>
-              <Text>Carregando métricas...</Text>
-            </div>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '100px 0' }}>
+          <Spin size="large" />
+          <div style={{ marginTop: 16 }}>
+            <Text>Carregando métricas...</Text>
           </div>
+        </div>
         ) : (
           <>
             {/* Cards de Estatísticas Principais */}
@@ -428,7 +423,6 @@ const Dashboard: React.FC = () => {
             </Row>
           </>
         )}
-      </div>
     </MainLayout>
   );
 };

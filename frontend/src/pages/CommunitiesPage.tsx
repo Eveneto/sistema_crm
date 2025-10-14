@@ -20,7 +20,6 @@ import {
 import './communities-responsive.css';
 import {
   PlusOutlined,
-  SearchOutlined,
   TeamOutlined,
   GlobalOutlined,
   LockOutlined,
@@ -29,15 +28,15 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import MainLayout from '../components/layout/MainLayout';
+import PageHeader from '../components/layout/PageHeader';
 import CommunityCard from '../components/communities/CommunityCard';
 import CommunityModal from '../components/communities/CommunityModal';
 import { Community, CommunityCreateData, CommunityUpdateData } from '../types/community';
 import { communitiesApi } from '../services/communitiesApi';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const { TabPane } = Tabs;
 
 interface CommunityFilters {
   search: string;
@@ -203,52 +202,31 @@ const CommunitiesPage: React.FC = () => {
 
   return (
     <MainLayout>
+      <PageHeader
+        title="Comunidades"
+        subtitle="Conecte-se com outros usuários em comunidades de interesse"
+        actions={[
+          <Button 
+            key="refresh"
+            icon={<ReloadOutlined />} 
+            onClick={loadCommunities}
+          >
+            Atualizar
+          </Button>,
+          <Button 
+            key="create"
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={openCreateModal}
+          >
+            Criar Comunidade
+          </Button>
+        ]}
+      />
+      
       <div style={{ padding: '24px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: 24 }}>
-          {/* Header e Stats Cards - responsivo */}
-          {window.innerWidth > 700 ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div>
-                <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <TeamOutlined />
-                  Comunidades
-                </Title>
-                <Text type="secondary">
-                  Conecte-se com outros usuários em comunidades de interesse
-                </Text>
-              </div>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={openCreateModal}
-                size="large"
-              >
-                Criar Comunidade
-              </Button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-              <Title level={2} style={{ margin: 0, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <TeamOutlined />
-                Comunidades
-              </Title>
-              <Text type="secondary" style={{ marginBottom: 8 }}>
-                Conecte-se com outros usuários em comunidades de interesse
-              </Text>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={openCreateModal}
-                size="large"
-                style={{ width: '100%' }}
-              >
-                Criar Comunidade
-              </Button>
-            </div>
-          )}
-
-          {window.innerWidth > 700 ? (
+        {/* Stats Cards */}
+        {window.innerWidth > 700 ? (
             <Row gutter={16} style={{ marginBottom: 24 }}>
               <Col xs={24} sm={6}>
                 <Card size="small">
@@ -481,7 +459,6 @@ const CommunitiesPage: React.FC = () => {
               ))}
             </div>
           )}
-        </div>
 
         {/* Create/Edit Modal */}
         <CommunityModal

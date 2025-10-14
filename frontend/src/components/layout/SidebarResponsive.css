@@ -247,6 +247,25 @@
   color: #1890ff !important; /* Azul no hover */
 }
 
+/* Theme Toggle Section */
+.theme-toggle-section-responsive {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.theme-toggle-section-responsive .theme-toggle-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.theme-toggle-section-responsive .theme-toggle-container {
+  justify-content: center;
+}
+
 .logout-section-responsive {
   margin-top: 8px;
 }

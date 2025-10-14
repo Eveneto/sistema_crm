@@ -35,7 +35,7 @@ import {
 } from '../redux/slices/kanbanSlice';
 import { Column, Task, CreateBoardData, CreateColumnData, CreateTaskData } from '../services/kanbanApi';
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 const KanbanPage: React.FC = () => {

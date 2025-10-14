@@ -1,6 +1,12 @@
-/* Global Layout Styles for HG Assessoria Theme */
-
-/* Variables */
+/* Global Layout Styles for HG Assessoria Theme *  --hg-border-dark: #1890ff;
+  
+  --hg-text-primary: #ffffff;
+  --hg-text-secondary: #ffffff;
+  --hg-text-tertiary: #e6f0ff;
+  
+  --hg-shadow-light: 0 2px 8px rgba(24, 144, 255, 0.15);
+  --hg-shadow-medium: 0 4px 12px rgba(24, 144, 255, 0.2);
+  --hg-shadow-strong: 0 6px 16px rgba(24, 144, 255, 0.25);iables */
 :root {
   --hg-primary: #1890ff;
   --hg-primary-light: #40a9ff;
@@ -30,6 +36,32 @@
   --hg-radius-large: 12px;
   
   --hg-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Dark Mode Variables */
+:root[data-theme="dark"] {
+  --hg-primary: #1890ff;
+  --hg-primary-light: #40a9ff;
+  --hg-primary-dark: #096dd9;
+  --hg-success: #ffffff;
+  --hg-warning: #ffffff;
+  --hg-error: #ffffff;
+  --hg-info: #ffffff;
+  
+  --hg-bg-primary: #0f1419;
+  --hg-bg-secondary: #1890ff;
+  --hg-bg-tertiary: #1a1a2e;
+  
+  --hg-border: rgba(24, 144, 255, 0.3);
+  --hg-border-dark: #1890ff;
+  
+  --hg-text-primary: #ffffff;
+  --hg-text-secondary: #c1c1d1;
+  --hg-text-tertiary: #8a8aa0;
+  
+  --hg-shadow-light: 0 2px 8px rgba(0, 0, 20, 0.3);
+  --hg-shadow-medium: 0 4px 12px rgba(0, 0, 25, 0.35);
+  --hg-shadow-strong: 0 6px 16px rgba(0, 0, 30, 0.4);
 }
 
 /* Base Layout Styles */

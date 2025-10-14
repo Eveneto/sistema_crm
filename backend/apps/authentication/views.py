@@ -158,20 +158,21 @@ class GoogleLoginView(generics.GenericAPIView):
             )
 
         # Validar token Firebase (APENAS UMA VEZ)
-        firebase_user_data, error = FirebaseService.verify_firebase_token(firebase_token)
-        
-        if error:
+        firebase_service = FirebaseService()
+        try:
+            firebase_user_data = firebase_service.verify_token(firebase_token)
+        except Exception as e:
             return Response(
-                {'error': f'Token Firebase inválido: {error}'}, 
+                {'error': f'Token Firebase inválido: {str(e)}'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
         # Criar/buscar usuário Django baseado nos dados do Google
-        user, error = FirebaseService.get_or_create_user_from_firebase(firebase_user_data)
-        
-        if error:
+        try:
+            user = firebase_service.create_or_update_user(firebase_user_data)
+        except Exception as e:
             return Response(
-                {'error': f'Erro ao criar usuário: {error}'}, 
+                {'error': f'Erro ao criar usuário: {str(e)}'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -286,19 +287,20 @@ class FirebaseTokenValidationView(generics.GenericAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         # Valida token Firebase
-        firebase_user_data, error = FirebaseService.verify_firebase_token(firebase_token)
-        
-        if error:
+        firebase_service = FirebaseService()
+        try:
+            firebase_user_data = firebase_service.verify_token(firebase_token)
+        except Exception as e:
             return Response({
-                'error': error
+                'error': str(e)
             }, status=status.HTTP_401_UNAUTHORIZED)
         
         # Busca ou cria usuário Django
-        user, error = FirebaseService.get_or_create_user_from_firebase(firebase_user_data)
-        
-        if error:
+        try:
+            user = firebase_service.create_or_update_user(firebase_user_data)
+        except Exception as e:
             return Response({
-                'error': error
+                'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Gera tokens JWT Django
