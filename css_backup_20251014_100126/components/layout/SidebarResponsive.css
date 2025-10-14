@@ -1,0 +1,696 @@
+/* Responsive Sidebar Styles */
+.app-sidebar-responsive {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-header-responsive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  height: 72px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+}
+
+.sidebar-logo-responsive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Isso distribui o espaço */
+  width: 100%;
+  gap: 12px;
+}
+
+.logo-content-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1; /* Permite que o conteúdo do logo ocupe o espaço disponível */
+}
+
+.logo-icon-responsive {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.logo-icon-responsive span {
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+}
+
+.logo-text-responsive {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.collapse-btn-responsive {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+  flex-shrink: 0; /* Impede que o botão encolha */
+}
+
+.collapse-btn-responsive:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: scale(1.05);
+}
+
+/* User Section */
+.sidebar-user-responsive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  margin: 0 12px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.sidebar-user-collapsed-responsive {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.user-info-responsive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Menu Styles */
+.sidebar-menu-responsive {
+  flex: 1;
+  padding: 0 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 300px); /* Altura ajustada para forçar scroll */
+  min-height: 200px; /* Altura mínima */
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 3px;
+  margin: 4px 0;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-thumb {
+  background: rgba(24, 144, 255, 0.2);
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(24, 144, 255, 0.4);
+}
+
+.sidebar-menu-responsive .ant-menu {
+  background: transparent !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item {
+  border-radius: 10px !important;
+  margin: 6px 0 !important;
+  height: 48px !important;
+  line-height: 48px !important;
+  padding: 0 20px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item .ant-menu-title-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-menu-responsive .ant-menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.sidebar-menu-responsive .ant-menu-item:hover::before {
+  left: 100%;
+}
+
+.sidebar-menu-responsive .ant-menu-item:hover {
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%) !important;
+  color: #1890ff !important;
+  transform: translateX(4px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15) !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item-selected {
+  background: linear-gradient(135deg, #4a90e2 0%, #1890ff 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  transform: translateX(4px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item-selected .ant-menu-title-content {
+  color: #ffffff !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item-selected::after {
+  border-right: 4px solid #1890ff !important;
+  border-radius: 0 !important;
+  right: 0 !important;
+  width: 4px !important;
+}
+
+.sidebar-menu-responsive .ant-menu-item-icon {
+  font-size: 18px;
+  min-width: 18px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge Styles */
+.menu-item-badge {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  transform: scale(0.9);
+}
+
+.sidebar-menu-responsive .ant-badge-count {
+  background: #ff4d4f;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.3);
+}
+
+/* Settings menu styling */
+.sidebar-footer-responsive {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+  background: #f8f9fa; /* Fundo claro */
+  border-radius: 0 0 0 12px; /* Arredondar cantos */
+}
+
+.sidebar-footer-responsive .ant-menu-item {
+  color: #fff !important; /* Texto escuro para fundo claro */
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+}
+
+.sidebar-footer-responsive .ant-menu-item .anticon {
+  color: #fff !important; /* Ícone escuro para fundo claro */
+}
+
+.sidebar-footer-responsive .ant-menu-item:hover {
+  background-color: #e9ecef !important;
+  color: #333 !important;
+}
+
+.sidebar-footer-responsive .ant-menu-item:hover .anticon {
+  color: #1890ff !important; /* Azul no hover */
+}
+
+/* Theme Toggle Section */
+.theme-toggle-section-responsive {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.theme-toggle-section-responsive .theme-toggle-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.theme-toggle-section-responsive .theme-toggle-container {
+  justify-content: center;
+}
+
+.logout-section-responsive {
+  margin-top: 8px;
+}
+
+.logout-btn-responsive,
+.logout-btn-collapsed-responsive {
+  transition: all 0.3s;
+  border-radius: 10px;
+}
+
+.logout-btn-responsive:hover,
+.logout-btn-collapsed-responsive:hover {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffece6 100%) !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.15);
+}
+
+/* Scrollbar Styles */
+.sidebar-menu-responsive::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 3px;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.sidebar-menu-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(24, 144, 255, 0.3);
+}
+
+/* Collapsed State Adjustments */
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-header-responsive {
+  padding: 0 !important; /* Remove padding para alinhar com ícones */
+  justify-content: center;
+  height: auto;
+  min-height: auto;
+  border-bottom: none; /* Remove borda para melhor integração */
+  background: transparent; /* Background transparente */
+}
+
+.sidebar-logo-collapsed-responsive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 6px; /* Mesmo gap dos ícones do menu */
+  padding: 8px; /* Padding consistente */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .logo-icon-responsive.collapsed {
+  width: 44px !important; /* Mesmo tamanho dos ícones do menu */
+  height: 44px !important;
+  margin: 6px auto !important; /* Mesmo espaçamento */
+  border-radius: 8px !important; /* Mesmo border-radius */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .collapse-btn-responsive.collapsed {
+  width: 44px !important; /* Mesmo tamanho dos ícones do menu */
+  height: 44px !important;
+  margin: 6px auto !important; /* Mesmo espaçamento */
+  border-radius: 8px !important;
+  color: white !important; /* Cor branca do ícone */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Fundo sutil */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .collapse-btn-responsive.collapsed:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive {
+  padding: 0 8px; /* Padding balanceado para centralização */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item {
+  padding: 0 !important;
+  justify-content: center !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 6px auto !important; /* Centralização automática com espaçamento */
+  height: 44px !important;
+  width: 44px !important; /* Tamanho quadrado para melhor proporção */
+  border-radius: 8px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item .ant-menu-item-icon {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item .anticon {
+  font-size: 16px !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+  display: block !important;
+}
+
+/* Garantir que o ícone seja sempre exibido */
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item > .ant-menu-title-content {
+  display: none !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item > span:first-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item:hover,
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item-selected {
+  transform: scale(1.05) !important;
+}
+
+/* Força visibilidade dos ícones em todos os cenários */
+.app-sidebar-responsive.ant-layout-sider-collapsed .anticon {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Melhora visual do item selecionado no modo collapsed */
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item-selected {
+  background: linear-gradient(135deg, #4a90e2 0%, #1890ff 100%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
+  border: none !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+/* Hover effect melhorado */
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+  transform: scale(1.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-menu-responsive .ant-menu-item:hover .anticon {
+  color: #1890ff !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive {
+  padding: 8px !important; /* Padding consistente */
+  background: transparent !important; /* Background transparente no modo collapsed */
+  border-top: none !important; /* Remove borda no modo collapsed */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .ant-menu-item {
+  padding: 0 !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 6px auto !important;
+  height: 44px !important;
+  width: 44px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: rgba(0, 0, 0, 0.05) !important; /* Fundo sutil para contraste */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .ant-menu-item .anticon {
+  color: #666 !important; /* Cor consistente com outros ícones no modo collapsed */
+  font-size: 16px !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .ant-menu-item:hover {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .ant-menu-item:hover .anticon {
+  color: #1890ff !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .logout-btn-collapsed-responsive {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 8px !important;
+  margin: 6px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(255, 77, 79, 0.1) !important; /* Fundo vermelho sutil */
+  color: #ff4d4f !important; /* Cor vermelha para o ícone */
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .sidebar-footer-responsive .logout-btn-collapsed-responsive:hover {
+  background-color: rgba(255, 77, 79, 0.2) !important;
+  color: #ff4d4f !important;
+}
+
+/* Tooltip Customization for Collapsed Menu */
+.ant-tooltip {
+  z-index: 9999 !important;
+}
+
+.ant-tooltip .ant-tooltip-inner {
+  background-color: #001529 !important;
+  color: #ffffff !important;
+  border: 1px solid #002140 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.ant-tooltip .ant-tooltip-arrow::before {
+  background-color: #001529 !important;
+  border: 1px solid #002140 !important;
+}
+
+.app-sidebar-responsive.ant-layout-sider-collapsed .logout-btn-collapsed-responsive {
+  margin: 4px 0 !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .app-sidebar-responsive {
+    position: fixed !important;
+    left: -280px !important;
+    z-index: 1050 !important;
+    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .app-sidebar-responsive.sidebar-mobile-open {
+    left: 0 !important;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1040;
+    transition: opacity 0.3s;
+  }
+
+  .sidebar-header-responsive {
+    height: 64px;
+    padding: 12px 16px;
+  }
+
+  .logo-icon-responsive {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .sidebar-user-responsive {
+    margin: 0 8px;
+    padding: 16px;
+  }
+
+  .sidebar-menu-responsive {
+    padding: 0 8px;
+  }
+
+  .sidebar-menu-responsive .ant-menu-item,
+  .sidebar-menu-responsive .ant-menu-submenu-title {
+    height: 44px !important;
+    line-height: 44px !important;
+    padding: 0 16px !important;
+  }
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .app-sidebar-responsive {
+    width: 240px !important;
+  }
+
+  .app-sidebar-responsive.ant-layout-sider-collapsed {
+    width: 64px !important;
+  }
+
+  .sidebar-header-responsive {
+    padding: 12px 16px;
+  }
+
+  .sidebar-user-responsive {
+    padding: 16px;
+  }
+}
+
+/* High DPI / Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo-icon-responsive {
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.4);
+  }
+
+  .sidebar-menu-responsive .ant-menu-item:hover {
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+  .app-sidebar-responsive {
+    background: #001529 !important;
+    border-right-color: #303030 !important;
+  }
+
+  .sidebar-header-responsive {
+    background: linear-gradient(135deg, #001529 0%, #002140 100%) !important;
+    border-bottom-color: #303030 !important;
+  }
+
+  .sidebar-user-responsive {
+    background: linear-gradient(135deg, #001529 0%, #002140 100%) !important;
+    border-color: #303030 !important;
+  }
+
+  .sidebar-footer-responsive {
+    background: linear-gradient(135deg, #001529 0%, #002140 100%) !important;
+    border-top-color: #303030 !important;
+  }
+
+  .logo-text-responsive .ant-typography {
+    color: #ffffff !important;
+  }
+
+  .logo-text-responsive .ant-typography-caption {
+    color: #8c8c8c !important;
+  }
+
+  .user-info-responsive .ant-typography {
+    color: #ffffff !important;
+  }
+
+  .user-info-responsive .ant-typography-caption {
+    color: #8c8c8c !important;
+  }
+
+  .sidebar-menu-responsive .ant-menu-item:hover {
+    background: linear-gradient(135deg, #1b2951 0%, #253a66 100%) !important;
+  }
+
+  .sidebar-menu-responsive .ant-menu-item-selected {
+    background: linear-gradient(135deg, #1b2951 0%, #253a66 100%) !important;
+  }
+}
+
+/* Animation for smooth transitions */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebar-mobile-open {
+  animation: slideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.sidebar-backdrop {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Focus and accessibility improvements */
+.sidebar-menu-responsive .ant-menu-item:focus,
+.sidebar-menu-responsive .ant-menu-submenu-title:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.collapse-btn-responsive:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .app-sidebar-responsive {
+    display: none !important;
+  }
+}

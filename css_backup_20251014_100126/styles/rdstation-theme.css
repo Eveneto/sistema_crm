@@ -1,0 +1,289 @@
+/* Tema RD Station CRM - Estilos Globais */
+
+/* Importar fonte Inter do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Variables - Cores */
+:root {
+  --rd-primary: #00B050;
+  --rd-primary-hover: #009A43;
+  --rd-primary-light: #F0F9F4;
+  --rd-success: #52C41A;
+  --rd-success-light: #F6FFED;
+  --rd-text: #1C1C1C;
+  --rd-text-secondary: #666666;
+  --rd-text-tertiary: #999999;
+  --rd-text-disabled: #BFBFBF;
+  --rd-bg: #FFFFFF;
+  --rd-bg-secondary: #FAFAFA;
+  --rd-bg-hover: #F5F5F5;
+  --rd-border: #E8E8E8;
+  --rd-border-light: #F0F0F0;
+  --rd-border-dark: #D9D9D9;
+  --rd-error: #FF4D4F;
+  --rd-error-light: #FFF2F0;
+  --rd-warning: #FAAD14;
+  --rd-warning-light: #FFFBE6;
+  --rd-info: #1890FF;
+  --rd-info-light: #E6F7FF;
+  --rd-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --rd-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --rd-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Variáveis para modo escuro */
+:root[data-theme="dark"] {
+  --rd-primary: #1890ff;
+  --rd-primary-hover: #40a9ff;
+  --rd-primary-light: #0f1419;
+  --rd-success: #ffffff;
+  --rd-success-light: #0f1419;
+  --rd-text: #ffffff;
+  --rd-text-secondary: #ffffff;
+  --rd-text-tertiary: #e6f0ff;
+  --rd-text-disabled: #8cc8ff;
+  --rd-bg: #1a1a2e;
+  --rd-bg-secondary: #0f1419;
+  --rd-bg-hover: #1a1a2e;
+  --rd-border: rgba(24, 144, 255, 0.3);
+  --rd-border-light: rgba(24, 144, 255, 0.2);
+  --rd-border-dark: #1890ff;
+  --rd-error: #ffffff;
+  --rd-error-light: #0f1419;
+  --rd-warning: #ffffff;
+  --rd-warning-light: #0f1419;
+  --rd-info: #ffffff;
+  --rd-info-light: #0f1419;
+  --rd-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  --rd-shadow-light: 0 1px 4px rgba(24, 144, 255, 0.15);
+  --rd-shadow-medium: 0 4px 12px rgba(24, 144, 255, 0.25);
+}
+
+/* CSS Variables - Tipografia */
+:root {
+  --rd-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --rd-font-family-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  
+  --rd-font-size-xs: 12px;
+  --rd-font-size-sm: 13px;
+  --rd-font-size-base: 14px;
+  --rd-font-size-lg: 16px;
+  --rd-font-size-xl: 18px;
+  --rd-font-size-2xl: 20px;
+  --rd-font-size-3xl: 24px;
+  --rd-font-size-4xl: 28px;
+  --rd-font-size-5xl: 32px;
+  
+  --rd-font-weight-normal: 400;
+  --rd-font-weight-medium: 500;
+  --rd-font-weight-semibold: 600;
+  --rd-font-weight-bold: 700;
+  
+  --rd-line-height-tight: 1.2;
+  --rd-line-height-normal: 1.4;
+  --rd-line-height-relaxed: 1.6;
+}
+
+/* Reset e base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--rd-font-family) !important;
+  color: var(--rd-text) !important;
+  background-color: var(--rd-bg-secondary) !important;
+  line-height: var(--rd-line-height-normal);
+  font-size: var(--rd-font-size-base);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings customizados */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--rd-font-family) !important;
+  color: var(--rd-text) !important;
+  font-weight: var(--rd-font-weight-semibold);
+  line-height: var(--rd-line-height-tight);
+  margin: 0 0 16px 0;
+}
+
+h1 { font-size: var(--rd-font-size-5xl); }
+h2 { font-size: var(--rd-font-size-4xl); }
+h3 { font-size: var(--rd-font-size-3xl); }
+h4 { font-size: var(--rd-font-size-2xl); }
+h5 { font-size: var(--rd-font-size-xl); }
+h6 { font-size: var(--rd-font-size-lg); }
+
+/* Parágrafos */
+p {
+  color: var(--rd-text-secondary);
+  line-height: var(--rd-line-height-relaxed);
+  margin: 0 0 12px 0;
+}
+
+/* Links */
+a {
+  color: var(--rd-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--rd-primary-hover);
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--rd-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rd-border-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rd-text-tertiary);
+}
+
+/* Classes utilitárias */
+.rd-text-primary { color: var(--rd-text) !important; }
+.rd-text-secondary { color: var(--rd-text-secondary) !important; }
+.rd-text-tertiary { color: var(--rd-text-tertiary) !important; }
+.rd-text-success { color: var(--rd-success) !important; }
+.rd-text-primary-color { color: var(--rd-primary) !important; }
+
+.rd-bg-white { background-color: var(--rd-bg) !important; }
+.rd-bg-secondary { background-color: var(--rd-bg-secondary) !important; }
+.rd-bg-hover { background-color: var(--rd-bg-hover) !important; }
+.rd-bg-primary-light { background-color: var(--rd-primary-light) !important; }
+
+.rd-border { border: 1px solid var(--rd-border) !important; }
+.rd-border-light { border: 1px solid var(--rd-border-light) !important; }
+.rd-border-dark { border: 1px solid var(--rd-border-dark) !important; }
+
+.rd-shadow { box-shadow: var(--rd-shadow) !important; }
+.rd-shadow-light { box-shadow: var(--rd-shadow-light) !important; }
+.rd-shadow-medium { box-shadow: var(--rd-shadow-medium) !important; }
+
+.rd-font-medium { font-weight: var(--rd-font-weight-medium) !important; }
+.rd-font-semibold { font-weight: var(--rd-font-weight-semibold) !important; }
+.rd-font-bold { font-weight: var(--rd-font-weight-bold) !important; }
+
+/* Overrides específicos do Ant Design */
+.ant-layout {
+  background: var(--rd-bg-secondary) !important;
+}
+
+.ant-layout-header {
+  background: var(--rd-bg) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  box-shadow: var(--rd-shadow-light) !important;
+}
+
+.ant-layout-sider {
+  background: var(--rd-bg) !important;
+  border-right: 1px solid var(--rd-border) !important;
+}
+
+.ant-menu {
+  font-family: var(--rd-font-family) !important;
+  font-weight: var(--rd-font-weight-medium) !important;
+}
+
+.ant-btn {
+  font-family: var(--rd-font-family) !important;
+  font-weight: var(--rd-font-weight-medium) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  border: 1px solid transparent !important;
+}
+
+.ant-btn-primary {
+  background: var(--rd-primary) !important;
+  border-color: var(--rd-primary) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--rd-primary-hover) !important;
+  border-color: var(--rd-primary-hover) !important;
+}
+
+.ant-card {
+  border-radius: 12px !important;
+  box-shadow: var(--rd-shadow-light) !important;
+  border: 1px solid var(--rd-border-light) !important;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 8px !important;
+  border-color: var(--rd-border) !important;
+  font-family: var(--rd-font-family) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: var(--rd-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 176, 80, 0.1) !important;
+}
+
+.ant-table {
+  font-family: var(--rd-font-family) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--rd-bg-secondary) !important;
+  color: var(--rd-text-secondary) !important;
+  font-weight: var(--rd-font-weight-semibold) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--rd-bg-hover) !important;
+}
+
+.ant-dropdown {
+  border-radius: 8px !important;
+  box-shadow: var(--rd-shadow-medium) !important;
+}
+
+.ant-notification {
+  font-family: var(--rd-font-family) !important;
+}
+
+.ant-message {
+  font-family: var(--rd-font-family) !important;
+}
+
+/* Animações suaves */
+.ant-btn,
+.ant-input,
+.ant-card,
+.ant-menu-item {
+  transition: all 0.2s ease !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--rd-font-size-sm);
+  }
+  
+  h1 { font-size: var(--rd-font-size-4xl); }
+  h2 { font-size: var(--rd-font-size-3xl); }
+  h3 { font-size: var(--rd-font-size-2xl); }
+  h4 { font-size: var(--rd-font-size-xl); }
+  h5 { font-size: var(--rd-font-size-lg); }
+}

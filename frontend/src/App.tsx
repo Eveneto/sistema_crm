@@ -1,143 +1,98 @@
-import React from 'react';
-import { Provider } from 'react-redux';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
-import { store } from './redux/store';
-import AuthProvider from './components/auth/AuthProvider';
-import ThemeProvider, { useTheme } from './contexts/ThemeContext';
-import PrivateRoute from './components/auth/PrivateRoute';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import EmailVerificationPage from './pages/auth/EmailVerificationPage';
-import EmailVerificationNotice from './pages/auth/EmailVerificationNotice';
-import Dashboard from './pages/Dashboard';
-import CompaniesPage from './pages/CompaniesPage';
-import KanbanPage from './pages/KanbanPage';
-import CommunitiesPage from './pages/CommunitiesPage';
-import CommunityDetailsPage from './pages/CommunityDetailsPage';
-import ChatPage from './pages/ChatPage';
-import TestingToolsPage from './pages/TestingToolsPage';
-import TokenTestPage from './pages/TokenTestPage';
-import ApiTest from './components/ApiTest';
+import { Provider, useSelector } from 'react-redux';
+import { store, RootState } from './redux/store';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { verifyToken } from './redux/slices/authSlice';
 
-// Temas
-import rdstationTheme from './theme/rdstationTheme';
-import darkTheme from './theme/darkTheme';
+// Pages
+import LoginPageBootstrap from './pages/auth/LoginPageBootstrap';
+import RegisterPageBootstrap from './pages/auth/RegisterPageBootstrap';
+import CompaniesPageBootstrap from './pages/CompaniesPageBootstrap';
+import CommunitiesPageBootstrap from './pages/CommunitiesPageBootstrap';
 
-// Estilos principais
-import './App.css';
+// Styles
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/bootstrap-theme.css';
 
-// Tema RD Station CSS
-import './styles/rdstation-theme.css';
-
-// Layout Enhancements
-import './components/layout/LayoutEnhancements.css';
-
-// Navigation styles
-import './styles/navigation.css';
-
-// Novos estilos melhorados
-import './styles/toastStyles.css';
-import './styles/responsiveBreakpoints.css';
-import './styles/global-responsive.css';
-
-// Importa os services para inicializar
-// import './services/tokenService';
-import './services/authSyncService';
-
-// Componente que usa o tema dinâmico
-const AppWithTheme: React.FC = () => {
-  const { isDarkMode } = useTheme();
-  const currentTheme = isDarkMode ? darkTheme : rdstationTheme;
+// Simple Protected Route Component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
   
+  if (isLoading) {
+    return <div className="d-flex justify-content-center p-4">Carregando...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+function AppContent() {
+  const dispatch = store.dispatch;
+
+  useEffect(() => {
+    // Check authentication status on app start
+    dispatch(verifyToken());
+  }, [dispatch]);
+
   return (
-    <ConfigProvider theme={currentTheme}>
-      <div className="App">
-        <Router>
-          <AuthProvider>
-            <Routes>
-              {/* Rotas públicas */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
-              <Route path="/test" element={<ApiTest />} />
-              <Route path="/token-test" element={<TokenTestPage />} />
-              <Route path="/testing-tools" element={<TestingToolsPage />} />
-              <Route path="/verifique-email" element={<EmailVerificationNotice />} />
-              
-              {/* Rotas protegidas */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/companies" 
-                element={
-                  <PrivateRoute>
-                    <CompaniesPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/kanban" 
-                element={
-                  <PrivateRoute>
-                    <KanbanPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/communities" 
-                element={
-                  <PrivateRoute>
-                    <CommunitiesPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/communities/:id" 
-                element={
-                  <PrivateRoute>
-                    <CommunityDetailsPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/chat" 
-                element={
-                  <PrivateRoute>
-                    <ChatPage />
-                  </PrivateRoute>
-                } 
-              />
-              <Route 
-                path="/chat/:roomId" 
-                element={
-                  <PrivateRoute>
-                    <ChatPage />
-                  </PrivateRoute>
-                } 
-              />
-              
-              {/* Rota padrão - redireciona para dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </AuthProvider>
-        </Router>
-      </div>
-    </ConfigProvider>
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/auth/login" element={<LoginPageBootstrap />} />
+        <Route path="/auth/register" element={<RegisterPageBootstrap />} />
+
+        {/* Protected Routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <div className="p-4">Dashboard em construção...</div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/companies" 
+          element={
+            <ProtectedRoute>
+              <CompaniesPageBootstrap />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/communities" 
+          element={
+            <ProtectedRoute>
+              <CommunitiesPageBootstrap />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* TODO: Add more protected routes */}
+        {/* 
+        <Route path="/kanban" element={<ProtectedRoute><KanbanPageBootstrap /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><ChatPageBootstrap /></ProtectedRoute>} />
+        */}
+
+        {/* Default Redirects */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
+        
+        {/* Catch all - redirect to dashboard */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 function App() {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <AppWithTheme />
+        <AppContent />
       </ThemeProvider>
     </Provider>
   );

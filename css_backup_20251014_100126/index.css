@@ -1,0 +1,413 @@
+/* ===== CSS CUSTOM PROPERTIES - DESIGN SYSTEM ===== */
+:root {
+  /* Cores principais */
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  
+  /* Superfícies e backgrounds */
+  --surface-glass: rgba(255, 255, 255, 0.9);
+  --surface-glass-hover: rgba(255, 255, 255, 0.95);
+  --surface-blur: rgba(255, 255, 255, 0.8);
+  --background-overlay: rgba(0, 0, 0, 0.1);
+  --background-primary: #ffffff;
+  --background-secondary: #f5f7fa;
+  --background-elevated: #ffffff;
+  
+  /* Texto */
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --text-tertiary: #bdc3c7;
+  --text-white: #ffffff;
+  --text-white-alpha: rgba(255, 255, 255, 0.8);
+  
+  /* Bordas */
+  --border-color: #e8e8e8;
+  --border-light: #f0f0f0;
+  --border-dark: #d9d9d9;
+  
+  /* Sombras */
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 8px 25px rgba(102, 126, 234, 0.3);
+  
+  /* Estados */
+  --success-color: #4CAF50;
+  --error-color: #F44336;
+  --warning-color: #FF9800;
+  --info-color: #2196F3;
+  
+  /* Transições */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Bordas */
+  --border-radius-small: 8px;
+  --border-radius-medium: 12px;
+  --border-radius-large: 20px;
+  --border-radius-full: 50%;
+  
+  /* Espaçamentos */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Touch targets */
+  --touch-target-min: 44px;
+}
+
+/* ===== MODO ESCURO ===== */
+:root[data-theme="dark"] {
+  /* Cores principais - azul mais vibrante */
+  --primary-gradient: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  --primary-color: #1890ff;
+  --secondary-color: #096dd9;
+  
+  /* Superfícies e backgrounds - azul escuro */
+  --surface-glass: rgba(24, 144, 255, 0.1);
+  --surface-glass-hover: rgba(24, 144, 255, 0.15);
+  --surface-blur: rgba(24, 144, 255, 0.08);
+  --background-overlay: rgba(255, 255, 255, 0.05);
+  --background-primary: #0f1419;
+  --background-secondary: #1890ff;
+  --background-elevated: #1a1a2e;
+  
+  /* Texto - sempre branco */
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-tertiary: #e6f0ff;
+  --text-white: #ffffff;
+  --text-white-alpha: rgba(255, 255, 255, 0.9);
+  
+  /* Bordas - azul escuro */
+  --border-color: #1890ff;
+  --border-light: rgba(24, 144, 255, 0.3);
+  --border-dark: #096dd9;
+  
+  /* Sombras - azuis */
+  --shadow-soft: 0 8px 32px rgba(24, 144, 255, 0.2);
+  --shadow-medium: 0 4px 20px rgba(24, 144, 255, 0.25);
+  --shadow-strong: 0 8px 25px rgba(24, 144, 255, 0.3);
+  
+  /* Estados - apenas branco/azul */
+  --success-color: #ffffff;
+  --error-color: #ffffff;
+  --warning-color: #ffffff;
+  --info-color: #ffffff;
+}
+
+/* ===== ACESSIBILIDADE - REDUCE MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== ESTILOS BASE ===== */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  background-color: var(--background-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* ===== MELHORIAS MODO ESCURO ===== */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Sidebar com fundo azul completo */
+:root[data-theme="dark"] .ant-layout-sider {
+  background: var(--primary-color) !important;
+}
+
+:root[data-theme="dark"] .sidebar-content-responsive {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Menu da sidebar com fundo azul e texto branco */
+:root[data-theme="dark"] .ant-menu-light,
+:root[data-theme="dark"] .ant-menu-horizontal,
+:root[data-theme="dark"] .ant-menu-vertical,
+:root[data-theme="dark"] .ant-menu-inline {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+:root[data-theme="dark"] .ant-menu-light .ant-menu-item,
+:root[data-theme="dark"] .ant-menu-light .ant-menu-submenu-title {
+  color: white !important;
+}
+
+:root[data-theme="dark"] .ant-menu-light .ant-menu-item:hover,
+:root[data-theme="dark"] .ant-menu-light .ant-menu-submenu-title:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+:root[data-theme="dark"] .ant-menu-light .ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* Dashboard e conteúdo principal com fundo azul escuro */
+:root[data-theme="dark"] .main-content-responsive {
+  background: var(--background-primary) !important;
+  color: white !important;
+}
+
+/* Cards com fundo azul escuro e texto branco */
+:root[data-theme="dark"] .ant-card {
+  background-color: var(--background-elevated) !important;
+  border-color: var(--border-light) !important;
+  color: white !important;
+}
+
+:root[data-theme="dark"] .ant-card-head-title {
+  color: white !important;
+}
+
+/* Inputs com fundo azul escuro e texto branco */
+:root[data-theme="dark"] .ant-input,
+:root[data-theme="dark"] .ant-input-affix-wrapper,
+:root[data-theme="dark"] .ant-select-selector,
+:root[data-theme="dark"] .ant-picker {
+  background-color: var(--background-elevated) !important;
+  border-color: var(--border-light) !important;
+  color: white !important;
+}
+
+/* Tabelas com fundo azul escuro */
+:root[data-theme="dark"] .ant-table-tbody > tr > td {
+  background-color: var(--background-elevated) !important;
+  color: white !important;
+  border-color: var(--border-light) !important;
+}
+
+:root[data-theme="dark"] .ant-table-thead > tr > th {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--border-light) !important;
+}
+
+/* Botões mantendo apenas azul e branco */
+:root[data-theme="dark"] .ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+:root[data-theme="dark"] .ant-btn-default {
+  background-color: transparent !important;
+  border-color: white !important;
+  color: white !important;
+}
+
+/* Remover cores verde/laranja - apenas azul e branco */
+:root[data-theme="dark"] .ant-tag,
+:root[data-theme="dark"] .ant-badge {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Popover/tooltip com fundo azul escuro */
+:root[data-theme="dark"] .ant-popover-inner,
+:root[data-theme="dark"] .ant-tooltip-inner {
+  background-color: var(--background-elevated) !important;
+  color: white !important;
+}
+
+/* Dashboard específico - números e estatísticas em branco */
+:root[data-theme="dark"] .dashboard-stat-number,
+:root[data-theme="dark"] .ant-statistic-content-value,
+:root[data-theme="dark"] .ant-statistic-title {
+  color: white !important;
+}
+
+/* Gráficos e elementos visuais em branco */
+:root[data-theme="dark"] .recharts-text,
+:root[data-theme="dark"] .recharts-cartesian-axis-tick-value,
+:root[data-theme="dark"] .recharts-legend-item-text {
+  fill: white !important;
+  color: white !important;
+}
+
+/* Progress bars e indicators em azul/branco */
+:root[data-theme="dark"] .ant-progress-text,
+:root[data-theme="dark"] .ant-progress-bg {
+  color: white !important;
+}
+
+/* Typography específica para dashboard */
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] h5,
+:root[data-theme="dark"] h6 {
+  color: white !important;
+}
+
+:root[data-theme="dark"] p,
+:root[data-theme="dark"] span,
+:root[data-theme="dark"] div {
+  color: white !important;
+}
+
+/* Dashboard específico - remover fundos brancos */
+:root[data-theme="dark"] .main-content-responsive .content-container {
+  background: transparent !important;
+}
+
+:root[data-theme="dark"] .ant-layout-content {
+  background: var(--background-primary) !important;
+}
+
+/* Breadcrumb/campo do topo da dashboard */
+:root[data-theme="dark"] .ant-breadcrumb,
+:root[data-theme="dark"] .ant-breadcrumb a,
+:root[data-theme="dark"] .ant-breadcrumb-link {
+  color: white !important;
+  background: transparent !important;
+}
+
+/* Título principal da página */
+:root[data-theme="dark"] .page-header,
+:root[data-theme="dark"] .page-title {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Quadro/container do topo - deve ser azul */
+:root[data-theme="dark"] .dashboard-header,
+:root[data-theme="dark"] .content-header {
+  background: var(--background-elevated) !important;
+  color: white !important;
+}
+
+/* Títulos dos gráficos e seções */
+:root[data-theme="dark"] .ant-card-head-title,
+:root[data-theme="dark"] .chart-title,
+:root[data-theme="dark"] .section-title {
+  color: white !important;
+}
+
+/* Forçar texto branco em todos os elementos de texto */
+:root[data-theme="dark"] .ant-typography,
+:root[data-theme="dark"] .ant-typography-caption,
+:root[data-theme="dark"] .ant-typography-title {
+  color: white !important;
+}
+
+/* Remover qualquer fundo branco residual */
+:root[data-theme="dark"] .ant-layout,
+:root[data-theme="dark"] .ant-layout-content,
+:root[data-theme="dark"] .main-layout,
+:root[data-theme="dark"] .content-wrapper {
+  background: var(--background-primary) !important;
+  background-color: var(--background-primary) !important;
+}
+
+/* Container principal da dashboard sem fundo branco */
+:root[data-theme="dark"] .dashboard-container,
+:root[data-theme="dark"] .dashboard-content {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Forçar todos os textos a serem brancos */
+:root[data-theme="dark"] * {
+  color: white !important;
+}
+
+/* Exceções para inputs que precisam de background */
+:root[data-theme="dark"] .ant-input,
+:root[data-theme="dark"] .ant-input-affix-wrapper,
+:root[data-theme="dark"] .ant-select-selector {
+  color: white !important;
+  background-color: var(--background-elevated) !important;
+}
+
+/* Botões mantendo suas cores específicas */
+:root[data-theme="dark"] .ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* PageHeader específico - fundo azul */
+:root[data-theme="dark"] .rd-page-header {
+  background: var(--background-elevated) !important;
+  color: white !important;
+  border-color: var(--border-light) !important;
+}
+
+/* Variáveis RD Station para modo escuro */
+:root[data-theme="dark"] {
+  --rd-bg: var(--background-elevated);
+  --rd-bg-secondary: var(--background-primary);
+  --rd-border-light: var(--border-light);
+  --rd-shadow-light: var(--shadow-soft);
+  --rd-text-primary: white;
+  --rd-text-secondary: white;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.glass-surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.animated-element {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ===== FOCUS STYLES ===== */
+*:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-small);
+}
+
+/* ===== SCROLL CUSTOMIZATION ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
