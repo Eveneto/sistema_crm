@@ -1,0 +1,270 @@
+/* ===== TECH CRM - DASHBOARD CARDS SUTIS ===== */
+
+/* === CARDS DE ESTATÍSTICAS SUTIS === */
+.dashboard-stats-card,
+.ant-card.stats-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: var(--tech-space-6) !important;
+  margin-bottom: var(--tech-space-6) !important;
+  transition: var(--tech-transition-base) !important;
+  position: relative !important;
+  min-height: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* Efeito sutil de fundo apenas no hover */
+.dashboard-stats-card:hover,
+.ant-card.stats-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-sm) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* === CONTEÚDO DOS CARDS === */
+.dashboard-stats-card .ant-card-body,
+.ant-card.stats-card .ant-card-body {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* === TÍTULOS DOS CARDS === */
+.dashboard-stats-title,
+.stats-card-title {
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-xs) !important;
+  font-weight: var(--tech-font-medium) !important;
+  color: var(--tech-gray-500) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  margin-bottom: var(--tech-space-2) !important;
+  opacity: 0.8 !important;
+}
+
+/* === VALORES DOS CARDS === */
+.dashboard-stats-value,
+.stats-card-value,
+.ant-statistic-content-value {
+  font-family: var(--tech-font-mono) !important;
+  font-size: var(--tech-text-4xl) !important;
+  font-weight: var(--tech-font-bold) !important;
+  color: var(--tech-gray-900) !important;
+  line-height: 1.1 !important;
+  margin-bottom: var(--tech-space-1) !important;
+}
+
+/* === ÍCONES DOS CARDS === */
+.dashboard-stats-icon,
+.stats-card-icon {
+  font-size: var(--tech-text-2xl) !important;
+  color: var(--tech-gray-400) !important;
+  margin-bottom: var(--tech-space-3) !important;
+  opacity: 0.6 !important;
+  transition: var(--tech-transition-fast) !important;
+}
+
+.dashboard-stats-card:hover .dashboard-stats-icon,
+.ant-card.stats-card:hover .stats-card-icon {
+  color: var(--tech-primary) !important;
+  opacity: 1 !important;
+}
+
+/* === INDICADORES DE PROGRESSO === */
+.dashboard-stats-progress,
+.stats-card-progress {
+  margin-top: var(--tech-space-2) !important;
+  opacity: 0 !important;
+  transition: var(--tech-transition-base) !important;
+}
+
+.dashboard-stats-card:hover .dashboard-stats-progress,
+.ant-card.stats-card:hover .stats-card-progress {
+  opacity: 1 !important;
+}
+
+/* === TEXTO AUXILIAR === */
+.dashboard-stats-helper,
+.stats-card-helper {
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-xs) !important;
+  color: var(--tech-gray-400) !important;
+  margin-top: var(--tech-space-1) !important;
+  opacity: 0 !important;
+  transition: var(--tech-transition-base) !important;
+}
+
+.dashboard-stats-card:hover .dashboard-stats-helper,
+.ant-card.stats-card:hover .stats-card-helper {
+  opacity: 1 !important;
+}
+
+/* === LAYOUT GRID PARA ALTURA UNIFORME === */
+.dashboard-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: var(--tech-space-6) !important;
+  margin-bottom: var(--tech-space-8) !important;
+}
+
+.dashboard-stats-grid > * {
+  min-height: 140px !important;
+}
+
+/* === CARDS DE GRÁFICOS SUTIS === */
+.dashboard-chart-card,
+.ant-card.chart-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  margin-bottom: var(--tech-space-6) !important;
+}
+
+.dashboard-chart-card:hover,
+.ant-card.chart-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-sm) !important;
+}
+
+.dashboard-chart-card .ant-card-head,
+.ant-card.chart-card .ant-card-head {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: var(--tech-space-4) 0 !important;
+}
+
+.dashboard-chart-card:hover .ant-card-head,
+.ant-card.chart-card:hover .ant-card-head {
+  border-bottom: 1px solid var(--tech-gray-100) !important;
+  padding: var(--tech-space-4) var(--tech-space-6) !important;
+}
+
+.dashboard-chart-card .ant-card-body,
+.ant-card.chart-card .ant-card-body {
+  padding: 0 !important;
+}
+
+.dashboard-chart-card:hover .ant-card-body,
+.ant-card.chart-card:hover .ant-card-body {
+  padding: var(--tech-space-6) !important;
+}
+
+/* === TÍTULOS DE GRÁFICOS === */
+.dashboard-chart-title,
+.chart-card-title {
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-lg) !important;
+  font-weight: var(--tech-font-semibold) !important;
+  color: var(--tech-gray-700) !important;
+  margin-bottom: 0 !important;
+}
+
+.dashboard-chart-card:hover .dashboard-chart-title,
+.ant-card.chart-card:hover .chart-card-title {
+  color: var(--tech-gray-900) !important;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--tech-space-4) !important;
+  }
+  
+  .dashboard-stats-card,
+  .ant-card.stats-card {
+    min-height: 120px !important;
+    padding: var(--tech-space-4) !important;
+  }
+  
+  .dashboard-stats-value,
+  .stats-card-value {
+    font-size: var(--tech-text-3xl) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats-value,
+  .stats-card-value {
+    font-size: var(--tech-text-2xl) !important;
+  }
+}
+
+/* === OVERRIDE PARA ANT DESIGN COMPONENTS === */
+.ant-row .ant-col .ant-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  min-height: 140px !important;
+}
+
+.ant-row .ant-col .ant-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-sm) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* === ESTATÍSTICAS ANT DESIGN === */
+.ant-statistic {
+  text-align: center !important;
+}
+
+.ant-statistic-title {
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-xs) !important;
+  font-weight: var(--tech-font-medium) !important;
+  color: var(--tech-gray-500) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  margin-bottom: var(--tech-space-3) !important;
+}
+
+.ant-statistic-content {
+  font-family: var(--tech-font-mono) !important;
+  color: var(--tech-gray-900) !important;
+}
+
+.ant-statistic-content-value {
+  font-size: var(--tech-text-4xl) !important;
+  font-weight: var(--tech-font-bold) !important;
+  line-height: 1.1 !important;
+}
+
+/* === MODO ESCURO === */
+[data-theme="dark"] .dashboard-stats-card:hover,
+[data-theme="dark"] .ant-card.stats-card:hover {
+  background: var(--tech-white) !important;
+  border-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .dashboard-stats-title,
+[data-theme="dark"] .stats-card-title {
+  color: var(--tech-gray-500) !important;
+}
+
+[data-theme="dark"] .dashboard-stats-value,
+[data-theme="dark"] .stats-card-value,
+[data-theme="dark"] .ant-statistic-content-value {
+  color: var(--tech-gray-900) !important;
+}
+
+[data-theme="dark"] .dashboard-chart-card:hover,
+[data-theme="dark"] .ant-card.chart-card:hover {
+  background: var(--tech-white) !important;
+  border-color: var(--tech-gray-200) !important;
+}

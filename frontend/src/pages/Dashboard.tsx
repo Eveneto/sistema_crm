@@ -25,6 +25,7 @@ import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import MainLayout from '../components/layout/MainLayout';
 import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
+import '../styles/dashboard-improved.css';
 
 // Registrar componentes do Chart.js
 ChartJS.register(
@@ -220,96 +221,85 @@ const Dashboard: React.FC = () => {
   };
   return (
     <MainLayout>
-      <PageHeader
-        title="Dashboard"
-        subtitle="Visão geral do seu sistema de gestão"
-      />
+      <div className="dashboard-container">
+        <PageHeader
+          title="Dashboard"
+          subtitle="Visão geral do seu sistema de gestão"
+        />
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '100px 0' }}>
-          <Spin size="large" />
-          <div style={{ marginTop: 16 }}>
-            <Text>Carregando métricas...</Text>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '100px 0' }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 16 }}>
+              <Text>Carregando métricas...</Text>
+            </div>
           </div>
-        </div>
-        ) : (
-          <>
-            {/* Cards de Estatísticas Principais */}
-            <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-              <Col xs={24} sm={12} lg={6}>
-                <Card hoverable style={{ borderRadius: 12, border: '1px solid #e8f4fd' }}>
+          ) : (
+            <>
+              {/* Cards de Estatísticas Principais - Layout Horizontal Otimizado */}
+              <div className="dashboard-stats-grid">
+                <Card className="stats-card">
                   <Statistic
                     title="Empresas Cadastradas"
                     value={stats.companies}
-                    prefix={<BankOutlined style={{ color: '#1890ff' }} />}
-                    valueStyle={{ color: '#1890ff', fontSize: 32, fontWeight: 'bold' }}
+                    prefix={<BankOutlined />}
                   />
-                  <Progress 
+                  {/* <Progress 
                     percent={Math.min((stats.companies / 50) * 100, 100)} 
                     showInfo={false} 
-                    strokeColor="#1890ff"
-                    style={{ marginTop: 8 }}
-                  />
+                    strokeColor="var(--tech-primary)"
+                    className="dashboard-stats-progress"
+                  /> */}
                 </Card>
-              </Col>
-              
-              <Col xs={24} sm={12} lg={6}>
-                <Card hoverable style={{ borderRadius: 12, border: '1px solid #f0f9ff' }}>
+                
+                <Card className="stats-card">
                   <Statistic
                     title="Tasks Ativas"
                     value={stats.tasks}
-                    prefix={<RiseOutlined style={{ color: '#52c41a' }} />}
-                    valueStyle={{ color: '#52c41a', fontSize: 32, fontWeight: 'bold' }}
+                    prefix={<RiseOutlined />}
                   />
-                  <Progress 
+                  {/* <Progress 
                     percent={Math.min((stats.tasks / 100) * 100, 100)} 
                     showInfo={false} 
-                    strokeColor="#52c41a"
-                    style={{ marginTop: 8 }}
-                  />
+                    strokeColor="var(--tech-success)"
+                    className="dashboard-stats-progress"
+                  /> */}
                 </Card>
-              </Col>
-              
-              <Col xs={24} sm={12} lg={6}>
-                <Card hoverable style={{ borderRadius: 12, border: '1px solid #fffbe6' }}>
+                
+                <Card className="stats-card">
                   <Statistic
                     title="Mensagens Enviadas"
                     value={stats.messages}
-                    prefix={<MessageOutlined style={{ color: '#faad14' }} />}
-                    valueStyle={{ color: '#faad14', fontSize: 32, fontWeight: 'bold' }}
+                    prefix={<MessageOutlined />}
                   />
-                  <Progress 
+                  {/* <Progress 
                     percent={Math.min((stats.messages / 1000) * 100, 100)} 
                     showInfo={false} 
-                    strokeColor="#faad14"
-                    style={{ marginTop: 8 }}
-                  />
+                    strokeColor="var(--tech-warning)"
+                    className="dashboard-stats-progress"
+                  /> */}
                 </Card>
-              </Col>
-              
-              <Col xs={24} sm={12} lg={6}>
-                <Card hoverable style={{ borderRadius: 12, border: '1px solid #f6ffed' }}>
+                
+                <Card className="stats-card">
                   <Statistic
                     title="Faturamento"
                     value={stats.revenue}
                     prefix="R$"
-                    suffix={<DollarCircleOutlined style={{ color: '#52c41a' }} />}
-                    valueStyle={{ color: '#52c41a', fontSize: 28, fontWeight: 'bold' }}
+                    suffix={<DollarCircleOutlined />}
                     precision={0}
                   />
-                  <Text type="success" style={{ fontSize: 12 }}>
+                  {/* <Text className="dashboard-stats-helper">
                     +12% este mês
-                  </Text>
+                  </Text> */}
                 </Card>
-              </Col>
-            </Row>
+              </div>
 
             {/* Gráficos */}
-            <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+            <Row gutter={[16, 16]} className="dashboard-charts-row">
               <Col xs={24} lg={12}>
                 <Card 
+                  className="chart-card"
                   title="Crescimento Mensal" 
-                  style={{ borderRadius: 12, height: 400 }}
                   extra={<Tag color="blue">Últimos 6 meses</Tag>}
                 >
                   <div style={{ height: 300 }}>
@@ -320,8 +310,8 @@ const Dashboard: React.FC = () => {
               
               <Col xs={24} lg={12}>
                 <Card 
+                  className="chart-card"
                   title="Atividade por Módulo" 
-                  style={{ borderRadius: 12, height: 400 }}
                   extra={<Tag color="green">Hoje</Tag>}
                 >
                   <div style={{ height: 300 }}>
@@ -335,8 +325,8 @@ const Dashboard: React.FC = () => {
             <Row gutter={[24, 24]}>
               <Col xs={24} lg={8}>
                 <Card 
+                  className="chart-card"
                   title="Status do Pipeline" 
-                  style={{ borderRadius: 12, height: 350 }}
                   extra={<Tag color="purple">Kanban</Tag>}
                 >
                   <div style={{ height: 250 }}>
@@ -347,8 +337,8 @@ const Dashboard: React.FC = () => {
               
               <Col xs={24} lg={16}>
                 <Card 
+                  className="chart-card"
                   title="Atividades Recentes" 
-                  style={{ borderRadius: 12, height: 350 }}
                   extra={<Tag color="orange">Tempo Real</Tag>}
                 >
                   <List
@@ -386,43 +376,41 @@ const Dashboard: React.FC = () => {
             </Row>
 
             {/* Cards de Resumo Rápido */}
-            <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+            <Row gutter={[16, 16]} className="dashboard-summary-cards">
               <Col xs={24} sm={8}>
-                <Card style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                <Card className="tech-dashboard-stat-card tech-dashboard-users">
                   <Statistic
-                    title={<span style={{ color: 'white' }}>Usuários Ativos</span>}
+                    title="Usuários Ativos"
                     value={stats.users}
                     prefix={<UserOutlined />}
-                    valueStyle={{ color: 'white', fontSize: 28 }}
                   />
                 </Card>
               </Col>
               
               <Col xs={24} sm={8}>
-                <Card style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
+                <Card className="tech-dashboard-stat-card tech-dashboard-communities">
                   <Statistic
-                    title={<span style={{ color: 'white' }}>Comunidades</span>}
+                    title="Comunidades"
                     value={stats.communities}
                     prefix={<TeamOutlined />}
-                    valueStyle={{ color: 'white', fontSize: 28 }}
                   />
                 </Card>
               </Col>
               
               <Col xs={24} sm={8}>
-                <Card style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
+                <Card className="tech-dashboard-stat-card tech-dashboard-conversion">
                   <Statistic
-                    title={<span style={{ color: 'white' }}>Taxa de Conversão</span>}
+                    title="Taxa de Conversão"
                     value={87}
                     suffix="%"
                     prefix={<TrophyOutlined />}
-                    valueStyle={{ color: 'white', fontSize: 28 }}
                   />
                 </Card>
               </Col>
             </Row>
           </>
         )}
+      </div>
     </MainLayout>
   );
 };

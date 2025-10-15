@@ -11,8 +11,8 @@ interface ContentContainerProps {
 
 const ContentContainer: React.FC<ContentContainerProps> = ({
   children,
-  maxWidth = '1400px',
-  padding = '24px',
+  maxWidth = '100%', // Alterado de '1400px' para '100%'
+  padding = '6px', // Reduzido ainda mais para 6px
   background = 'transparent',
   className = '',
   style,

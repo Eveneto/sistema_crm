@@ -1,0 +1,242 @@
+/* ===== TECH CRM - DASHBOARD LAYOUT HORIZONTAL FORÇADO ===== */
+
+/* === OVERRIDE TOTAL DO LAYOUT DO DASHBOARD === */
+.dashboard-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  margin: 0 0 24px 0 !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* === CARDS DE ESTATÍSTICAS COMPACTOS === */
+.stats-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: all 0.3s ease !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.stats-card:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid #e8e8e8 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* === ESTATÍSTICAS COM TEXTOS ULTRA COMPACTOS === */
+.stats-card .ant-statistic {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.stats-card .ant-statistic-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 500 !important;
+  color: #666 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 4px !important;
+  line-height: 1.1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.stats-card .ant-statistic-content-value {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1a237e !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.stats-card .ant-statistic-content-prefix {
+  font-size: 14px !important;
+  color: #666 !important;
+  margin-right: 4px !important;
+}
+
+.stats-card .ant-statistic-content-suffix {
+  font-size: 14px !important;
+  color: #666 !important;
+  margin-left: 4px !important;
+}
+
+/* === PROGRESS BARS ULTRA SUTIS === */
+.dashboard-stats-progress {
+  margin-top: 4px !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.stats-card:hover .dashboard-stats-progress {
+  opacity: 1 !important;
+}
+
+.dashboard-stats-progress .ant-progress-bg {
+  background: #1a237e !important;
+}
+
+.dashboard-stats-progress .ant-progress-outer {
+  height: 3px !important;
+}
+
+/* === TEXTOS AUXILIARES === */
+.dashboard-stats-helper {
+  font-size: 8px !important;
+  color: #999 !important;
+  margin-top: 2px !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.stats-card:hover .dashboard-stats-helper {
+  opacity: 1 !important;
+}
+
+/* === RESPONSIVIDADE ESPECÍFICA === */
+@media (max-width: 1400px) {
+  .dashboard-stats-grid {
+    gap: 8px !important;
+  }
+  
+  .stats-card .ant-statistic-content-value {
+    font-size: 16px !important;
+  }
+  
+  .stats-card .ant-statistic-title {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  .stats-card {
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  
+  .stats-card {
+    height: 75px !important;
+    min-height: 75px !important;
+    max-height: 75px !important;
+  }
+  
+  .stats-card .ant-statistic-content-value {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  
+  .stats-card {
+    height: 70px !important;
+    min-height: 70px !important;
+    max-height: 70px !important;
+  }
+}
+
+/* === CONTAINER PRINCIPAL CONSIDERANDO SIDEBAR === */
+.dashboard-container {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 16px !important;
+}
+
+/* === OVERRIDE PARA LAYOUT PRINCIPAL === */
+.rd-content-container {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.main-content-responsive {
+  padding: 16px !important;
+  background: #f5f7fa !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* === LAYOUT QUE CONSIDERA O SIDEBAR DINÂMICO === */
+.ant-layout-content {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  background: #f5f7fa !important;
+}
+
+/* === LAYOUT PRINCIPAL CONSIDERANDO SIDEBAR === */
+.main-layout-content {
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* === GARANTIR QUE O MARGIN-LEFT DO MAINLAYOUT FUNCIONE === */
+.ant-layout-has-sider > .ant-layout {
+  margin-left: 0 !important;
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* === FORÇAR LARGURA TOTAL === */
+.ant-row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.ant-col {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+/* === ANIMAÇÃO SUAVE === */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-card:hover .dashboard-stats-progress,
+.stats-card:hover .dashboard-stats-helper {
+  animation: fade-in-up 0.3s ease;
+}

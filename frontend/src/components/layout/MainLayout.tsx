@@ -58,7 +58,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Layout style={getMainContentStyle()}>
         <Content
           style={{
-            padding: isMobile ? '16px' : '24px',
+            padding: isMobile ? '8px' : '12px', // Reduzido de 16px/24px para 8px/12px
             background: '#f5f7fa',
             overflow: 'auto',
             minHeight: '100vh',

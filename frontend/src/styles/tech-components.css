@@ -1,0 +1,301 @@
+/* ===== TECH CRM - COMPONENTES ESPECÍFICOS ===== */
+
+/* === LAYOUT PRINCIPAL === */
+.main-content-responsive {
+  background: var(--tech-gray-50) !important;
+  font-family: var(--tech-font-primary) !important;
+  min-height: 100vh;
+}
+
+/* === CARDS TECNOLÓGICOS === */
+.ant-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  font-family: var(--tech-font-primary) !important;
+}
+
+.ant-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-md) !important;
+  transform: translateY(-1px);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--tech-gray-200) !important;
+  padding: var(--tech-space-4) var(--tech-space-6) !important;
+  min-height: auto !important;
+}
+
+.ant-card-head-title {
+  font-family: var(--tech-font-primary) !important;
+  font-weight: var(--tech-font-semibold) !important;
+  font-size: var(--tech-text-lg) !important;
+  color: var(--tech-gray-900) !important;
+}
+
+.ant-card-body {
+  padding: var(--tech-space-6) !important;
+}
+
+/* === BOTÕES TECNOLÓGICOS === */
+.ant-btn {
+  border-radius: var(--tech-radius-base) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-weight: var(--tech-font-medium) !important;
+  transition: var(--tech-transition-fast) !important;
+  height: 40px !important;
+  padding: 0 var(--tech-space-4) !important;
+  font-size: var(--tech-text-base) !important;
+}
+
+.ant-btn-primary {
+  background: var(--tech-primary) !important;
+  border-color: var(--tech-primary) !important;
+  color: var(--tech-white) !important;
+  box-shadow: var(--tech-shadow-sm) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--tech-primary-dark) !important;
+  border-color: var(--tech-primary-dark) !important;
+  box-shadow: var(--tech-shadow-md) !important;
+  transform: translateY(-1px) !important;
+}
+
+.ant-btn-default {
+  background: var(--tech-white) !important;
+  border-color: var(--tech-gray-300) !important;
+  color: var(--tech-gray-700) !important;
+}
+
+.ant-btn-default:hover {
+  background: var(--tech-gray-50) !important;
+  border-color: var(--tech-gray-400) !important;
+  color: var(--tech-gray-900) !important;
+}
+
+/* === INPUTS TECNOLÓGICOS === */
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  border-radius: var(--tech-radius-base) !important;
+  border: 1px solid var(--tech-gray-300) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-base) !important;
+  transition: var(--tech-transition-fast) !important;
+  min-height: 40px !important;
+}
+
+.ant-input:focus,
+.ant-select-focused .ant-select-selector,
+.ant-picker:focus {
+  border-color: var(--tech-primary) !important;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1) !important;
+}
+
+/* === TABELAS TECNOLÓGICAS === */
+.ant-table {
+  font-family: var(--tech-font-primary) !important;
+  border-radius: var(--tech-radius-base) !important;
+  overflow: hidden !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--tech-gray-50) !important;
+  border-bottom: 1px solid var(--tech-gray-200) !important;
+  color: var(--tech-gray-700) !important;
+  font-weight: var(--tech-font-semibold) !important;
+  font-size: var(--tech-text-sm) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--tech-gray-100) !important;
+  color: var(--tech-gray-900) !important;
+  font-size: var(--tech-text-base) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--tech-gray-50) !important;
+}
+
+/* === MODAIS TECNOLÓGICOS === */
+.ant-modal .ant-modal-content {
+  border-radius: var(--tech-radius-lg) !important;
+  box-shadow: var(--tech-shadow-xl) !important;
+  overflow: hidden !important;
+}
+
+.ant-modal .ant-modal-header {
+  background: var(--tech-white) !important;
+  border-bottom: 1px solid var(--tech-gray-200) !important;
+  padding: var(--tech-space-6) !important;
+}
+
+.ant-modal .ant-modal-title {
+  font-family: var(--tech-font-primary) !important;
+  font-weight: var(--tech-font-semibold) !important;
+  font-size: var(--tech-text-xl) !important;
+  color: var(--tech-gray-900) !important;
+}
+
+.ant-modal .ant-modal-body {
+  padding: var(--tech-space-6) !important;
+}
+
+.ant-modal .ant-modal-footer {
+  border-top: 1px solid var(--tech-gray-200) !important;
+  padding: var(--tech-space-4) var(--tech-space-6) !important;
+}
+
+/* === MENU TECNOLÓGICO === */
+.ant-menu {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--tech-font-primary) !important;
+}
+
+.ant-menu-item {
+  border-radius: var(--tech-radius-base) !important;
+  margin: var(--tech-space-1) 0 !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-weight: var(--tech-font-medium) !important;
+}
+
+.ant-menu-item-selected {
+  background: var(--tech-gray-100) !important;
+  color: var(--tech-primary) !important;
+}
+
+.ant-menu-item:hover {
+  background: var(--tech-gray-50) !important;
+  color: var(--tech-primary) !important;
+}
+
+/* === BADGES E TAGS === */
+.ant-tag {
+  border-radius: var(--tech-radius-base) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-weight: var(--tech-font-medium) !important;
+  font-size: var(--tech-text-sm) !important;
+}
+
+.ant-badge {
+  font-family: var(--tech-font-primary) !important;
+}
+
+/* === ESTATÍSTICAS === */
+.ant-statistic {
+  font-family: var(--tech-font-primary) !important;
+}
+
+.ant-statistic-title {
+  color: var(--tech-gray-600) !important;
+  font-weight: var(--tech-font-medium) !important;
+  font-size: var(--tech-text-sm) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ant-statistic-content {
+  color: var(--tech-gray-900) !important;
+  font-weight: var(--tech-font-bold) !important;
+  font-family: var(--tech-font-mono) !important;
+}
+
+/* === PROGRESS BARS === */
+.ant-progress-bg {
+  background: var(--tech-primary) !important;
+}
+
+/* === TOOLTIPS === */
+.ant-tooltip .ant-tooltip-inner {
+  background: var(--tech-gray-900) !important;
+  color: var(--tech-white) !important;
+  border-radius: var(--tech-radius-base) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-sm) !important;
+}
+
+/* === NOTIFICATIONS === */
+.ant-notification {
+  font-family: var(--tech-font-primary) !important;
+}
+
+.ant-notification-notice {
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-lg) !important;
+}
+
+/* === MODO ESCURO === */
+[data-theme="dark"] .ant-card {
+  background: var(--tech-white) !important;
+  border-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .ant-card-head-title {
+  color: var(--tech-gray-900) !important;
+}
+
+[data-theme="dark"] .ant-table-thead > tr > th {
+  background: var(--tech-gray-50) !important;
+  color: var(--tech-gray-700) !important;
+}
+
+[data-theme="dark"] .ant-table-tbody > tr > td {
+  color: var(--tech-gray-900) !important;
+}
+
+[data-theme="dark"] .ant-menu-item-selected {
+  background: var(--tech-gray-100) !important;
+  color: var(--tech-primary) !important;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .ant-card-body {
+    padding: var(--tech-space-4) !important;
+  }
+  
+  .ant-modal .ant-modal-body {
+    padding: var(--tech-space-4) !important;
+  }
+  
+  .ant-btn {
+    height: 44px !important;
+    font-size: var(--tech-text-lg) !important;
+  }
+}
+
+/* === ANIMATIONS === */
+@keyframes tech-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tech-animate-in {
+  animation: tech-fade-in var(--tech-transition-base) ease-out;
+}
+
+/* === LOADING STATES === */
+.ant-spin {
+  color: var(--tech-primary) !important;
+}
+
+.ant-spin-dot-item {
+  background-color: var(--tech-primary) !important;
+}

@@ -3,7 +3,7 @@
 /* Containers principais */
 .main-container, .ant-layout-content {
   max-width: 1400px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   padding: 0 24px;
 }
 

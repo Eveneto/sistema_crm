@@ -38,6 +38,10 @@ RESOLUCAO_FIREBASE_JWT.md
 /backend/.env*
 /backend/.venv/
 /backend/venv/
+/.venv/
+/venv/
+.venv/
+venv/
 /backend/__pycache__/
 /backend/**/__pycache__/
 /backend/.pytest_cache/
@@ -99,3 +103,4 @@ backend/cache/
 backend/staticfiles/
 security_*_report_*.txt
 frontend/security-test-reports/
+node_modules

@@ -170,7 +170,7 @@ body {
 
 /* Cards com fundo azul escuro e texto branco */
 :root[data-theme="dark"] .ant-card {
-  background-color: var(--background-elevated) !important;
+  /* background-color: var(--background-elevated) !important; */
   border-color: var(--border-light) !important;
   color: white !important;
 }

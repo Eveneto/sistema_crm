@@ -20,21 +20,19 @@ import TestingToolsPage from './pages/TestingToolsPage';
 import TokenTestPage from './pages/TokenTestPage';
 import ApiTest from './components/ApiTest';
 
-// Temas
-import rdstationTheme from './theme/rdstationTheme';
-import darkTheme from './theme/darkTheme';
+// Temas Tecnológicos
+import techTheme from './theme/techTheme';
+import techDarkTheme from './theme/techDarkTheme';
 
 // Estilos principais
 import './App.css';
 
-// Tema RD Station CSS
-import './styles/rdstation-theme.css';
-
-// Layout Enhancements
-import './components/layout/LayoutEnhancements.css';
-
-// Navigation styles
-import './styles/navigation.css';
+// Novo Design System Tecnológico
+import './styles/tech-design-system.css';
+import './styles/tech-components.css';
+import './styles/tech-dashboard.css';
+import './styles/tech-dashboard-overrides.css';
+import './components/layout/TechSidebar.css';
 
 // Novos estilos melhorados
 import './styles/toastStyles.css';
@@ -48,7 +46,7 @@ import './services/authSyncService';
 // Componente que usa o tema dinâmico
 const AppWithTheme: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const currentTheme = isDarkMode ? darkTheme : rdstationTheme;
+  const currentTheme = isDarkMode ? techDarkTheme : techTheme;
   
   return (
     <ConfigProvider theme={currentTheme}>

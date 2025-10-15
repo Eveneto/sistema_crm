@@ -1,0 +1,251 @@
+/* ===== TECH CRM - OVERRIDES ESPECÍFICOS PARA DASHBOARD ===== */
+
+/* === CARDS ESPECÍFICOS COM CLASSES === */
+.tech-dashboard-stat-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  height: auto !important;
+  text-align: center !important;
+  min-height: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tech-dashboard-stat-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-md) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== TECH CRM - OVERRIDES ESPECÍFICOS PARA DASHBOARD ===== */
+
+/* === CONTAINER PRINCIPAL COM MARGENS REDUZIDAS === */
+.ant-layout-content {
+  padding: var(--tech-space-4) var(--tech-space-2) !important;
+}
+
+/* === ESPAÇAMENTO ENTRE SEÇÕES === */
+.dashboard-charts-row {
+  margin-bottom: var(--tech-space-4) !important;
+}
+
+.dashboard-summary-cards {
+  margin-top: var(--tech-space-4) !important;
+}
+
+/* === SOBRESCREVER TODOS OS ESTILOS INLINE DOS CARDS === */
+.ant-layout-content .ant-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  height: auto !important;
+}
+
+.ant-layout-content .ant-card:hover {
+  background: var(--tech-white) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  border-radius: var(--tech-radius-base) !important;
+  box-shadow: var(--tech-shadow-md) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* === GRID DE ALTURA UNIFORME COM MAIS ESPAÇO === */
+.ant-row[gutter] {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  gap: var(--tech-space-3) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ant-row[gutter] .ant-col {
+  width: auto !important;
+  flex: none !important;
+  padding: 0 !important;
+}
+
+/* === REMOVER TODOS OS ESTILOS INLINE ANTIGOS === */
+.ant-card[style*="borderRadius"] {
+  border-radius: 0 !important;
+}
+
+.ant-card[style*="border"] {
+  border: none !important;
+}
+
+.ant-card[style*="height"] {
+  height: auto !important;
+  min-height: 140px !important;
+}
+
+/* === FORÇAR ALTURA UNIFORME MENOR === */
+.ant-row .ant-col .ant-card {
+  min-height: 100px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* === ESTATÍSTICAS COM VISUAL LIMPO E TEXTO MENOR === */
+.ant-statistic {
+  text-align: center !important;
+  padding: var(--tech-space-1) 0 !important;
+}
+
+.ant-statistic-title {
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-2xs) !important;
+  font-weight: var(--tech-font-medium) !important;
+  color: var(--tech-gray-500) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  margin-bottom: var(--tech-space-2) !important;
+}
+
+.ant-statistic-content-value {
+  font-family: var(--tech-font-mono) !important;
+  font-size: var(--tech-text-2xl) !important;
+  font-weight: var(--tech-font-bold) !important;
+  color: var(--tech-gray-900) !important;
+  line-height: 1.1 !important;
+}
+
+/* === ÍCONES MENORES === */
+.ant-statistic-content-prefix .anticon {
+  font-size: var(--tech-text-lg) !important;
+  color: var(--tech-gray-400) !important;
+  opacity: 0.6 !important;
+  margin-right: var(--tech-space-2) !important;
+  transition: var(--tech-transition-fast) !important;
+}
+
+.ant-card:hover .ant-statistic-content-prefix .anticon {
+  color: var(--tech-primary) !important;
+  opacity: 1 !important;
+}
+
+/* === PROGRESS BARS SUTIS === */
+.ant-progress {
+  opacity: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  margin-top: var(--tech-space-3) !important;
+}
+
+.ant-card:hover .ant-progress {
+  opacity: 1 !important;
+}
+
+.ant-progress-bg {
+  background: var(--tech-primary) !important;
+}
+
+/* === TAGS MAIS SUTIS === */
+.ant-tag {
+  background: transparent !important;
+  border: 1px solid var(--tech-gray-300) !important;
+  color: var(--tech-gray-600) !important;
+  border-radius: var(--tech-radius-sm) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-xs) !important;
+  font-weight: var(--tech-font-medium) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 2px var(--tech-space-2) !important;
+  opacity: 0 !important;
+  transition: var(--tech-transition-base) !important;
+}
+
+.ant-card:hover .ant-tag {
+  opacity: 1 !important;
+}
+
+/* === TEXTOS AUXILIARES === */
+.ant-typography {
+  opacity: 0 !important;
+  transition: var(--tech-transition-base) !important;
+  font-family: var(--tech-font-primary) !important;
+  font-size: var(--tech-text-xs) !important;
+  color: var(--tech-gray-500) !important;
+}
+
+.ant-card:hover .ant-typography {
+  opacity: 1 !important;
+}
+
+/* === RESPONSIVIDADE MELHORADA === */
+@media (max-width: 768px) {
+  .ant-row[gutter] {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: var(--tech-space-3) !important;
+    padding: 0 var(--tech-space-1) !important;
+  }
+  
+  .ant-row .ant-col .ant-card {
+    min-height: 90px !important;
+  }
+  
+  .ant-statistic-content-value {
+    font-size: var(--tech-text-xl) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-row[gutter] {
+    grid-template-columns: 1fr !important;
+    gap: var(--tech-space-2) !important;
+    padding: 0 !important;
+  }
+  
+  .ant-statistic-content-value {
+    font-size: var(--tech-text-lg) !important;
+  }
+  
+  .ant-statistic-content-prefix .anticon {
+    font-size: var(--tech-text-base) !important;
+  }
+}
+
+/* === MODO ESCURO === */
+[data-theme="dark"] .ant-layout-content .ant-card:hover {
+  background: var(--tech-white) !important;
+  border-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .ant-statistic-title {
+  color: var(--tech-gray-500) !important;
+}
+
+[data-theme="dark"] .ant-statistic-content-value {
+  color: var(--tech-gray-900) !important;
+}
+
+[data-theme="dark"] .ant-tag {
+  border-color: var(--tech-gray-300) !important;
+  color: var(--tech-gray-600) !important;
+}
+
+/* === ANIMAÇÕES SUTIS === */
+@keyframes subtle-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ant-card:hover .ant-progress,
+.ant-card:hover .ant-tag,
+.ant-card:hover .ant-typography {
+  animation: subtle-fade-in 0.3s ease-out;
+}

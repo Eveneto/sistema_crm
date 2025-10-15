@@ -1,0 +1,307 @@
+/* ===== TECH CRM - SIDEBAR RESPONSIVO ===== */
+
+.tech-sidebar {
+  background: var(--tech-white) !important;
+  border-right: 1px solid var(--tech-gray-200) !important;
+  box-shadow: var(--tech-shadow-sm) !important;
+  font-family: var(--tech-font-primary) !important;
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: var(--tech-z-fixed) !important;
+  transition: var(--tech-transition-base) !important;
+}
+
+/* === HEADER DO SIDEBAR === */
+.tech-sidebar-header {
+  padding: var(--tech-space-6) var(--tech-space-4) !important;
+  border-bottom: 1px solid var(--tech-gray-200) !important;
+  background: var(--tech-white) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 64px !important;
+}
+
+.tech-sidebar-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--tech-space-3) !important;
+  color: var(--tech-primary) !important;
+  font-weight: var(--tech-font-bold) !important;
+  font-size: var(--tech-text-lg) !important;
+  text-decoration: none !important;
+}
+
+.tech-sidebar-logo:hover {
+  color: var(--tech-primary-dark) !important;
+}
+
+.tech-sidebar-logo .anticon {
+  font-size: var(--tech-text-xl) !important;
+  color: var(--tech-primary) !important;
+}
+
+/* === BOTÃO DE TOGGLE === */
+.tech-sidebar-toggle {
+  background: transparent !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  color: var(--tech-gray-600) !important;
+  border-radius: var(--tech-radius-base) !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.tech-sidebar-toggle:hover {
+  background: var(--tech-gray-50) !important;
+  border-color: var(--tech-gray-300) !important;
+  color: var(--tech-primary) !important;
+}
+
+/* === NAVEGAÇÃO === */
+.tech-sidebar-nav {
+  padding: var(--tech-space-4) !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+}
+
+.tech-sidebar-nav .ant-menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+.tech-sidebar-nav .ant-menu-item {
+  border-radius: var(--tech-radius-base) !important;
+  margin: var(--tech-space-1) 0 !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-weight: var(--tech-font-medium) !important;
+  color: var(--tech-gray-600) !important;
+  padding: 0 var(--tech-space-4) !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.tech-sidebar-nav .ant-menu-item:hover {
+  background: var(--tech-gray-50) !important;
+  color: var(--tech-primary) !important;
+}
+
+.tech-sidebar-nav .ant-menu-item-selected {
+  background: var(--tech-primary) !important;
+  color: var(--tech-white) !important;
+  position: relative !important;
+}
+
+.tech-sidebar-nav .ant-menu-item-selected::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 3px !important;
+  height: 24px !important;
+  background: var(--tech-white) !important;
+  border-radius: 0 var(--tech-radius-base) var(--tech-radius-base) 0 !important;
+}
+
+.tech-sidebar-nav .ant-menu-item .anticon {
+  font-size: var(--tech-text-lg) !important;
+  margin-right: var(--tech-space-3) !important;
+  min-width: 20px !important;
+}
+
+/* === FOOTER DO SIDEBAR === */
+.tech-sidebar-footer {
+  padding: var(--tech-space-4) !important;
+  border-top: 1px solid var(--tech-gray-200) !important;
+  background: var(--tech-white) !important;
+}
+
+.tech-user-profile {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--tech-space-3) !important;
+  padding: var(--tech-space-3) !important;
+  border-radius: var(--tech-radius-base) !important;
+  background: var(--tech-gray-50) !important;
+  cursor: pointer !important;
+  transition: var(--tech-transition-fast) !important;
+}
+
+.tech-user-profile:hover {
+  background: var(--tech-gray-100) !important;
+}
+
+.tech-user-avatar {
+  background: var(--tech-primary) !important;
+  color: var(--tech-white) !important;
+  font-weight: var(--tech-font-semibold) !important;
+}
+
+.tech-user-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.tech-user-name {
+  font-size: var(--tech-text-sm) !important;
+  font-weight: var(--tech-font-semibold) !important;
+  color: var(--tech-gray-900) !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.tech-user-role {
+  font-size: var(--tech-text-xs) !important;
+  color: var(--tech-gray-500) !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* === ESTADOS COLLAPSED === */
+.tech-sidebar.collapsed {
+  width: 80px !important;
+}
+
+.tech-sidebar.collapsed .tech-sidebar-logo span {
+  display: none !important;
+}
+
+.tech-sidebar.collapsed .tech-user-info {
+  display: none !important;
+}
+
+.tech-sidebar.collapsed .tech-sidebar-nav .ant-menu-item {
+  padding: 0 !important;
+  justify-content: center !important;
+}
+
+.tech-sidebar.collapsed .tech-sidebar-nav .ant-menu-item .anticon {
+  margin-right: 0 !important;
+}
+
+.tech-sidebar.collapsed .tech-sidebar-nav .ant-menu-item span {
+  display: none !important;
+}
+
+/* === MODO ESCURO === */
+[data-theme="dark"] .tech-sidebar {
+  background: var(--tech-white) !important;
+  border-right-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .tech-sidebar-header {
+  background: var(--tech-white) !important;
+  border-bottom-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .tech-sidebar-footer {
+  background: var(--tech-white) !important;
+  border-top-color: var(--tech-gray-200) !important;
+}
+
+[data-theme="dark"] .tech-user-profile {
+  background: var(--tech-gray-50) !important;
+}
+
+[data-theme="dark"] .tech-user-profile:hover {
+  background: var(--tech-gray-100) !important;
+}
+
+[data-theme="dark"] .tech-user-name {
+  color: var(--tech-gray-900) !important;
+}
+
+[data-theme="dark"] .tech-user-role {
+  color: var(--tech-gray-500) !important;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .tech-sidebar {
+    transform: translateX(-100%) !important;
+  }
+  
+  .tech-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+  
+  .tech-sidebar-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    z-index: var(--tech-z-modal) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+}
+
+/* === SCROLLBAR CUSTOMIZADA === */
+.tech-sidebar-nav::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.tech-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.tech-sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--tech-gray-300) !important;
+  border-radius: var(--tech-radius-base) !important;
+}
+
+.tech-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--tech-gray-400) !important;
+}
+
+/* === ANIMAÇÕES === */
+@keyframes tech-sidebar-slide-in {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.tech-sidebar-enter {
+  animation: tech-sidebar-slide-in var(--tech-transition-base) ease-out;
+}
+
+/* === THEME TOGGLE === */
+.tech-theme-toggle {
+  position: absolute !important;
+  bottom: var(--tech-space-4) !important;
+  right: var(--tech-space-4) !important;
+  background: var(--tech-gray-100) !important;
+  border: 1px solid var(--tech-gray-200) !important;
+  color: var(--tech-gray-600) !important;
+  border-radius: var(--tech-radius-base) !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: var(--tech-text-base) !important;
+}
+
+.tech-theme-toggle:hover {
+  background: var(--tech-gray-200) !important;
+  border-color: var(--tech-gray-300) !important;
+  color: var(--tech-primary) !important;
+}
