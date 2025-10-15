@@ -43,7 +43,7 @@
 .stats-card .ant-statistic-title {
   font-size: 11px !important; /* Reduzido */
   font-weight: 500 !important;
-  color: #ffffff !important; /* Sempre branco */
+  color: var(--tech-gray-600) !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
   margin-bottom: 4px !important;
@@ -57,7 +57,7 @@
 .stats-card .ant-statistic-content-value {
   font-size: 24px !important; /* Reduzido de 32px para 24px */
   font-weight: 700 !important;
-  color: #ffffff !important; /* Sempre branco */
+  color: var(--tech-gray-900) !important;
   line-height: 1.1 !important;
   margin-bottom: 2px !important;
 }
@@ -66,14 +66,14 @@
 .stats-card .ant-statistic-content-prefix {
   font-size: 18px !important; /* Reduzido proporcionalmente */
   margin-right: 4px !important;
-  color: #ffffff !important; /* Sempre branco */
+  color: var(--tech-primary) !important;
 }
 
 .dashboard-stats-card .ant-statistic-content-suffix,
 .stats-card .ant-statistic-content-suffix {
   font-size: 18px !important;
   margin-left: 4px !important;
-  color: #ffffff !important; /* Sempre branco */
+  color: var(--tech-primary) !important;
 }
 
 /* === PROGRESS BAR COMPACTA === */
@@ -99,39 +99,9 @@
 /* === TEXTO AUXILIAR COMPACTO === */
 .dashboard-stats-helper {
   font-size: 10px !important;
-  color: #ffffff !important; /* Sempre branco */
+  color: var(--tech-gray-500) !important;
   margin-top: 4px !important;
   text-align: center !important;
-  opacity: 0.9 !important; /* Ligeiramente transparente mas visível */
-}
-
-/* === FORÇA TEXTO BRANCO EM TODOS OS ELEMENTOS === */
-.dashboard-stats-card *,
-.stats-card * {
-  color: #ffffff !important;
-}
-
-.dashboard-stats-card .ant-statistic *,
-.stats-card .ant-statistic * {
-  color: #ffffff !important;
-}
-
-/* === ÍCONES SEMPRE BRANCOS === */
-.dashboard-stats-card .anticon,
-.stats-card .anticon {
-  color: #ffffff !important;
-}
-
-/* === OVERRIDE ESPECÍFICO PARA ESTATÍSTICAS === */
-.dashboard-stats-card .ant-statistic-title,
-.dashboard-stats-card .ant-statistic-content-value,
-.dashboard-stats-card .ant-statistic-content-prefix,
-.dashboard-stats-card .ant-statistic-content-suffix,
-.stats-card .ant-statistic-title,
-.stats-card .ant-statistic-content-value,
-.stats-card .ant-statistic-content-prefix,
-.stats-card .ant-statistic-content-suffix {
-  color: #ffffff !important;
 }
 
 /* === RESPONSIVIDADE MELHORADA === */
