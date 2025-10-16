@@ -1,0 +1,65 @@
+/* ===== CRM DESIGN SYSTEM ===== */
+/* Arquivo Principal: crm-main.css */
+/* Versão: 1.0.0 */
+/* Descrição: Arquivo principal que importa todos os módulos CSS do sistema */
+
+/* ===== IMPORTAÇÃO DOS MÓDULOS ===== */
+/* Ordem de importação crítica para funcionamento correto */
+
+/* 1. Design System - Variáveis CSS e configurações base */
+@import './crm-design-system.css';
+
+/* 2. Layout - Estrutura de layout e navegação */
+@import './crm-layout.css';
+
+/* 3. Components - Biblioteca de componentes reutilizáveis */
+@import './crm-components-new.css';
+
+/* 4. Pages - Estilos específicos de cada página */
+@import './crm-pages.css';
+
+/* 5. Responsive - Sistema responsivo mobile-first */
+@import './crm-responsive.css';
+
+/* 6. Utilities - Classes utilitárias e helpers */
+@import './crm-utilities.css';
+
+/* ===== INSTRUÇÕES DE USO ===== */
+/*
+Este arquivo principal (crm-main.css) deve ser importado no seu projeto React.
+
+Para usar no projeto:
+1. Importe este arquivo no seu index.tsx ou App.tsx:
+   import './styles/crm-main.css';
+
+2. Ou importe no seu arquivo CSS principal:
+   @import './crm-main.css';
+
+3. Ou adicione ao seu webpack/vite config se necessário.
+
+IMPORTANTE:
+- Mantenha a ordem de importação dos módulos
+- Não modifique este arquivo diretamente
+- Para customizações, crie arquivos adicionais ou modifique os módulos específicos
+- Teste sempre em todos os breakpoints após modificações
+
+ESTRUTURA DO SISTEMA:
+├── crm-design-system.css  → Variáveis CSS e design tokens
+├── crm-layout.css        → Layout e navegação
+├── crm-components-new.css → Componentes reutilizáveis
+├── crm-pages.css         → Estilos específicos de página
+├── crm-responsive.css    → Sistema responsivo
+└── crm-utilities.css     → Classes utilitárias
+
+Para desenvolvimento:
+- Use as classes CSS diretamente nos componentes React
+- Combine classes utilitárias para layouts rápidos
+- Estenda componentes existentes quando necessário
+- Mantenha consistência com o design system
+
+Para manutenção:
+- Atualize variáveis no crm-design-system.css para mudanças globais
+- Adicione novos componentes no crm-components-new.css
+- Use crm-utilities.css para classes helper
+- Teste sempre a responsividade
+*/
