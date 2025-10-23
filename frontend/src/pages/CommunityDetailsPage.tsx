@@ -211,7 +211,7 @@ const CommunityDetailsPage: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div style={{ textAlign: 'center', padding: '50px' }}>
+        <div className="crm-community-loading-center">
           <Spin size="large" />
         </div>
       </MainLayout>
@@ -221,7 +221,7 @@ const CommunityDetailsPage: React.FC = () => {
   if (!community) {
     return (
       <MainLayout>
-        <div style={{ textAlign: 'center', padding: '50px' }}>
+        <div className="crm-community-error-center">
           <Text>Comunidade não encontrada</Text>
         </div>
       </MainLayout>
@@ -230,9 +230,9 @@ const CommunityDetailsPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div style={{ padding: '24px' }}>
+      <div className="crm-community-content-padding">
         {/* Header */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Row gutter={[16, 16]} className="crm-community-header-margin">
           <Col span={24}>
             <Space>
               <Button 
@@ -249,10 +249,10 @@ const CommunityDetailsPage: React.FC = () => {
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={16}>
             <Card>
-              <Space direction="vertical" style={{ width: '100%' }} size="large">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Space direction="vertical" className="crm-community-space-full" size="large">
+                <div className="crm-community-header-flex">
                   <div>
-                    <Title level={2} style={{ margin: 0 }}>
+                    <Title level={2} className="crm-community-title-margin">
                       {!community.is_public ? <LockOutlined /> : <GlobalOutlined />}
                       {' '}
                       {community.name}
@@ -320,7 +320,7 @@ const CommunityDetailsPage: React.FC = () => {
                     </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="Total de Membros">
-                    <Badge count={community.member_count} style={{ backgroundColor: '#52c41a' }} />
+                    <Badge count={community.member_count} className="crm-community-badge-success" />
                   </Descriptions.Item>
                   <Descriptions.Item label="Criada por">
                     <Text>{community.created_by.full_name || community.created_by.email}</Text>

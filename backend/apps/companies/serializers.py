@@ -120,16 +120,6 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
         if request and request.user:
             validated_data['created_by'] = request.user
         return super().create(validated_data)
-    
-    def get_contact_count(self, obj):
-        """Retorna o número de contatos da empresa"""
-        return obj.contacts.count()
-    
-    def create(self, validated_data):
-        """Criar empresa com usuário atual como criador"""
-        user = self.context['request'].user
-        validated_data['created_by'] = user
-        return super().create(validated_data)
 
 
 class CompanyListSerializer(serializers.ModelSerializer):

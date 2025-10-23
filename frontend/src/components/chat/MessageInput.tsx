@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Input, Button, Upload, Popover } from 'antd';
 import { SendOutlined, PaperClipOutlined, SmileOutlined } from '@ant-design/icons';
 import { ChatMessage } from '../../redux/slices/chatSlice';
-import './MessageInput.css';
 
 const { TextArea } = Input;
 

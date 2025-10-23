@@ -1,0 +1,180 @@
+
+[0;34m╔════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m    🗄️  MIGRAÇÃO SQLite → PostgreSQL - CRM SYSTEM         [0;34m║[0m
+[0;34m╚════════════════════════════════════════════════════════════╝[0m
+
+
+[0;34m[0/13] Verificando ambiente[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[0;32m✓[0m Docker encontrado
+[0;32m✓[0m Docker Compose encontrado
+[0;32m✓[0m Python 3 encontrado
+
+[0;34m[1/13] Backup do banco SQLite[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[0;32m✓[0m Backup criado: backups/db.sqlite3.backup.20251023_105532
+-rw-rw-r-- 1 dev_pc dev_pc 524K out 23 10:55 backups/db.sqlite3.backup.20251023_105532
+
+[0;34m[2/13] Configurando ambiente Python[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[0;32m✓[0m Virtual environment encontrado
+
+[0;34m[3/13] Instalando dependências Python[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Atualizando pip...
+[1;33m⚠[0m Instalando requirements.txt...
+[0;32m✓[0m Dependências instaladas
+
+[0;34m[4/13] Parando containers anteriores[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Parando containers em execução...
+[0;32m✓[0m Containers parados
+
+[0;34m[5/13] Iniciando PostgreSQL em Docker[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Iniciando PostgreSQL com docker-compose...
+ Network sistema_crm_crm_network  Creating
+ Network sistema_crm_crm_network  Created
+ Volume "sistema_crm_postgres_data_prod"  Creating
+ Volume "sistema_crm_postgres_data_prod"  Created
+ Volume "sistema_crm_redis_data_prod"  Creating
+ Volume "sistema_crm_redis_data_prod"  Created
+ Container crm_redis_prod  Creating
+ Container crm_postgres_prod  Creating
+ Container crm_redis_prod  Created
+ Container crm_postgres_prod  Created
+ Container crm_redis_prod  Starting
+ Container crm_postgres_prod  Starting
+ Container crm_redis_prod  Started
+ Container crm_postgres_prod  Started
+[1;33m⚠[0m Aguardando inicialização do PostgreSQL (15 segundos)...
+[0;32m✓[0m PostgreSQL iniciado com sucesso
+
+[0;34m[6/13] Configurando arquivo .env[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[0;32m✓[0m .env já existe
+
+[0;34m[7/13] Testando conexão com PostgreSQL[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[0;32m✓[0m Conexão com PostgreSQL testada com sucesso
+
+[0;34m[8/13] Aplicando migrations no PostgreSQL[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Executando makemigrations...
+/home/dev_pc/Documentos/crm_freela2/sistema_crm/.venv/lib/python3.12/site-packages/rest_framework_simplejwt/__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+No changes detected
+[1;33m⚠[0m Executando migrate...
+Running migrations:
+[0;32m✓[0m Migrations aplicadas
+
+[0;34m[9/13] Exportando dados do SQLite[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Exportando dados com dumpdata...
+[0;32m✓[0m Dados exportados (100K)
+
+[0;34m[10/13] Importando dados no PostgreSQL[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[1;33m⚠[0m Importando dados com loaddata...
+    objects = json.loads(stream_or_string)
+    for obj in objects:
+[0;32m✓[0m Dados importados
+
+[0;34m[11/13] Validando integridade dos dados[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+System check identified no issues (0 silenced).
+[0;32m✓[0m Validação concluída
+
+[0;34m[12/13] Executando testes unitários (159 testes)[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+[DEBUG][LOGIN] Login bem-sucedido para: refreshuser
+----------------------------------------------------------------------
+Ran 159 tests in 75.770s
+
+OK
+
+[0;34m[13/13] Relatório Final[0m
+[0;34m════════════════════════════════════════════════════════════[0m
+
+
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║  ✅ MIGRAÇÃO CONCLUÍDA COM SUCESSO!                      ║
+║                                                           ║
+║  SQLite → PostgreSQL                                      ║
+║  Dados importados e validados                            ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+📊 RESUMO DA MIGRAÇÃO
+═══════════════════════════════════════════════════════════
+
+✅ Backup do SQLite realizado
+✅ PostgreSQL iniciado em Docker
+✅ Django migrations aplicadas
+✅ Dados exportados do SQLite
+✅ Dados importados no PostgreSQL
+✅ Integridade validada
+✅ Testes executados
+
+🗄️  BANCO DE DADOS
+═══════════════════════════════════════════════════════════
+
+Tipo:     PostgreSQL 15 (Docker)
+Host:     localhost
+Porta:    5432
+Banco:    crm_db
+Usuário:  crm_user
+Status:   ✅ ATIVO
+
+📦 DADOS
+═══════════════════════════════════════════════════════════
+
+Backup SQLite:  backups/db.sqlite3.backup.*
+Dados JSON:     sqlite_data.json
+Origem:         SQLite (arquivo local)
+Destino:        PostgreSQL (Docker)
+
+✨ PRÓXIMOS PASSOS
+═══════════════════════════════════════════════════════════
+
+1. Verificar PostgreSQL rodando:
+   docker-compose -f docker-compose.prod.yml ps
+
+2. Ver logs do PostgreSQL:
+   docker-compose -f docker-compose.prod.yml logs -f postgres
+
+3. Conectar ao banco:
+   psql -h localhost -U crm_user -d crm_db
+
+4. Iniciar backend com PostgreSQL:
+   cd backend && python manage.py runserver
+
+5. Próximas fases:
+   • Fase 2: Redis verification
+   • Fase 3: SendGrid configuration
+   • Fase 4: Domain purchase + SSL
+   • Fase 5: Nginx configuration
+   • Fase 6: Production deployment
+
+═══════════════════════════════════════════════════════════
+
+Migração concluída em: $(date)
+Status: ✅ SUCESSO
+
+═══════════════════════════════════════════════════════════
+
+[0;32m✓[0m Migração completada com sucesso!

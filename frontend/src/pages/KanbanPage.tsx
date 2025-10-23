@@ -20,7 +20,6 @@ import {
 import MainLayout from '../components/layout/MainLayout';
 import PageHeader from '../components/layout/PageHeader';
 import KanbanBoard from '../components/kanban/KanbanBoard';
-import './kanban-responsive.css';
 import TaskModal from '../components/kanban/TaskModal';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import {
@@ -181,6 +180,7 @@ const KanbanPage: React.FC = () => {
 
   return (
     <MainLayout>
+      <div className="crm-kanban">
       <PageHeader
         title="Pipeline Kanban"
         subtitle="Gerencie seus projetos e tarefas visualmente"
@@ -204,13 +204,15 @@ const KanbanPage: React.FC = () => {
       />
 
       {/* Board Selector */}
-      <Card style={{ marginBottom: 24 }}>
-        <Row gutter={16} align="middle">
-          <Col xs={24} sm={12} lg={8}>
-            <Space direction="vertical" size={4} style={{ width: '100%' }}>
-              <Text strong>Selecionar Board:</Text>
+      <div className="crm-kanban-board">
+        <div className="crm-kanban-controls">
+          <Row className="crm-kanban-controls-grid">
+            <div>
+              <div style={{ marginBottom: '8px' }}>
+                <Text strong>Selecionar Board:</Text>
+              </div>
               <Select
-                style={{ width: '100%' }}
+                className="crm-kanban-select-full"
                 placeholder="Escolha um board"
                 value={currentBoard?.id}
                 onChange={handleBoardChange}
@@ -223,46 +225,41 @@ const KanbanPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-            </Space>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <Button
-              type="dashed"
-              icon={<PlusOutlined />}
-              onClick={() => setColumnModalOpen(true)}
-              disabled={!currentBoard}
-              style={{ width: '100%' }}
-            >
-              Nova Coluna
-            </Button>
-          </Col>
-        </Row>
+            </div>
+            <div>
+              <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={() => setColumnModalOpen(true)}
+                disabled={!currentBoard}
+                className="crm-kanban-input-full"
+              >
+                Nova Coluna
+              </Button>
+            </div>
+          </Row>
+        </div>
 
-        {/* Stats */}
-        <Row gutter={16} style={{ marginTop: 16 }}>
-          <Col xs={8}>
+          {/* Stats */}
+          <div className="crm-kanban-stats">
             <Statistic title="Total Tasks" value={stats.totalTasks} />
-          </Col>
-          <Col xs={8}>
             <Statistic
               title="Concluídas"
               value={stats.completedTasks}
-              valueStyle={{ color: '#3f8600' }}
+              className="crm-kanban-stat-success"
             />
-          </Col>
-          <Col xs={8}>
             <Statistic
               title="Atrasadas"
               value={stats.overdueTasks}
-              valueStyle={{ color: '#cf1322' }}
+              className="crm-kanban-stat-error"
             />
-          </Col>
-        </Row>
-      </Card>
+          </div>
+        </div>
+      </div>
 
       {/* Kanban Board */}
       {currentBoard && (
-        <Card>
+        <div className="crm-kanban-board">
           <KanbanBoard
             board={currentBoard}
             columns={columns}
@@ -272,7 +269,7 @@ const KanbanPage: React.FC = () => {
             onDeleteColumn={handleDeleteColumn}
             onAddTask={handleCreateTask}
           />
-        </Card>
+        </div>
       )}
 
       {/* Modals */}
@@ -282,6 +279,7 @@ const KanbanPage: React.FC = () => {
         onCancel={() => setBoardModalOpen(false)}
         footer={null}
         destroyOnClose
+        className="crm-companies-modal"
       >
         <Form onFinish={handleCreateBoard} layout="vertical">
           <Form.Item
@@ -294,7 +292,7 @@ const KanbanPage: React.FC = () => {
           <Form.Item label="Descrição" name="description">
             <Input.TextArea placeholder="Descrição do board..." />
           </Form.Item>
-          <div style={{ textAlign: 'right' }}>
+          <div className="crm-kanban-text-right">
             <Space>
               <Button onClick={() => setBoardModalOpen(false)}>
                 Cancelar
@@ -332,7 +330,7 @@ const KanbanPage: React.FC = () => {
           <Form.Item label="Ordem" name="order">
             <Input type="number" placeholder="1" />
           </Form.Item>
-          <div style={{ textAlign: 'right' }}>
+          <div className="crm-kanban-text-right">
             <Space>
               <Button
                 onClick={() => {

@@ -20,7 +20,6 @@ import {
 import MainLayout from '../components/layout/MainLayout';
 import PageHeader from '../components/layout/PageHeader';
 import KanbanBoard from '../components/kanban/KanbanBoard';
-import './kanban-responsive.css';
 import TaskModal from '../components/kanban/TaskModal';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import {

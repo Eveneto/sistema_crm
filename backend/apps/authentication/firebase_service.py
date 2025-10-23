@@ -17,6 +17,11 @@ class FirebaseService:
             return
 
         try:
+            # Se estamos em modo de teste, não carregar Firebase
+            if getattr(settings, 'TESTING', False):
+                logger.info("🧪 Modo de teste detectado - Firebase não será inicializado")
+                return
+
             # Prefer Django settings, then env var for credentials path
             cred_path = getattr(settings, 'FIREBASE_CREDENTIALS_PATH', None)
             if not cred_path:
@@ -51,6 +56,11 @@ class FirebaseService:
     def verify_token(self, token):
         """Verifica token Firebase e retorna dados do usuário"""
         try:
+            # Se em modo de teste, pular verificação
+            if getattr(settings, 'TESTING', False):
+                logger.debug("🧪 Modo de teste - Firebase token skipped")
+                raise Exception("Firebase disabled in test mode")
+            
             # Garantir inicialização antes de verificar
             self.initialize()
             decoded_token = auth.verify_id_token(token)

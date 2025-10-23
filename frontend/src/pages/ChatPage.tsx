@@ -38,7 +38,6 @@ import {
 import { useChatWebSocket } from '../hooks/useChatWebSocket';
 import ChatMessage from '../components/chat/ChatMessage';
 import MessageInput from '../components/chat/MessageInput';
-import './ChatPage.css';
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -182,11 +181,11 @@ const ChatPage: React.FC = () => {
     <div className="connection-status">
       {wsConnected && isConnected ? (
         <Tooltip title="Conectado">
-          <WifiOutlined style={{ color: '#52c41a' }} />
+          <WifiOutlined className="crm-chat-connection-online" />
         </Tooltip>
       ) : (
         <Tooltip title="Desconectado">
-          <DisconnectOutlined style={{ color: '#ff4d4f' }} />
+          <DisconnectOutlined className="crm-chat-connection-offline" />
         </Tooltip>
       )}
     </div>
@@ -226,10 +225,10 @@ const ChatPage: React.FC = () => {
   }
 
   return (
-    <Layout className="chat-layout">
+    <Layout className="crm-chat">
       {/* Sidebar with room list */}
       <Sider
-        className="chat-sidebar"
+        className="crm-chat-sidebar"
         width={320}
         breakpoint="md"
         collapsedWidth={0}
@@ -237,10 +236,10 @@ const ChatPage: React.FC = () => {
         onCollapse={setSidebarCollapsed}
         trigger={null}
       >
-        <div className="sidebar-header">
+        <div className="crm-chat-rooms-header">
           <div className="header-title">
             <MessageOutlined />
-            <Title level={4} style={{ margin: 0, color: 'white' }}>
+            <Title level={4} className="crm-chat-rooms-title">
               Chat
             </Title>
           </div>
@@ -257,7 +256,7 @@ const ChatPage: React.FC = () => {
           />
         </div>
 
-        <div className="rooms-list">
+        <div className="crm-chat-rooms">
           {isLoading ? (
             <div className="loading-container">
               <Spin />
@@ -265,14 +264,14 @@ const ChatPage: React.FC = () => {
           ) : filteredRooms.length === 0 ? (
             <Empty
               description="Nenhuma conversa encontrada"
-              style={{ padding: '20px' }}
+              className="crm-chat-content-padding"
             />
           ) : (
             <List
               dataSource={filteredRooms}
               renderItem={(room) => (
                 <List.Item
-                  className={`room-item ${roomId === room.id ? 'active' : ''}`}
+                  className={`crm-chat-room ${roomId === room.id ? 'active' : ''}`}
                   onClick={() => handleRoomSelect(room)}
                 >
                   <List.Item.Meta
@@ -284,15 +283,15 @@ const ChatPage: React.FC = () => {
                       </Badge>
                     }
                     title={
-                      <div className="room-title">
-                        <span className="room-name">{room.name}</span>
+                      <div className="crm-chat-room-info">
+                        <span className="crm-chat-room-name">{room.name}</span>
                         <Tag color={room.room_type === 'community' ? 'blue' : 'green'}>
                           {room.room_type === 'community' ? 'Comunidade' : 'Chat'}
                         </Tag>
                       </div>
                     }
                     description={
-                      <div className="room-description">
+                      <div className="crm-chat-room-last-message">
                         {room.last_message ? (
                           <Text ellipsis>
                             <strong>{room.last_message.sender}:</strong> {room.last_message.content}
@@ -311,11 +310,11 @@ const ChatPage: React.FC = () => {
       </Sider>
 
       {/* Main chat content */}
-      <Layout className="chat-content-layout">
+      <Layout className="crm-chat-main">
         {currentRoom ? (
           <>
             {/* Chat header */}
-            <div className="chat-header">
+            <div className="crm-chat-header">
               <div className="header-left">
                 {sidebarCollapsed && (
                   <Button
@@ -325,11 +324,11 @@ const ChatPage: React.FC = () => {
                     className="back-button"
                   />
                 )}
-                <Avatar className="room-avatar">
+                <Avatar className="crm-chat-room-avatar">
                   {currentRoom.name.charAt(0).toUpperCase()}
                 </Avatar>
                 <div className="room-info">
-                  <Title level={5} style={{ margin: 0 }}>
+                  <Title level={5} className="crm-chat-title">
                     {currentRoom.name}
                   </Title>
                   <Text type="secondary">
@@ -364,13 +363,13 @@ const ChatPage: React.FC = () => {
                   description={wsError}
                   type="warning"
                   closable
-                  style={{ margin: '8px' }}
+                  className="crm-chat-message-margin"
                 />
               )}
               
               <div 
                 ref={messagesContainerRef}
-                className="messages-container"
+                className="crm-chat-messages"
               >
                 {loadingMessages && (
                   <div className="loading-messages">
@@ -382,7 +381,7 @@ const ChatPage: React.FC = () => {
                   <div className="empty-messages">
                     <Empty
                       description="Nenhuma mensagem ainda"
-                      style={{ padding: '40px' }}
+                      className="crm-chat-empty-padding"
                     />
                   </div>
                 ) : (
@@ -413,7 +412,7 @@ const ChatPage: React.FC = () => {
             </Content>
 
             {/* Message input */}
-            <div className="message-input-area">
+            <div className="crm-chat-input-container">
               <MessageInput
                 onSendMessage={handleSendMessage}
                 onTyping={handleTyping}
@@ -434,7 +433,7 @@ const ChatPage: React.FC = () => {
           <Content className="no-room-selected">
             <Empty
               description="Selecione uma conversa para começar"
-              style={{ padding: '60px 20px' }}
+              className="crm-chat-no-rooms-padding"
             />
           </Content>
         )}

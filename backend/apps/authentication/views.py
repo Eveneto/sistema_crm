@@ -54,29 +54,44 @@ class RegisterView(generics.CreateAPIView):
         from .email_utils import send_verification_email
 
         print('[DEBUG][REGISTER] Dados recebidos:', request.data)
+        
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        user.is_active = False
-        user.save()
-        print(f'[DEBUG][REGISTER] Usuário criado: {user.username}, ativo? {user.is_active}')
+        
+        # Verificar erros de validação
+        if not serializer.is_valid():
+            print(f'[DEBUG][REGISTER] Erros de validação: {serializer.errors}')
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = serializer.save()
+            user.is_active = False
+            user.save()
+            print(f'[DEBUG][REGISTER] Usuário criado: {user.username}, ativo? {user.is_active}')
 
-        # Gerar token de verificação
-        expires_at = timezone.now() + timedelta(hours=24)
-        token_obj = EmailVerificationToken.objects.create(user=user, expires_at=expires_at)
-        print(f'[DEBUG][REGISTER] Token de verificação gerado: {token_obj.token}')
+            # Gerar token de verificação
+            expires_at = timezone.now() + timedelta(hours=24)
+            token_obj = EmailVerificationToken.objects.create(user=user, expires_at=expires_at)
+            print(f'[DEBUG][REGISTER] Token de verificação gerado: {token_obj.token}')
 
-        # Enviar e-mail de verificação
-        send_verification_email(user, token_obj.token)
-        print(f'[DEBUG][REGISTER] E-mail de verificação enviado para: {user.email}')
+            # Enviar e-mail de verificação
+            send_verification_email(user, token_obj.token)
+            print(f'[DEBUG][REGISTER] E-mail de verificação enviado para: {user.email}')
 
-        # Não retorna token JWT para usuários inativos
-        response_data = {
-            'user': UserSerializer(user).data,
-            'message': 'Cadastro realizado! Verifique seu e-mail para ativar a conta.'
-        }
-        print('[DEBUG][REGISTER] Resposta enviada:', response_data)
-        return Response(response_data, status=status.HTTP_201_CREATED)
+            # Não retorna token JWT para usuários inativos
+            response_data = {
+                'user': UserSerializer(user).data,
+                'message': 'Cadastro realizado! Verifique seu e-mail para ativar a conta.'
+            }
+            print('[DEBUG][REGISTER] Resposta enviada:', response_data)
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            print(f'[DEBUG][REGISTER] Erro ao criar usuário: {str(e)}')
+            return Response(
+                {'error': f'Erro ao criar conta: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 
 # @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='post')

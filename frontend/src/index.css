@@ -1,3 +1,6 @@
+/* ===== IMPORTAÇÃO DO NOVO SISTEMA CSS ===== */
+@import './styles/crm-main.css';
+
 /* ===== CSS CUSTOM PROPERTIES - DESIGN SYSTEM ===== */
 :root {
   /* Cores principais */

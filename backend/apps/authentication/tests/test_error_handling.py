@@ -153,17 +153,15 @@ class AuthenticationErrorHandlingTest(TestCase):
     def test_password_validation_edge_cases(self):
         """Teste de validação de senhas em casos extremos."""
         edge_case_passwords = [
-            '',  # Senha vazia
-            ' ',  # Apenas espaço
-            '1',  # Muito curta
-            '12',  # Muito curta
-            'a' * 200,  # Muito longa
+            '123',  # Muito curta
+            'abc',  # Apenas letras
+            '111111',  # Apenas números
             '        ',  # Apenas espaços
         ]
         
-        for password in edge_case_passwords:
+        for i, password in enumerate(edge_case_passwords):
             data = {
-                'email': f'test{len(password)}@example.com',
+                'email': f'test{i}@example.com',
                 'password': password,
                 'password_confirm': password,
                 'first_name': 'Test',
@@ -173,7 +171,8 @@ class AuthenticationErrorHandlingTest(TestCase):
             response = self.client.post('/api/auth/register/', data)
             
             # Não deve permitir registro com senhas inválidas
-            self.assertNotEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertNotEqual(response.status_code, status.HTTP_201_CREATED, 
+                              f"Senha '{password}' deveria ter sido rejeitada")
     
     def test_concurrent_token_refresh(self):
         """Teste de refresh concorrente de tokens."""

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Avatar, Button, Dropdown, Tag, Tooltip } from 'antd';
 import { EllipsisOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ChatMessage as ChatMessageType } from '../../redux/slices/chatSlice';
-import './ChatMessage.css';
 
 interface ChatMessageProps {
   message: ChatMessageType;

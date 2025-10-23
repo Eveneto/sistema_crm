@@ -17,7 +17,6 @@ import {
   Statistic,
   Tooltip,
 } from 'antd';
-import './communities-responsive.css';
 import {
   PlusOutlined,
   TeamOutlined,

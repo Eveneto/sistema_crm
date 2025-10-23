@@ -11,15 +11,15 @@ interface ContentContainerProps {
 
 const ContentContainer: React.FC<ContentContainerProps> = ({
   children,
-  maxWidth = '100%', // Alterado de '1400px' para '100%'
-  padding = '6px', // Reduzido ainda mais para 6px
+  maxWidth = '100%',
+  padding = 'var(--crm-space-4)',
   background = 'transparent',
   className = '',
   style,
 }) => {
   return (
     <div
-      className={`rd-content-container ${className}`}
+      className={`crm-container-fluid ${className}`}
       style={{
         maxWidth,
         margin: '0 auto',

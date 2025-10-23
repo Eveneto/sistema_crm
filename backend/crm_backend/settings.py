@@ -30,9 +30,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# ============================================
+# CARREGAR CONFIGURAÇÕES DE PRODUÇÃO
+# ============================================
+# Se ENVIRONMENT=production, importar overrides de produção
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+IS_PRODUCTION = ENVIRONMENT == 'production'
+
+if IS_PRODUCTION:
+    from .production_settings import *  # noqa
 
 
 # Application definition
@@ -420,7 +430,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Firebase Configuration
-FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR.parent, 'crm-system-ff0eb-firebase-adminsdk-fbsvc-bc12dede9b.json')
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR.parent, 'crm-system-ff0eb-firebase-adminsdk-fbsvc-327b45027f.json')
 
 # Swagger Configuration
 SWAGGER_SETTINGS = {

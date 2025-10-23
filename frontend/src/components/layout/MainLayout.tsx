@@ -13,63 +13,68 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check if mobile device
+  // Sistema de responsividade fluida - usa container queries
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth <= 768;
+    const checkResponsive = () => {
+      const width = window.innerWidth;
+      const mobile = width <= 768;
       setIsMobile(mobile);
-      
-      // Auto-collapse on mobile
-      if (mobile) {
+
+      // Auto-collapse em mobile
+      if (mobile && !sidebarCollapsed) {
         setSidebarCollapsed(true);
       }
     };
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, [sidebarCollapsed]);
 
-  // Calculate main content margin based on sidebar state
-  const getMainContentStyle = () => {
+  // Layout fluido baseado em container queries
+  const getLayoutStyle = () => {
     if (isMobile) {
       return {
-        marginLeft: 0,
-        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        minHeight: '100vh',
+        background: 'var(--crm-bg-primary)',
       };
     }
-    
+
     return {
-      marginLeft: sidebarCollapsed ? 80 : 280,
-      transition: 'margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+      display: 'grid',
+      gridTemplateColumns: sidebarCollapsed ? '80px 1fr' : '280px 1fr',
+      minHeight: '100vh',
+      background: 'var(--crm-bg-primary)',
+      transition: 'grid-template-columns var(--crm-transition-base)',
+    };
+  };
+
+  const getContentStyle = () => {
+    return {
+      background: 'var(--crm-bg-primary)',
+      padding: isMobile ? 'var(--crm-space-2)' : 'var(--crm-space-4)',
+      overflow: 'auto',
+      minHeight: '100vh',
     };
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
-      {/* Responsive Sidebar */}
+    <div style={getLayoutStyle()}>
+      {/* Sidebar Responsiva */}
       <ResponsiveSidebar
         collapsed={sidebarCollapsed}
         onCollapse={setSidebarCollapsed}
         isMobile={isMobile}
       />
 
-      {/* Main Content Area */}
-      <Layout style={getMainContentStyle()}>
-        <Content
-          style={{
-            padding: isMobile ? '8px' : '12px', // Reduzido de 16px/24px para 8px/12px
-            background: '#f5f7fa',
-            overflow: 'auto',
-            minHeight: '100vh',
-          }}
-          className="main-content-responsive"
-        >
-          <ContentContainer>
-            {children}
-          </ContentContainer>
-        </Content>
-      </Layout>
+      {/* Área de Conteúdo Principal */}
+      <div style={getContentStyle()}>
+        <ContentContainer>
+          {children}
+        </ContentContainer>
+      </div>
 
       {/* Mobile backdrop overlay */}
       {isMobile && !sidebarCollapsed && (
@@ -82,13 +87,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0, 0, 0, 0.45)',
+            background: 'var(--crm-bg-overlay)',
             zIndex: 1040,
-            transition: 'opacity 0.3s ease',
+            transition: 'opacity var(--crm-transition-base)',
           }}
         />
       )}
-    </Layout>
+    </div>
   );
 };
 

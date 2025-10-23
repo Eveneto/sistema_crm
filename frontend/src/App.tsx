@@ -27,17 +27,12 @@ import techDarkTheme from './theme/techDarkTheme';
 // Estilos principais
 import './App.css';
 
-// Novo Design System Tecnológico
-import './styles/tech-design-system.css';
-import './styles/tech-components.css';
-import './styles/tech-dashboard.css';
-import './styles/tech-dashboard-overrides.css';
-import './components/layout/TechSidebar.css';
+// NOVO DESIGN SYSTEM UNIFICADO - 2025
+import './styles/crm-design-system.css';
+import './styles/crm-components.css';
 
-// Novos estilos melhorados
-import './styles/toastStyles.css';
-import './styles/responsiveBreakpoints.css';
-import './styles/global-responsive.css';
+// Componentes específicos
+import './components/layout/crm-sidebar.css';
 
 // Importa os services para inicializar
 // import './services/tokenService';

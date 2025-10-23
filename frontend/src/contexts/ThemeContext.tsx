@@ -32,20 +32,12 @@ const THEME_STORAGE_KEY = 'crm_theme_mode';
 
 // Provider do tema
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Função para detectar preferência do sistema
+  // Função para detectar preferência do sistema - MODO ESCURO COMO PADRÃO
   const getSystemPreference = (): ThemeMode => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      try {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      } catch (error) {
-        // Fallback se matchMedia não funcionar (ex: testes)
-        return 'light';
-      }
-    }
-    return 'light';
+    return 'dark'; // Sempre retorna dark como padrão
   };
 
-  // Função para carregar tema do localStorage
+  // Função para carregar tema do localStorage - MODO ESCURO COMO PADRÃO
   const getStoredTheme = (): ThemeMode => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -53,7 +45,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         return stored;
       }
     }
-    return getSystemPreference();
+    return 'dark'; // Retorna dark como padrão se não houver preferência salva
   };
 
   // Estado do tema
