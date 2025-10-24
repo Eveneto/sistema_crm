@@ -222,10 +222,20 @@ if IS_PRODUCTION:
     # ============================================
     # MIDDLEWARE ADICIONAL - COMPRESSÃO
     # ============================================
+    # Sobrescrever MIDDLEWARE com compressão adicional para produção
     MIDDLEWARE = [
         'whitenoise.middleware.WhiteNoiseMiddleware',  # Static files comprimidos
         'django.middleware.gzip.GZipMiddleware',  # Compressão de resposta
-    ] + MIDDLEWARE  # type: ignore
+        'corsheaders.middleware.CorsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'apps.authentication.jwt_cookie_middleware.CookieJWTAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
     
     # ============================================
     # GUNICORN CONFIGURATION

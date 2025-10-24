@@ -6,6 +6,9 @@ WORKDIR /tmp
 # Instalar dependências do sistema para build
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
+    pkg-config \
+    libmariadb-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +27,7 @@ WORKDIR /app
 # Instalar dependências apenas de runtime
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    libmariadb3 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

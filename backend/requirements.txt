@@ -20,6 +20,10 @@ gunicorn==21.2.0
 whitenoise==6.5.0
 django-redis==5.4.0
 sendgrid-django==4.2.0
+daphne==4.1.2
 
 # Security
 django-cors-headers==4.3.1
+
+# System dependencies
+setuptools>=65.0.0
