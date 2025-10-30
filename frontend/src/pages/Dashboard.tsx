@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Card, Row, Col, Statistic, Progress, Space, Avatar, List, Tag, Spin } from 'antd';
+import { Typography, Card, Statistic, Space, Avatar, List, Tag, Spin } from 'antd';
 import { 
   UserOutlined, 
   TeamOutlined, 
@@ -23,7 +23,6 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
 
 // Registrar componentes do Chart.js
@@ -39,7 +38,7 @@ ChartJS.register(
   ArcElement
 );
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface DashboardStats {
   companies: number;
@@ -219,49 +218,43 @@ const Dashboard: React.FC = () => {
     },
   };
   return (
-    <MainLayout>
-      <div className="crm-dashboard">
-        <PageHeader
-          title="Dashboard"
-          subtitle="Visão geral do seu sistema de gestão"
-        />
-
-        {loading ? (
-          <div className="crm-dashboard-empty-center">
-            <Spin size="large" />
-            <div className="crm-dashboard-empty-margin">
-              <Text>Carregando métricas...</Text>
-            </div>
+    <MainLayout title="Dashboard" subtitle="Visão geral do seu sistema de gestão">
+      {loading ? (
+        <div className="crm-flex-center crm-padding-responsive">
+          <Spin size="large" />
+          <div className="crm-margin-responsive">
+            <Text>Carregando métricas...</Text>
           </div>
-          ) : (
-            <>
-              {/* Cards de Estatísticas Principais - Layout Horizontal Otimizado */}
-              <div className="crm-dashboard-stats">
-                <Card className="crm-stats-card">
+        </div>
+                    ) : (
+          <>
+            {/* Cards de Estatísticas Principais - Layout Otimizado com Tailwind */}
+            <div className="crm-dashboard-stats">
+                <Card className="crm-metric-card crm-fade-in crm-hover-lift">
                   <Statistic
                     title="Empresas Cadastradas"
                     value={stats.companies}
                     prefix={<BankOutlined />}
                   />
                 </Card>
-                
-                <Card className="crm-stats-card">
+
+                <Card className="crm-metric-card crm-fade-in crm-hover-lift">
                   <Statistic
                     title="Tasks Ativas"
                     value={stats.tasks}
                     prefix={<RiseOutlined />}
                   />
                 </Card>
-                
-                <Card className="crm-stats-card">
+
+                <Card className="crm-metric-card crm-fade-in crm-hover-lift">
                   <Statistic
                     title="Mensagens Enviadas"
                     value={stats.messages}
                     prefix={<MessageOutlined />}
                   />
                 </Card>
-                
-                <Card className="crm-stats-card">
+
+                <Card className="crm-metric-card crm-fade-in crm-hover-lift">
                   <Statistic
                     title="Faturamento"
                     value={stats.revenue}
@@ -272,51 +265,51 @@ const Dashboard: React.FC = () => {
                 </Card>
               </div>
 
-            {/* Gráficos */}
-            <Row gutter={[16, 16]} className="crm-dashboard-main">
-              <Col xs={24} lg={12}>
-                <Card 
-                  className="crm-chart-container"
-                  title="Crescimento Mensal" 
+            {/* Gráficos - Layout Responsivo com Tailwind */}
+            <div className="crm-grid-responsive crm-gap-responsive">
+              <div className="crm-col-span-1 crm-tablet:col-span-2">
+                <Card
+                  className="crm-metric-card crm-slide-up crm-hover-lift"
+                  title="Crescimento Mensal"
                   extra={<Tag color="blue">Últimos 6 meses</Tag>}
                 >
                   <div className="crm-dashboard-chart-height">
                     <Line data={lineChartData} options={chartOptions} />
                   </div>
                 </Card>
-              </Col>
-              
-              <Col xs={24} lg={12}>
-                <Card 
-                  className="crm-chart-container"
-                  title="Atividade por Módulo" 
+              </div>
+
+              <div className="crm-col-span-1">
+                <Card
+                  className="crm-metric-card crm-slide-up crm-hover-lift"
+                  title="Atividade por Módulo"
                   extra={<Tag color="green">Hoje</Tag>}
                 >
                   <div className="crm-dashboard-chart-height">
                     <Bar data={barChartData} options={chartOptions} />
                   </div>
                 </Card>
-              </Col>
-            </Row>
+              </div>
+            </div>
 
-            {/* Status do Pipeline e Atividades Recentes */}
-            <Row gutter={[24, 24]}>
-              <Col xs={24} lg={8}>
-                <Card 
-                  className="crm-chart-container"
-                  title="Status do Pipeline" 
+            {/* Status do Pipeline e Atividades Recentes - Layout Responsivo */}
+            <div className="crm-grid-responsive crm-gap-responsive">
+              <div className="crm-col-span-1">
+                <Card
+                  className="crm-metric-card crm-bounce-in crm-hover-lift"
+                  title="Status do Pipeline"
                   extra={<Tag color="purple">Kanban</Tag>}
                 >
                   <div className="crm-dashboard-chart-small">
                     <Doughnut data={doughnutData} options={chartOptions} />
                   </div>
                 </Card>
-              </Col>
-              
-              <Col xs={24} lg={16}>
-                <Card 
-                  className="crm-chart-container"
-                  title="Atividades Recentes" 
+              </div>
+
+              <div className="crm-col-span-1 crm-tablet:col-span-2">
+                <Card
+                  className="crm-metric-card crm-bounce-in crm-hover-lift"
+                  title="Atividades Recentes"
                   extra={<Tag color="orange">Tempo Real</Tag>}
                 >
                   <List
@@ -349,45 +342,38 @@ const Dashboard: React.FC = () => {
                     )}
                   />
                 </Card>
-              </Col>
-            </Row>
+              </div>
+            </div>
 
-            {/* Cards de Resumo Rápido */}
-            <Row gutter={[16, 16]} className="crm-dashboard-sidebar">
-              <Col xs={24} sm={8}>
-                <Card className="crm-stats-card crm-stats-card-info">
-                  <Statistic
-                    title="Usuários Ativos"
-                    value={stats.users}
-                    prefix={<UserOutlined />}
-                  />
-                </Card>
-              </Col>
-              
-              <Col xs={24} sm={8}>
-                <Card className="crm-stats-card crm-stats-card-success">
-                  <Statistic
-                    title="Comunidades"
-                    value={stats.communities}
-                    prefix={<TeamOutlined />}
-                  />
-                </Card>
-              </Col>
-              
-              <Col xs={24} sm={8}>
-                <Card className="crm-stats-card crm-stats-card-warning">
-                  <Statistic
-                    title="Taxa de Conversão"
-                    value={87}
-                    suffix="%"
-                    prefix={<TrophyOutlined />}
-                  />
-                </Card>
-              </Col>
-            </Row>
+            {/* Cards de Resumo Rápido - Grid Responsivo */}
+            <div className="crm-grid-responsive crm-gap-responsive">
+              <Card className="crm-stats-card crm-stats-card-info">
+                <Statistic
+                  title="Usuários Ativos"
+                  value={stats.users}
+                  prefix={<UserOutlined />}
+                />
+              </Card>
+
+              <Card className="crm-stats-card crm-stats-card-success">
+                <Statistic
+                  title="Comunidades"
+                  value={stats.communities}
+                  prefix={<TeamOutlined />}
+                />
+              </Card>
+
+              <Card className="crm-stats-card crm-stats-card-warning">
+                <Statistic
+                  title="Taxa de Conversão"
+                  value={87}
+                  suffix="%"
+                  prefix={<TrophyOutlined />}
+                />
+              </Card>
+            </div>
           </>
         )}
-      </div>
     </MainLayout>
   );
 };

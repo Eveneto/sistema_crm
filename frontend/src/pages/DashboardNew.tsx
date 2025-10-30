@@ -23,7 +23,6 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
 
 // Registrar componentes do Chart.js
@@ -244,13 +243,8 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <MainLayout>
+    <MainLayout title="Visão Geral" subtitle="Bem-vindo ao seu painel de controle">
       <div className="crm-dashboard">
-        {/* Header */}
-        <PageHeader
-          title="Visão Geral"
-          subtitle="Bem-vindo ao seu painel de controle"
-        />
 
         {/* Stats Cards */}
         <div className="crm-dashboard-stats">

@@ -5,7 +5,6 @@ import {
   TeamOutlined,
   LockOutlined,
   GlobalOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
   CrownOutlined,
   SafetyCertificateOutlined,

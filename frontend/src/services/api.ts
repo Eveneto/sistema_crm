@@ -48,8 +48,6 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
-    
     // IMPORTANTE: Com cookies HttpOnly, NÃO fazer refresh automático
     // O browser e backend gerenciam isso automaticamente
     

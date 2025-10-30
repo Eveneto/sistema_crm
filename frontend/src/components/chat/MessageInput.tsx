@@ -114,31 +114,35 @@ const MessageInput: React.FC<MessageInputProps> = ({
   );
 
   return (
-    <div className="message-input-container">
+    <div className="crm-message-input">
       {/* Reply preview */}
       {replyToMessage && (
-        <div className="reply-preview">
-          <div className="reply-content">
-            <span className="reply-to">Respondendo a {replyToMessage.sender.username}:</span>
-            <span className="reply-message">
+        <div className="crm-message-input-reply">
+          <div className="crm-message-input-reply-content">
+            <div className="crm-message-input-reply-to">
+              Respondendo a {replyToMessage.sender.username}:
+            </div>
+            <div className="crm-message-input-reply-message">
               {replyToMessage.content.length > 100 
                 ? replyToMessage.content.substring(0, 100) + '...' 
                 : replyToMessage.content}
-            </span>
+            </div>
           </div>
-          <Button 
-            type="text" 
-            size="small" 
+          <button 
+            type="button" 
             onClick={onCancelReply}
-            className="cancel-reply"
+            className="crm-message-input-reply-cancel"
+            title="Cancelar resposta"
           >
             ×
-          </Button>
+          </button>
         </div>
       )}
 
-      <div className="input-wrapper">
-        <div className="input-actions-left">
+      {/* Input area - Modern horizontal layout */}
+      <div className="crm-message-input-wrapper">
+        {/* Left actions - Anexos e Emojis */}
+        <div className="crm-message-input-actions">
           <Upload
             beforeUpload={handleFileUpload}
             showUploadList={false}
@@ -150,6 +154,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               size="small"
               disabled={disabled}
               title="Anexar arquivo"
+              className="crm-message-input-action-btn"
             />
           </Upload>
 
@@ -164,10 +169,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
               size="small"
               disabled={disabled}
               title="Adicionar emoji"
+              className="crm-message-input-action-btn"
             />
           </Popover>
         </div>
 
+        {/* Text input - Flexible width */}
         <TextArea
           ref={inputRef}
           value={message}
@@ -176,19 +183,18 @@ const MessageInput: React.FC<MessageInputProps> = ({
           placeholder={placeholder}
           disabled={disabled}
           autoSize={{ minRows: 1, maxRows: 4 }}
-          className="message-textarea"
+          className="crm-message-input-field"
         />
 
-        <div className="input-actions-right">
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
-            onClick={handleSend}
-            disabled={disabled || !message.trim()}
-            className="send-button"
-            title="Enviar mensagem (Enter)"
-          />
-        </div>
+        {/* Send button */}
+        <Button
+          type="primary"
+          icon={<SendOutlined />}
+          onClick={handleSend}
+          disabled={disabled || !message.trim()}
+          className="crm-message-input-send"
+          title="Enviar mensagem (Enter)"
+        />
       </div>
     </div>
   );

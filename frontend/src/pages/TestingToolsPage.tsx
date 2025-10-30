@@ -24,19 +24,6 @@ const TestingToolsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
-  const createTestUsers = async () => {
-    const testUsers = [
-      { email: 'admin.test@example.com', name: 'Admin Test', role: 'admin' },
-      { email: 'moderator.test@example.com', name: 'Moderator Test', role: 'moderator' },
-      { email: 'member1.test@example.com', name: 'Member 1', role: 'member' },
-      { email: 'member2.test@example.com', name: 'Member 2', role: 'member' },
-      { email: 'member3.test@example.com', name: 'Member 3', role: 'member' },
-    ];
-
-    console.log('🧪 Test Users created (simulate):', testUsers);
-    message.success('Usuários de teste simulados criados! Veja o console.');
-  };
-
   const generateTestEmails = () => {
     const timestamp = Date.now();
     const testEmails = [
@@ -223,13 +210,13 @@ exit()`}
           <Card title="4. URLs Úteis para Teste">
             <Space direction="vertical">
               <Text>
-                <strong>Django Admin:</strong> <a href="http://localhost:8000/admin" target="_blank">http://localhost:8000/admin</a>
+                <strong>Django Admin:</strong> <a href="http://localhost:8000/admin" target="_blank" rel="noreferrer">http://localhost:8000/admin</a>
               </Text>
               <Text>
-                <strong>API Communities:</strong> <a href="http://localhost:8000/api/communities/communities/" target="_blank">http://localhost:8000/api/communities/communities/</a>
+                <strong>API Communities:</strong> <a href="http://localhost:8000/api/communities/communities/" target="_blank" rel="noreferrer">http://localhost:8000/api/communities/communities/</a>
               </Text>
               <Text>
-                <strong>Frontend (Dev):</strong> <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>
+                <strong>Frontend (Dev):</strong> <a href="http://localhost:3000" target="_blank" rel="noreferrer">http://localhost:3000</a>
               </Text>
             </Space>
           </Card>

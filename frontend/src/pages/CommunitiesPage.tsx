@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Row,
@@ -27,7 +27,6 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import CommunityCard from '../components/communities/CommunityCard';
 import CommunityModal from '../components/communities/CommunityModal';
 import { Community, CommunityCreateData, CommunityUpdateData } from '../types/community';
@@ -64,7 +63,7 @@ const CommunitiesPage: React.FC = () => {
     privateCount: 0,
   });
 
-  const loadCommunities = async () => {
+  const loadCommunities = useCallback(async () => {
     setLoading(true);
     try {
       const params: any = {
@@ -100,16 +99,16 @@ const CommunitiesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     loadCommunities();
-  }, [filters]);
+  }, [filters, loadCommunities]);
 
   const handleCreateCommunity = async (data: CommunityCreateData) => {
     setModalLoading(true);
     try {
-      const newCommunity = await communitiesApi.createCommunity(data);
+      await communitiesApi.createCommunity(data);
       message.success('Comunidade criada com sucesso!');
       setModalVisible(false);
       await loadCommunities(); // Reload to get updated data
@@ -200,30 +199,26 @@ const CommunitiesPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
-      <PageHeader
-        title="Comunidades"
-        subtitle="Conecte-se com outros usuários em comunidades de interesse"
-        actions={[
-          <Button 
-            key="refresh"
-            icon={<ReloadOutlined />} 
+    <MainLayout title="Comunidades" subtitle="Conecte-se com outros usuários em comunidades de interesse">
+      <div className="crm-margin-bottom-responsive crm-flex-between">
+        <Space>
+          <Button
+            icon={<ReloadOutlined />}
             onClick={loadCommunities}
           >
             Atualizar
-          </Button>,
-          <Button 
-            key="create"
-            type="primary" 
+          </Button>
+          <Button
+            type="primary"
             icon={<PlusOutlined />}
             onClick={openCreateModal}
           >
             Criar Comunidade
           </Button>
-        ]}
-      />
-      
-      <div style={{ padding: '24px' }}>
+        </Space>
+      </div>
+
+      <div>
         {/* Stats Cards */}
         {window.innerWidth > 700 ? (
             <Row gutter={16} style={{ marginBottom: 24 }}>

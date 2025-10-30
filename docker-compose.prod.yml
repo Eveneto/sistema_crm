@@ -66,16 +66,9 @@ services:
       dockerfile: Dockerfile
     container_name: crm_backend_prod
     restart: always
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
-             gunicorn crm_backend.wsgi:application 
-             --bind 0.0.0.0:8000 
-             --workers 4 
-             --worker-class sync 
-             --timeout 30 
-             --max-requests 1000 
-             --max-requests-jitter 50"
+    env_file:
+      - ./backend/.env
+    command: ./start.sh
     environment:
       ENVIRONMENT: production
       DEBUG: "False"
@@ -99,7 +92,8 @@ services:
       - ./backend:/app
       - ./firebase-credentials.json:/app/firebase-credentials.json:ro
     ports:
-      - "8000:8000"
+      - "8000:8000"  # HTTP (WSGI)
+      - "8001:8001"  # WebSocket (ASGI)
     depends_on:
       postgres:
         condition: service_healthy
@@ -149,23 +143,35 @@ services:
         max-file: "3"
 
   # ============================================
-  # Nginx Reverse Proxy (Optional - para produção real)
+  # Nginx Reverse Proxy - PRODUÇÃO
   # ============================================
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: crm_nginx_prod
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
-  #     - /etc/letsencrypt:/etc/letsencrypt:ro
-  #   depends_on:
-  #     - backend
-  #     - frontend
-  #   networks:
-  #     - crm_network
+  nginx:
+    image: nginx:alpine
+    container_name: crm_nginx_prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/var/www/static:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - crm_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 # ============================================
 # Volumes

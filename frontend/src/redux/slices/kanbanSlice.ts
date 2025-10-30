@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { kanbanApi, Board, Column, Task, CreateBoardData, CreateColumnData, CreateTaskData, PaginatedResponse } from '../../services/kanbanApi';
+import { kanbanApi, Board, Column, Task, CreateBoardData, CreateColumnData, CreateTaskData } from '../../services/kanbanApi';
 
 interface KanbanState {
   boards: Board[];

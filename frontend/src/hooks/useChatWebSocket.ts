@@ -32,6 +32,56 @@ export const useChatWebSocket = (roomId: string | null, isAuthenticated: boolean
     isConnecting: isConnectingRef.current
   });
 
+  const handleWebSocketMessage = useCallback((data: WebSocketMessage) => {
+    if (!roomId) return;
+
+    switch (data.type) {
+      case 'new_message':
+        dispatch(addMessage({ roomId, message: data.message }));
+        break;
+
+      case 'message_edited':
+        dispatch(updateMessage({ roomId, message: data.message }));
+        break;
+
+      case 'message_deleted':
+        dispatch(removeMessage({ roomId, messageId: data.message_id }));
+        break;
+
+      case 'user_typing':
+        dispatch(setUserTyping({
+          roomId,
+          user_id: data.user_id,
+          username: data.username,
+          is_typing: data.is_typing,
+        }));
+        break;
+
+      case 'user_status':
+        dispatch(setUserOnlineStatus({
+          roomId,
+          user_id: data.user_id,
+          username: data.username,
+          status: data.status,
+          timestamp: data.timestamp,
+        }));
+        break;
+
+      case 'message_read':
+        // Pode implementar indicadores de leitura se necessário
+        console.log('📖 Mensagem lida:', data);
+        break;
+
+      case 'error':
+        console.error('❌ Erro do servidor:', data.error);
+        dispatch(setWsError(data.error));
+        break;
+
+      default:
+        console.log('📢 Mensagem WebSocket não tratada:', data);
+    }
+  }, [roomId, dispatch]);
+
   const connect = useCallback(() => {
     console.log('🔍 CONNECT ATTEMPT:', { roomId, isAuthenticated, isConnecting: isConnectingRef.current });
     
@@ -108,7 +158,7 @@ export const useChatWebSocket = (roomId: string | null, isAuthenticated: boolean
       dispatch(setWsError('Erro ao conectar WebSocket'));
       isConnectingRef.current = false;
     }
-  }, [roomId, isAuthenticated, dispatch]);
+  }, [roomId, isAuthenticated, dispatch, handleWebSocketMessage]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -124,56 +174,6 @@ export const useChatWebSocket = (roomId: string | null, isAuthenticated: boolean
     isConnectingRef.current = false;
     reconnectAttempts.current = 0;
   }, [dispatch]);
-
-  const handleWebSocketMessage = useCallback((data: WebSocketMessage) => {
-    if (!roomId) return;
-
-    switch (data.type) {
-      case 'new_message':
-        dispatch(addMessage({ roomId, message: data.message }));
-        break;
-
-      case 'message_edited':
-        dispatch(updateMessage({ roomId, message: data.message }));
-        break;
-
-      case 'message_deleted':
-        dispatch(removeMessage({ roomId, messageId: data.message_id }));
-        break;
-
-      case 'user_typing':
-        dispatch(setUserTyping({
-          roomId,
-          user_id: data.user_id,
-          username: data.username,
-          is_typing: data.is_typing,
-        }));
-        break;
-
-      case 'user_status':
-        dispatch(setUserOnlineStatus({
-          roomId,
-          user_id: data.user_id,
-          username: data.username,
-          status: data.status,
-          timestamp: data.timestamp,
-        }));
-        break;
-
-      case 'message_read':
-        // Pode implementar indicadores de leitura se necessário
-        console.log('📖 Mensagem lida:', data);
-        break;
-
-      case 'error':
-        console.error('❌ Erro do servidor:', data.error);
-        dispatch(setWsError(data.error));
-        break;
-
-      default:
-        console.log('📢 Mensagem WebSocket não tratada:', data);
-    }
-  }, [roomId, dispatch]);
 
   // Funções para enviar mensagens via WebSocket
   const sendMessage = useCallback((content: string, messageType: string = 'text', replyTo?: string) => {

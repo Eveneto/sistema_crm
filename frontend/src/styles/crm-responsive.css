@@ -293,30 +293,35 @@
     padding: var(--crm-space-3);
   }
 
-  /* Companies table mobile adjustments */
-  .crm-companies-table-container {
-    border-radius: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  /* Chat Mobile */
+  .crm-chat-container {
+    flex-direction: column;
+    height: calc(100vh - 56px);
   }
 
-  .crm-companies-table {
-    min-width: 800px; /* Garantir largura mínima para rolagem */
+  .crm-chat-sidebar {
+    width: 100%;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid var(--crm-border);
   }
 
-  .crm-companies-table .ant-table-thead > tr > th,
-  .crm-companies-table .ant-table-tbody > tr > td {
-    white-space: nowrap;
-    padding: var(--crm-space-2) var(--crm-space-3);
-    font-size: var(--crm-text-xs);
+  .crm-chat-sidebar-collapsed {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
   }
 
-  /* Esconder colunas menos importantes em mobile */
-  .crm-companies-table .ant-table-thead > tr > th:nth-child(5),
-  .crm-companies-table .ant-table-tbody > tr > td:nth-child(5),
-  .crm-companies-table .ant-table-thead > tr > th:nth-child(6),
-  .crm-companies-table .ant-table-tbody > tr > td:nth-child(6) {
-    display: none;
+  .crm-chat-main {
+    height: calc(100vh - 200px - 56px);
+  }
+
+  .crm-chat-messages {
+    padding: var(--crm-space-2);
+  }
+
+  .crm-chat-input-area {
+    padding: var(--crm-space-2);
   }
 }
 

@@ -1153,6 +1153,7 @@
 
 .crm-message-input-reply-content {
   flex: 1;
+  min-width: 0;
 }
 
 .crm-message-input-reply-to {
@@ -1165,6 +1166,7 @@
 .crm-message-input-reply-message {
   font-size: var(--crm-text-sm);
   color: var(--crm-text-secondary);
+  word-break: break-word;
 }
 
 .crm-message-input-reply-cancel {
@@ -1175,6 +1177,9 @@
   padding: var(--crm-space-1);
   border-radius: var(--crm-radius-sm);
   transition: var(--crm-transition-fast);
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .crm-message-input-reply-cancel:hover {
@@ -1185,13 +1190,29 @@
 .crm-message-input-wrapper {
   display: flex;
   align-items: flex-end;
-  gap: var(--crm-space-3);
+  gap: var(--crm-space-2);
+  min-height: 44px;
 }
 
 .crm-message-input-actions {
   display: flex;
   align-items: center;
-  gap: var(--crm-space-2);
+  gap: var(--crm-space-1);
+  flex-shrink: 0;
+}
+
+.crm-message-input-action-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: var(--crm-radius-lg) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: var(--crm-transition-fast) !important;
+}
+
+.crm-message-input-action-btn:hover {
+  background: var(--crm-bg-hover) !important;
 }
 
 .crm-message-input-field {
@@ -1207,6 +1228,7 @@
   max-height: 120px;
   outline: none;
   transition: var(--crm-transition-fast);
+  min-width: 0;
 }
 
 .crm-message-input-field:focus {
@@ -1231,6 +1253,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  width: 44px;
+  height: 44px;
 }
 
 .crm-message-input-send:hover:not(:disabled) {

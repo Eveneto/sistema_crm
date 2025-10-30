@@ -18,7 +18,6 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import TaskModal from '../components/kanban/TaskModal';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
@@ -179,28 +178,24 @@ const KanbanPage: React.FC = () => {
   const stats = getBoardStats();
 
   return (
-    <MainLayout>
-      <PageHeader
-        title="Pipeline Kanban"
-        subtitle="Gerencie seus projetos e tarefas visualmente"
-        actions={[
-          <Button 
-            key="refresh"
-            icon={<ReloadOutlined />} 
+    <MainLayout title="Pipeline Kanban" subtitle="Gerencie seus projetos e tarefas visualmente">
+      <div className="crm-margin-bottom-responsive crm-flex-between">
+        <Space>
+          <Button
+            icon={<ReloadOutlined />}
             onClick={() => currentBoard && dispatch(fetchBoardById(currentBoard.id))}
           >
             Atualizar
-          </Button>,
-          <Button 
-            key="new-board"
-            type="primary" 
+          </Button>
+          <Button
+            type="primary"
             icon={<PlusOutlined />}
             onClick={() => setBoardModalOpen(true)}
           >
             Novo Board
           </Button>
-        ]}
-      />
+        </Space>
+      </div>
 
       {/* Board Selector */}
       <Card style={{ marginBottom: 24 }}>

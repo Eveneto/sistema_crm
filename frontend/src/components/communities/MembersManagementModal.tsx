@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Table,
@@ -9,7 +9,6 @@ import {
   Space,
   message,
   Popconfirm,
-  Tag,
   Avatar,
   Typography,
   Divider,
@@ -20,7 +19,6 @@ import {
   CrownOutlined,
   UserOutlined,
   TeamOutlined,
-  SearchOutlined,
 } from '@ant-design/icons';
 import { Community, CommunityMember } from '../../types/community';
 import communitiesApi from '../../services/communitiesApi';
@@ -47,13 +45,7 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
   const [memberForm] = Form.useForm();
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    if (visible) {
-      loadMembers();
-    }
-  }, [visible, community.id]);
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await communitiesApi.getCommunityMembers(community.id);
@@ -72,7 +64,13 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [community.id]);
+
+  useEffect(() => {
+    if (visible) {
+      loadMembers();
+    }
+  }, [visible, community.id, loadMembers]);
 
   const handleAddMember = async (values: { email: string; role: string }) => {
     try {
@@ -126,23 +124,6 @@ const MembersManagementModal: React.FC<MembersManagementModalProps> = ({
       console.error('Error changing role:', error);
       const errorMsg = error.response?.data?.error || error.response?.data?.detail || 'Erro ao alterar função';
       message.error(errorMsg);
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'red';
-      case 'moderator': return 'orange';
-      case 'member': return 'blue';
-      default: return 'default';
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin': return <CrownOutlined />;
-      case 'moderator': return <UserOutlined />;
-      default: return <TeamOutlined />;
     }
   };
 

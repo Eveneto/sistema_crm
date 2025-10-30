@@ -30,10 +30,9 @@ import {
 } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import api from '../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 interface Company {
@@ -72,7 +71,6 @@ const CompaniesPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
 
   // Carregar empresas e estatísticas
@@ -119,7 +117,6 @@ const CompaniesPage: React.FC = () => {
   };
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
     if (value.trim()) {
       fetchCompanies(value);
     } else {
@@ -335,22 +332,18 @@ const CompaniesPage: React.FC = () => {
   ];
 
   return (
-    <MainLayout>
-      <PageHeader
-        title="Empresas"
-        subtitle="Gerencie sua carteira de clientes e prospects"
-        actions={[
-          <Button
-            key="new-company"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => showModal()}
-            data-testid="new-company-button"
-          >
-            Nova Empresa
-          </Button>
-        ]}
-      />
+    <MainLayout title="Empresas" subtitle="Gerencie sua carteira de clientes e prospects">
+      <div className="crm-margin-bottom-responsive">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => showModal()}
+          data-testid="new-company-button"
+          className="crm-button-primary"
+        >
+          Nova Empresa
+        </Button>
+      </div>
 
       {/* Estatísticas */}
       {stats && (

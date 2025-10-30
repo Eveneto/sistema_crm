@@ -32,11 +32,6 @@ const THEME_STORAGE_KEY = 'crm_theme_mode';
 
 // Provider do tema
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Função para detectar preferência do sistema - MODO ESCURO COMO PADRÃO
-  const getSystemPreference = (): ThemeMode => {
-    return 'dark'; // Sempre retorna dark como padrão
-  };
-
   // Função para carregar tema do localStorage - MODO ESCURO COMO PADRÃO
   const getStoredTheme = (): ThemeMode => {
     if (typeof window !== 'undefined') {

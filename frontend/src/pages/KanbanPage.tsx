@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Card,
   Button,
   Select,
   Space,
@@ -9,16 +8,12 @@ import {
   Form,
   Input,
   message,
-  Row,
-  Col,
-  Statistic,
 } from 'antd';
 import {
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
 import MainLayout from '../components/layout/MainLayout';
-import PageHeader from '../components/layout/PageHeader';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import TaskModal from '../components/kanban/TaskModal';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
@@ -165,59 +160,43 @@ const KanbanPage: React.FC = () => {
     }
   };
 
-  const getBoardStats = () => {
-    const allTasks = columns.flatMap(column => column.tasks || []);
-    const totalTasks = allTasks.length;
-    const completedTasks = allTasks.filter(task => task && task.status === 'completed').length;
-    const overdueTasks = allTasks.filter(task => 
-      task && task.due_date && new Date(task.due_date) < new Date()
-    ).length;
-
-    return { totalTasks, completedTasks, overdueTasks };
-  };
-
-  const stats = getBoardStats();
-
   return (
-    <MainLayout>
+    <MainLayout title="Pipeline Kanban" subtitle="Gerencie seus projetos e tarefas visualmente">
       <div className="crm-kanban">
-      <PageHeader
-        title="Pipeline Kanban"
-        subtitle="Gerencie seus projetos e tarefas visualmente"
-        actions={[
-          <Button 
-            key="refresh"
-            icon={<ReloadOutlined />} 
-            onClick={() => currentBoard && dispatch(fetchBoardById(currentBoard.id))}
-          >
-            Atualizar
-          </Button>,
-          <Button 
-            key="new-board"
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => setBoardModalOpen(true)}
-          >
-            Novo Board
-          </Button>
-        ]}
-      />
+        <div className="crm-margin-bottom-responsive crm-flex-between">
+          <Space>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => currentBoard && dispatch(fetchBoardById(currentBoard.id))}
+            >
+              Atualizar
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setBoardModalOpen(true)}
+            >
+              Novo Board
+            </Button>
+          </Space>
+        </div>
 
       {/* Board Selector */}
       <div className="crm-kanban-board">
         <div className="crm-kanban-controls">
-          <Row className="crm-kanban-controls-grid">
-            <div>
-              <div style={{ marginBottom: '8px' }}>
-                <Text strong>Selecionar Board:</Text>
+          <div className="crm-kanban-controls-grid">
+            <div className="crm-kanban-selector-section">
+              <div className="crm-margin-bottom-small">
+                <Text strong className="crm-text-primary">Selecionar Board:</Text>
               </div>
               <Select
-                className="crm-kanban-select-full"
+                className="crm-kanban-select"
                 placeholder="Escolha um board"
                 value={currentBoard?.id}
                 onChange={handleBoardChange}
                 allowClear
                 loading={loading}
+                style={{ minWidth: '250px' }}
               >
                 {(boards || []).map(board => (
                   <Option key={board.id} value={board.id}>
@@ -226,35 +205,20 @@ const KanbanPage: React.FC = () => {
                 ))}
               </Select>
             </div>
-            <div>
+            <div className="crm-kanban-actions-section">
               <Button
                 type="dashed"
                 icon={<PlusOutlined />}
                 onClick={() => setColumnModalOpen(true)}
                 disabled={!currentBoard}
-                className="crm-kanban-input-full"
+                className="crm-kanban-add-column-btn"
               >
                 Nova Coluna
               </Button>
             </div>
-          </Row>
-        </div>
-
-          {/* Stats */}
-          <div className="crm-kanban-stats">
-            <Statistic title="Total Tasks" value={stats.totalTasks} />
-            <Statistic
-              title="Concluídas"
-              value={stats.completedTasks}
-              className="crm-kanban-stat-success"
-            />
-            <Statistic
-              title="Atrasadas"
-              value={stats.overdueTasks}
-              className="crm-kanban-stat-error"
-            />
           </div>
         </div>
+      </div>
       </div>
 
       {/* Kanban Board */}

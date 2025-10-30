@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Row,
@@ -52,37 +52,7 @@ const CommunityDetailsPage: React.FC = () => {
   const currentUserId = localStorage.getItem('user_id');
   const userEmail = localStorage.getItem('user_email');
 
-  useEffect(() => {
-    if (id) {
-      loadCommunityDetails();
-    }
-  }, [id]);
-
-  const loadCommunityDetails = async () => {
-    if (!id) {
-      console.warn('⚠️ No community ID provided');
-      return;
-    }
-    
-    console.log('🏘️ Loading community details for ID:', id);
-    
-    try {
-      setLoading(true);
-      const communityData = await communitiesApi.getCommunity(id);
-      console.log('✅ Community loaded:', communityData);
-      setCommunity(communityData);
-      await loadMembers();
-    } catch (error: any) {
-      console.error('❌ Erro ao carregar comunidade:', error);
-      console.error('❌ Error details:', error.response?.data);
-      message.error('Erro ao carregar detalhes da comunidade');
-      navigate('/communities');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     if (!id) {
       console.warn('⚠️ No community ID for loading members');
       return;
@@ -107,7 +77,37 @@ const CommunityDetailsPage: React.FC = () => {
     } finally {
       setMembersLoading(false);
     }
-  };
+  }, [id]);
+
+  const loadCommunityDetails = useCallback(async () => {
+    if (!id) {
+      console.warn('⚠️ No community ID provided');
+      return;
+    }
+    
+    console.log('🏘️ Loading community details for ID:', id);
+    
+    try {
+      setLoading(true);
+      const communityData = await communitiesApi.getCommunity(id);
+      console.log('✅ Community loaded:', communityData);
+      setCommunity(communityData);
+      await loadMembers();
+    } catch (error: any) {
+      console.error('❌ Erro ao carregar comunidade:', error);
+      console.error('❌ Error details:', error.response?.data);
+      message.error('Erro ao carregar detalhes da comunidade');
+      navigate('/communities');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate, loadMembers]);
+
+  useEffect(() => {
+    if (id) {
+      loadCommunityDetails();
+    }
+  }, [id, loadCommunityDetails]);
 
   const handleLeaveCommunity = async () => {
     if (!community) {

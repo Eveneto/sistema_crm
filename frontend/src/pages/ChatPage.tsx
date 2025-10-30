@@ -81,17 +81,33 @@ const ChatPage: React.FC = () => {
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageType | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
+  // WebSocket hook
+  const { 
+    isConnected, 
+    sendMessage: wsSendMessage, 
+    sendTyping, 
+    markAsRead: wsMarkAsRead 
+  } = useChatWebSocket(roomId || null, isAuthenticated);
+  
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
-  // WebSocket hook
-  const {
-    isConnected,
-    sendMessage: wsSendMessage,
-    sendTyping,
-    markAsRead: wsMarkAsRead,
-  } = useChatWebSocket(roomId || null, isAuthenticated);
+  // Função auxiliar para formatar tempo das mensagens
+  const formatMessageTime = (timestamp: string) => {
+    try {
+      const messageDate = new Date(timestamp);
+      const now = new Date();
+      const diffInMinutes = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60));
+
+      if (diffInMinutes < 1) return 'agora';
+      if (diffInMinutes < 60) return `${diffInMinutes}m`;
+      if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
+      return `${Math.floor(diffInMinutes / 1440)}d`;
+    } catch {
+      return '';
+    }
+  };
 
   // Effects
   useEffect(() => {
@@ -225,172 +241,219 @@ const ChatPage: React.FC = () => {
   }
 
   return (
-    <Layout className="crm-chat">
-      {/* Sidebar with room list */}
-      <Sider
-        className="crm-chat-sidebar"
-        width={320}
-        breakpoint="md"
-        collapsedWidth={0}
-        collapsed={sidebarCollapsed}
-        onCollapse={setSidebarCollapsed}
-        trigger={null}
-      >
-        <div className="crm-chat-rooms-header">
-          <div className="header-title">
-            <MessageOutlined />
-            <Title level={4} className="crm-chat-rooms-title">
-              Chat
-            </Title>
+    <div className="crm-chat-container">
+      {/* Sidebar - Lista de Conversas */}
+      <div className={`crm-chat-sidebar ${sidebarCollapsed ? 'crm-chat-sidebar-collapsed' : ''}`}>
+        <div className="crm-chat-sidebar-header">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <MessageOutlined className="text-lg text-crm-primary" />
+              <h2 className="text-lg font-semibold text-crm-text-primary">Conversas</h2>
+            </div>
+            {connectionStatus}
           </div>
-          {connectionStatus}
+
+          {/* Search */}
+          <div className="px-4 pb-4">
+            <Input
+              placeholder="Buscar conversas..."
+              prefix={<SearchOutlined />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              allowClear
+              className="crm-chat-search-input"
+            />
+          </div>
         </div>
 
-        <div className="sidebar-search">
-          <Input
-            placeholder="Buscar conversas..."
-            prefix={<SearchOutlined />}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            allowClear
-          />
-        </div>
-
-        <div className="crm-chat-rooms">
+        {/* Lista de Conversas */}
+        <div className="crm-chat-conversations">
           {isLoading ? (
-            <div className="loading-container">
+            <div className="flex items-center justify-center p-8">
               <Spin />
             </div>
           ) : filteredRooms.length === 0 ? (
-            <Empty
-              description="Nenhuma conversa encontrada"
-              className="crm-chat-content-padding"
-            />
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Empty
+                description="Nenhuma conversa encontrada"
+                className="text-crm-text-secondary"
+              />
+            </div>
           ) : (
-            <List
-              dataSource={filteredRooms}
-              renderItem={(room) => (
-                <List.Item
-                  className={`crm-chat-room ${roomId === room.id ? 'active' : ''}`}
+            <div className="divide-y divide-crm-border">
+              {filteredRooms.map((room) => (
+                <div
+                  key={room.id}
+                  className={`crm-chat-conversation-item ${roomId === room.id ? 'crm-chat-conversation-active' : ''}`}
                   onClick={() => handleRoomSelect(room)}
                 >
-                  <List.Item.Meta
-                    avatar={
-                      <Badge count={room.unread_count} size="small">
-                        <Avatar>
-                          {room.name.charAt(0).toUpperCase()}
-                        </Avatar>
-                      </Badge>
-                    }
-                    title={
-                      <div className="crm-chat-room-info">
-                        <span className="crm-chat-room-name">{room.name}</span>
-                        <Tag color={room.room_type === 'community' ? 'blue' : 'green'}>
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="relative">
+                      <Avatar className="crm-chat-avatar">
+                        {room.name.charAt(0).toUpperCase()}
+                      </Avatar>
+                      {room.unread_count > 0 && (
+                        <Badge
+                          count={room.unread_count}
+                          size="small"
+                          className="crm-chat-unread-badge"
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-medium text-crm-text-primary truncate">
+                          {room.name}
+                        </h3>
+                        <span className="text-xs text-crm-text-secondary flex-shrink-0">
+                          {room.last_message ? formatMessageTime(room.last_message.created_at) : ''}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-crm-text-secondary truncate flex-1 mr-2">
+                          {room.last_message ? (
+                            <>
+                              <span className="font-medium">{room.last_message.sender}:</span>{' '}
+                              {room.last_message.content}
+                            </>
+                          ) : (
+                            'Nenhuma mensagem'
+                          )}
+                        </p>
+                        <Tag
+                          color={room.room_type === 'community' ? 'blue' : 'green'}
+                          className="text-xs flex-shrink-0 px-2 py-0.5"
+                        >
                           {room.room_type === 'community' ? 'Comunidade' : 'Chat'}
                         </Tag>
                       </div>
-                    }
-                    description={
-                      <div className="crm-chat-room-last-message">
-                        {room.last_message ? (
-                          <Text ellipsis>
-                            <strong>{room.last_message.sender}:</strong> {room.last_message.content}
-                          </Text>
-                        ) : (
-                          <Text type="secondary">Nenhuma mensagem</Text>
-                        )}
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      </Sider>
+      </div>
 
-      {/* Main chat content */}
-      <Layout className="crm-chat-main">
+      {/* Área Principal do Chat */}
+      <div className="crm-chat-main">
         {currentRoom ? (
           <>
-            {/* Chat header */}
+            {/* Header da Conversa - Modern Design */}
             <div className="crm-chat-header">
-              <div className="header-left">
-                {sidebarCollapsed && (
-                  <Button
-                    type="text"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={handleBackToRooms}
-                    className="back-button"
-                  />
-                )}
-                <Avatar className="crm-chat-room-avatar">
-                  {currentRoom.name.charAt(0).toUpperCase()}
-                </Avatar>
-                <div className="room-info">
-                  <Title level={5} className="crm-chat-title">
-                    {currentRoom.name}
-                  </Title>
-                  <Text type="secondary">
-                    {currentRoom.participant_count} {currentRoom.participant_count === 1 ? 'membro' : 'membros'}
-                  </Text>
+              <div className="flex items-center justify-between p-4 border-b border-crm-border bg-crm-bg-elevated">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Botão voltar (mobile) */}
+                  {sidebarCollapsed && (
+                    <Button
+                      type="text"
+                      icon={<ArrowLeftOutlined />}
+                      onClick={handleBackToRooms}
+                      className="md:hidden flex-shrink-0"
+                      size="large"
+                    />
+                  )}
+
+                  <Avatar 
+                    className="crm-chat-room-avatar flex-shrink-0"
+                    size={44}
+                  >
+                    {currentRoom.name.charAt(0).toUpperCase()}
+                  </Avatar>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-crm-text-primary truncate">
+                      {currentRoom.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-crm-text-secondary truncate">
+                        {currentRoom.participant_count} {currentRoom.participant_count === 1 ? 'membro' : 'membros'}
+                      </p>
+                      {currentRoom.room_type === 'community' && (
+                        <>
+                          <span className="text-crm-text-muted">•</span>
+                          <span className="text-xs text-crm-text-muted bg-crm-bg-secondary px-2 py-0.5 rounded-full">
+                            Comunidade
+                          </span>
+                        </>
+                      )}
+                      {currentRoom.is_read_only && (
+                        <>
+                          <span className="text-crm-text-muted">•</span>
+                          <span className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
+                            Somente leitura
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="header-actions">
-                <Space>
+
+                <div className="flex items-center gap-1 flex-shrink-0">
                   {connectionStatus}
                   <Button
                     type="text"
                     icon={<UsergroupAddOutlined />}
                     onClick={() => setShowMembersDrawer(true)}
                     title="Ver membros"
+                    size="large"
+                    className="hover:bg-crm-bg-hover"
                   />
                   <Button
                     type="text"
                     icon={<SettingOutlined />}
                     title="Configurações"
+                    size="large"
+                    className="hover:bg-crm-bg-hover"
                   />
-                </Space>
+                </div>
               </div>
             </div>
 
-            {/* Messages area */}
-            <Content className="messages-content">
+            {/* Área de Mensagens - Modern Layout */}
+            <div className="crm-chat-messages-area flex-1 flex flex-col min-h-0">
               {wsError && (
-                <Alert
-                  message="Erro de conexão"
-                  description={wsError}
-                  type="warning"
-                  closable
-                  className="crm-chat-message-margin"
-                />
+                <div className="p-4 border-b border-crm-border">
+                  <Alert
+                    message="Erro de conexão"
+                    description={wsError}
+                    type="warning"
+                    closable
+                    className="mb-0"
+                  />
+                </div>
               )}
-              
-              <div 
+
+              <div
                 ref={messagesContainerRef}
-                className="crm-chat-messages"
+                className="crm-chat-messages flex-1 overflow-y-auto p-4"
               >
-                {loadingMessages && (
-                  <div className="loading-messages">
-                    <Spin />
+                {loadingMessages ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Spin size="large" />
                   </div>
-                )}
-                
-                {currentMessages.length === 0 && !loadingMessages ? (
-                  <div className="empty-messages">
-                    <Empty
-                      description="Nenhuma mensagem ainda"
-                      className="crm-chat-empty-padding"
-                    />
+                ) : currentMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="mb-4">
+                      <MessageOutlined className="text-4xl text-crm-text-muted" />
+                    </div>
+                    <h3 className="text-lg font-medium text-crm-text-primary mb-2">
+                      Comece uma conversa
+                    </h3>
+                    <p className="text-crm-text-secondary max-w-sm">
+                      Envie a primeira mensagem para iniciar esta conversa.
+                    </p>
                   </div>
                 ) : (
-                  <div className="messages-list">
+                  <div className="crm-chat-messages-list space-y-1">
                     {currentMessages.map((message, index) => {
                       const isOwn = message.sender.id === user?.id;
-                      const showAvatar = !isOwn && 
+                      const showAvatar = !isOwn &&
                         (index === 0 || currentMessages[index - 1].sender.id !== message.sender.id);
-                      
+
                       return (
                         <ChatMessage
                           key={message.id}
@@ -409,43 +472,44 @@ const ChatPage: React.FC = () => {
 
               {/* Typing indicator */}
               {typingIndicator}
-            </Content>
 
-            {/* Message input */}
-            <div className="crm-chat-input-container">
-              <MessageInput
-                onSendMessage={handleSendMessage}
-                onTyping={handleTyping}
-                replyToMessage={replyToMessage}
-                onCancelReply={handleCancelReply}
-                disabled={!isConnected || currentRoom.is_read_only}
-                placeholder={
-                  !isConnected 
-                    ? "Reconectando..."
-                    : currentRoom.is_read_only 
-                    ? "Chat em modo somente leitura"
-                    : "Digite sua mensagem..."
-                }
-              />
+              {/* Message Input Area */}
+              <div className="crm-chat-input-area border-t border-crm-border bg-crm-bg-elevated p-4">
+                <MessageInput
+                  onSendMessage={handleSendMessage}
+                  onTyping={handleTyping}
+                  replyToMessage={replyToMessage}
+                  onCancelReply={handleCancelReply}
+                  disabled={!isConnected || currentRoom.is_read_only}
+                  placeholder={
+                    !isConnected
+                      ? "Reconectando..."
+                      : currentRoom.is_read_only
+                      ? "Chat em modo somente leitura"
+                      : "Digite sua mensagem..."
+                  }
+                />
+              </div>
             </div>
           </>
         ) : (
-          <Content className="no-room-selected">
+          <div className="flex flex-col items-center justify-center h-full text-center">
             <Empty
               description="Selecione uma conversa para começar"
-              className="crm-chat-no-rooms-padding"
+              className="text-crm-text-secondary"
             />
-          </Content>
+          </div>
         )}
-      </Layout>
+      </div>
 
-      {/* Members drawer */}
+      {/* Drawer de Membros (Mobile) */}
       <Drawer
         title="Membros do Chat"
         placement="right"
         onClose={() => setShowMembersDrawer(false)}
         open={showMembersDrawer}
         width={320}
+        className="md:hidden"
       >
         {currentRoom?.members && (
           <List
@@ -454,8 +518,8 @@ const ChatPage: React.FC = () => {
               <List.Item>
                 <List.Item.Meta
                   avatar={
-                    <Badge 
-                      dot 
+                    <Badge
+                      dot
                       status={member.is_online ? 'success' : 'default'}
                       offset={[-8, 8]}
                     >
@@ -484,7 +548,7 @@ const ChatPage: React.FC = () => {
           />
         )}
       </Drawer>
-    </Layout>
+    </div>
   );
 };
 

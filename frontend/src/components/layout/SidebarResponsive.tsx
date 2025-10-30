@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Button, Avatar, Typography, Divider, Tooltip } from 'antd';
+import React, { useEffect } from 'react';
+import { Button } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -9,7 +9,6 @@ import {
   TeamOutlined,
   MessageOutlined,
   SettingOutlined,
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -19,9 +18,6 @@ import { RootState } from '../../redux/store';
 import { logout } from '../../redux/slices/authSlice';
 import ThemeToggle from '../theme/ThemeToggle';
 import './crm-sidebar.css';
-
-const { Sider } = Layout;
-const { Text } = Typography;
 
 interface ResponsiveSidebarProps {
   collapsed: boolean;
@@ -39,7 +35,6 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   const dispatch = useDispatch();
   
   const { user } = useSelector((state: RootState) => state.auth);
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   // Menu items - apenas funcionalidades implementadas
   const menuItems = [
@@ -115,22 +110,7 @@ const settingsItems = [
   // Auto-expand parent menu of current page (simplificado)
   useEffect(() => {
     // Como removemos sub-menus, não precisamos mais desta lógica
-    setOpenKeys([]);
   }, [location.pathname, collapsed]);
-
-  // Create menu item (simplificado sem badges)
-  const createMenuItem = (item: any) => {
-    return {
-      key: item.key,
-      icon: collapsed && !isMobile ? (
-        <Tooltip title={item.label} placement="right">
-          {item.icon}
-        </Tooltip>
-      ) : item.icon,
-      label: item.label,
-      onClick: item.onClick,
-    };
-  };
 
   return (
     <div

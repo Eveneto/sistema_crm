@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Space, Typography, Divider } from 'antd';
+import { Space, Typography, Divider } from 'antd';
 import BreadcrumbNavigation from './BreadcrumbNavigation';
 
 const { Title, Text } = Typography;
@@ -11,7 +11,7 @@ interface BreadcrumbItem {
 }
 
 interface PageHeaderProps {
-  title?: string;
+  title?: string | React.ReactNode;
   subtitle?: string;
   breadcrumbs?: BreadcrumbItem[];
   actions?: React.ReactNode[];
@@ -47,7 +47,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       {/* Breadcrumb */}
       {showBreadcrumb && (
         <BreadcrumbNavigation
-          pageTitle={title}
+          pageTitle={typeof title === 'string' ? title : undefined}
           customBreadcrumbs={breadcrumbs}
           showPageTitle={false}
           style={{ marginBottom: 16, padding: 0, borderBottom: 'none' }}

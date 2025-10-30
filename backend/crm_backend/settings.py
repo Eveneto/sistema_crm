@@ -483,5 +483,5 @@ RATE_LIMIT_REQUESTS_PER_HOUR = 500   # 500 requests per hour
 RATE_LIMIT_BLOCK_DURATION = 300      # Block for 5 minutes
 
 # API Rate Limiting (more restrictive)
-API_RATE_LIMIT_REQUESTS_PER_MINUTE = 100  # Aumentado para desenvolvimento
-API_RATE_LIMIT_REQUESTS_PER_HOUR = 1000   # Aumentado para desenvolvimento
+API_RATE_LIMIT_REQUESTS_PER_MINUTE = 20  # 20 API requests per minute
+API_RATE_LIMIT_REQUESTS_PER_HOUR = 300   # 300 API requests per hour

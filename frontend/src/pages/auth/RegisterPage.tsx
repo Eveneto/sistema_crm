@@ -13,7 +13,7 @@ const { Title } = Typography;
 const RegisterPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, error } = useAuth();
+  const { isLoading, error } = useAuth();
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordError, setPasswordError] = useState('');
 
