@@ -17,8 +17,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
         """Conecta usuário ao WebSocket"""
-        # Extrair room_id da URL
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        # Extrair room_id da URL com proteção para testes
+        try:
+            self.room_id = self.scope.get('url_route', {}).get('kwargs', {}).get('room_id')
+            if not self.room_id:
+                # Tentar extrair da path
+                path_parts = self.scope.get('path', '').split('/')
+                if len(path_parts) >= 3:
+                    self.room_id = path_parts[-2]
+        except (KeyError, IndexError, TypeError):
+            self.room_id = None
+        
+        if not self.room_id:
+            await self.close(code=4004)  # Not found
+            return
+        
         self.room_group_name = f'chat_{self.room_id}'
         
         # Verificar autenticação
@@ -47,7 +60,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        
         await self.accept()
         
         # Atualizar status online do usuário
@@ -445,7 +457,17 @@ class TestChatConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
         """Conecta usuário ao WebSocket (sem autenticação para testes)"""
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        # Extrair room_id da URL com proteção para testes
+        try:
+            self.room_id = self.scope.get('url_route', {}).get('kwargs', {}).get('room_id')
+            if not self.room_id:
+                # Tentar extrair da path
+                path_parts = self.scope.get('path', '').split('/')
+                if len(path_parts) >= 3:
+                    self.room_id = path_parts[-2]
+        except (KeyError, IndexError, TypeError):
+            self.room_id = 'default'
+        
         self.room_group_name = f'test_chat_{self.room_id}'
         
         # Entrar no grupo do chat

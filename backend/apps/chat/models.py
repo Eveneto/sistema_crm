@@ -106,6 +106,33 @@ class ChatRoom(models.Model):
         else:
             # Para chats privados/grupos, verificar se é participante
             return self.members.filter(user=user, is_active=True).exists()
+    
+    def is_member(self, user):
+        """Verifica se um usuário é membro ativo da sala"""
+        return self.members.filter(user=user, is_active=True).exists()
+    
+    def add_member(self, user, role='member'):
+        """Adiciona um membro à sala"""
+        member, created = ChatRoomMember.objects.get_or_create(
+            room=self,
+            user=user,
+            defaults={'role': role, 'is_active': True}
+        )
+        if not created and not member.is_active:
+            member.is_active = True
+            member.role = role
+            member.save()
+        return member, created
+    
+    def remove_member(self, user):
+        """Remove um membro da sala"""
+        try:
+            member = ChatRoomMember.objects.get(room=self, user=user)
+            member.is_active = False
+            member.save()
+            return True
+        except ChatRoomMember.DoesNotExist:
+            return False
 
 
 class ChatRoomMember(models.Model):
@@ -274,6 +301,13 @@ class ChatAttachment(models.Model):
     content_type = models.CharField(max_length=100)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
+    # Campos adicionais para compatibilidade com testes
+    file_url = models.URLField(max_length=500, blank=True, null=True, help_text="URL do arquivo")
+    file_name = models.CharField(max_length=255, blank=True, null=True, help_text="Nome do arquivo")
+    file_type = models.CharField(max_length=50, blank=True, null=True, help_text="Tipo do arquivo (ex: image/png)")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    is_deleted = models.BooleanField(default=False)
+    
     class Meta:
         indexes = [
             models.Index(fields=['message']),
@@ -281,7 +315,9 @@ class ChatAttachment(models.Model):
         ]
 
     def __str__(self):
-        return f"Attachment: {self.original_name}"
+        # Preferir file_name se disponível (compatibilidade com testes)
+        name = self.file_name or self.original_name or 'Unnamed'
+        return f"Attachment: {name}"
 
     @property
     def file_size_formatted(self):

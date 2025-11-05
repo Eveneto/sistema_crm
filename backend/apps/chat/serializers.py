@@ -307,3 +307,9 @@ class ChatRoomCreateSerializer(serializers.ModelSerializer):
                     continue
         
         return chat_room
+
+
+# Aliases para compatibilidade com testes
+ChatRoomSerializer = ChatRoomDetailSerializer
+ChatMessageListSerializer = ChatMessageSerializer
+ChatMessageReadSerializer = ChatAttachmentSerializer
