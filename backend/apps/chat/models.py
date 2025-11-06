@@ -85,8 +85,7 @@ class ChatRoom(models.Model):
         """Remove um participante do chat"""
         try:
             member = ChatRoomMember.objects.get(room=self, user=user)
-            member.is_active = False
-            member.save()
+            member.delete()  # Delete real em vez de soft delete
             return True
         except ChatRoomMember.DoesNotExist:
             return False

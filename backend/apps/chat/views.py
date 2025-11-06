@@ -9,10 +9,11 @@ from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
 import logging
 
-from .models import ChatRoom, ChatRoomMember, ChatMessage, ChatMessageRead
+from .models import ChatRoom, ChatRoomMember, ChatMessage, ChatMessageRead, ChatAttachment
 from .serializers import (
     ChatRoomListSerializer, ChatRoomDetailSerializer, ChatRoomCreateSerializer,
-    ChatMessageSerializer, ChatMessageCreateSerializer, ChatRoomMemberSerializer
+    ChatMessageSerializer, ChatMessageCreateSerializer, ChatRoomMemberSerializer,
+    ChatAttachmentSerializer
 )
 from .permissions import ChatRoomPermissions, ChatMessagePermissions
 
@@ -34,6 +35,10 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retorna apenas chats que o usuário tem acesso"""
         user = self.request.user
+        
+        # Para retrieve/detail, não filtrar para permitir 403 em vez de 404
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
+            return ChatRoom.objects.filter(is_active=True)
         
         # Chats onde o usuário é membro direto
         direct_member_rooms = ChatRoom.objects.filter(
@@ -69,6 +74,50 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         instance = serializer.instance
         response_serializer = ChatRoomDetailSerializer(instance, context={'request': request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    
+    def retrieve(self, request, *args, **kwargs):
+        """Recupera sala específica com verificação de acesso"""
+        chat_room = self.get_object()
+        
+        # Verificar se usuário tem acesso
+        if not chat_room.can_user_access(request.user):
+            return Response(
+                {'error': 'Você não tem permissão para acessar este chat'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = self.get_serializer(chat_room)
+        return Response(serializer.data)
+    
+    def update(self, request, *args, **kwargs):
+        """Atualiza sala - apenas criador pode"""
+        chat_room = self.get_object()
+        
+        # Apenas o criador pode atualizar
+        if chat_room.created_by != request.user:
+            return Response(
+                {'error': 'Apenas o criador pode atualizar esta sala'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        return super().update(request, *args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        """Deleta sala (soft delete - marca como inativa)"""
+        chat_room = self.get_object()
+        
+        # Apenas o criador pode deletar
+        if chat_room.created_by != request.user:
+            return Response(
+                {'error': 'Apenas o criador pode deletar esta sala'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Soft delete
+        chat_room.is_active = False
+        chat_room.save()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
@@ -317,6 +366,107 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
                 {'error': 'Usuário não encontrado'},
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+    @action(detail=True, methods=['post'])
+    def remove_member(self, request, pk=None):
+        """Remove membro do chat"""
+        chat_room = self.get_object()
+        user_id = request.data.get('user_id')
+        
+        # Verificar permissões - admin pode remover, ou usuário remove a si mesmo
+        try:
+            requester_member = ChatRoomMember.objects.get(
+                room=chat_room, 
+                user=request.user
+            )
+        except ChatRoomMember.DoesNotExist:
+            return Response(
+                {'error': 'Você não é membro deste chat'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Se não é admin e não está removendo a si mesmo
+        if requester_member.role != 'admin' and str(user_id) != str(request.user.id):
+            return Response(
+                {'error': 'Apenas admins podem remover outros membros'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            user_to_remove = User.objects.get(id=user_id)
+            
+            if chat_room.remove_participant(user_to_remove):
+                return Response({
+                    'message': f'{user_to_remove.username} foi removido do chat'
+                })
+            else:
+                return Response(
+                    {'error': 'Usuário não é membro deste chat'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Usuário não encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=True, methods=['post'])
+    def change_member_role(self, request, pk=None):
+        """Altera o papel de um membro"""
+        chat_room = self.get_object()
+        user_id = request.data.get('user_id')
+        new_role = request.data.get('role')
+        
+        # Verificar permissões - apenas admin pode mudar roles
+        try:
+            requester_member = ChatRoomMember.objects.get(
+                room=chat_room, 
+                user=request.user
+            )
+            if requester_member.role != 'admin':
+                return Response(
+                    {'error': 'Apenas admins podem alterar papéis'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except ChatRoomMember.DoesNotExist:
+            return Response(
+                {'error': 'Você não é membro deste chat'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validar novo role
+        valid_roles = ['admin', 'moderator', 'member']
+        if new_role not in valid_roles:
+            return Response(
+                {'error': f'Role inválido. Use: {", ".join(valid_roles)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user_to_update = User.objects.get(id=user_id)
+            member = ChatRoomMember.objects.get(room=chat_room, user=user_to_update)
+            
+            member.role = new_role
+            member.save()
+            
+            serializer = ChatRoomMemberSerializer(member, context={'request': request})
+            
+            return Response({
+                'message': f'Papel de {user_to_update.username} alterado para {new_role}',
+                'member': serializer.data
+            })
+                
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Usuário não encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ChatRoomMember.DoesNotExist:
+            return Response(
+                {'error': 'Usuário não é membro deste chat'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class ChatMessageViewSet(viewsets.ModelViewSet):
@@ -328,6 +478,10 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retorna apenas mensagens de chats acessíveis pelo usuário"""
         user = self.request.user
+        
+        # Para retrieve/detail, não filtrar para permitir 403 em vez de 404
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'mark_as_read']:
+            return ChatMessage.objects.filter(is_deleted=False)
         
         # Mensagens de chats onde o usuário é membro
         return ChatMessage.objects.filter(
@@ -371,12 +525,19 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             )
         
         message.soft_delete()
-        return Response({'message': 'Mensagem deletada com sucesso'})
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def mark_as_read(self, request, pk=None):
         """Marca mensagem específica como lida"""
         message = self.get_object()
+        
+        # Verificar se usuário tem acesso à sala
+        if not message.room.can_user_access(request.user):
+            return Response(
+                {'error': 'Você não tem permissão para acessar esta mensagem'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         ChatMessageRead.objects.get_or_create(
             message=message,
@@ -384,3 +545,51 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         )
         
         return Response({'message': 'Mensagem marcada como lida'})
+
+
+class ChatAttachmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet para gerenciar anexos de chat"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChatAttachmentSerializer
+    
+    def get_queryset(self):
+        """Retorna apenas anexos de mensagens acessíveis pelo usuário"""
+        user = self.request.user
+        
+        # Para retrieve/detail, não filtrar para permitir 403 em vez de 404
+        if self.action in ['retrieve', 'download']:
+            return ChatAttachment.objects.filter(message__is_deleted=False)
+        
+        return ChatAttachment.objects.filter(
+            Q(message__room__members__user=user, message__room__members__is_active=True) |
+            Q(message__room__room_type='community', 
+              message__room__community__members__user=user,
+              message__room__community__members__is_active=True),
+            message__is_deleted=False
+        ).distinct().select_related('message__room', 'message__sender')
+    
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        """Faz download do anexo"""
+        attachment = self.get_object()
+        
+        # Verificar se usuário tem acesso ao chat
+        if not attachment.message.room.can_user_access(request.user):
+            return Response(
+                {'error': 'Você não tem permissão para acessar este anexo'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Retornar arquivo
+        try:
+            from django.http import FileResponse
+            response = FileResponse(attachment.file.open('rb'))
+            response['Content-Disposition'] = f'attachment; filename="{attachment.filename}"'
+            response['Content-Type'] = attachment.content_type
+            return response
+        except Exception as e:
+            logger.error(f"Erro ao fazer download de anexo: {e}")
+            return Response(
+                {'error': 'Erro ao fazer download do arquivo'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

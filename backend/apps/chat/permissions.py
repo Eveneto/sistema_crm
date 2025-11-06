@@ -84,16 +84,6 @@ class ChatMessagePermissions(BasePermission):
         return False
 
 
-class IsChatRoomOwner(BasePermission):
-    """
-    Permissão para verificar se o usuário é o criador/owner do chat room
-    """
-    
-    def has_object_permission(self, request, view, obj):
-        """Verifica se o usuário é o owner do chat room"""
-        return obj.created_by == request.user
-
-
 class CommunityMemberPermissions(BasePermission):
     """
     Permissões específicas para membros de comunidades
@@ -129,8 +119,9 @@ class CommunityMemberPermissions(BasePermission):
         return False
 
 
-# Aliases para compatibilidade com testes (manter IsChatRoomMember como alias de ChatRoomPermissions)
+# Aliases para compatibilidade com testes
 IsChatRoomMember = ChatRoomPermissions
+IsChatRoomOwner = ChatMessagePermissions
 IsChatRoomModerator = CommunityMemberPermissions
 CanDeleteMessage = ChatMessagePermissions
 CanEditMessage = ChatMessagePermissions
