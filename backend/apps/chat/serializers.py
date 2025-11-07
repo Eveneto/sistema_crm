@@ -113,19 +113,38 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
         import html
         import re
         
-        # Escapar HTML
-        sanitized = html.escape(value)
-        
-        # Remover tags script e outras perigosas
+        # PASSO 1: Remover tags e atributos perigosos ANTES de escapar
+        # Isso garante que até tags que já existem sejam removidas completamente
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',
-            r'<iframe[^>]*>.*?</iframe>',
-            r'javascript:',
-            r'on\w+\s*=',  # onclick, onload, etc
+            # Tags perigosas
+            r'<\s*script[^>]*>.*?</\s*script\s*>',
+            r'<\s*iframe[^>]*>.*?</\s*iframe\s*>',
+            r'<\s*object[^>]*>.*?</\s*object\s*>',
+            r'<\s*embed[^>]*>.*?</\s*embed\s*>',
+            r'<\s*link[^>]*>',
+            r'<\s*meta[^>]*>',
+            r'<\s*style[^>]*>.*?</\s*style\s*>',
+            # Atributos perigosos
+            r'\s+on\w+\s*=\s*["\']?[^"\'>\s]*["\']?',  # onclick, onerror, onload, etc
+            r'\s+javascript\s*:\s*',
+            r'\s+data\s*:\s*text/html',
+            # Outros padrões perigosos
+            r'<\s*img[^>]*\s+(?:onerror|onload)[^>]*>',
+            r'vbscript\s*:',
         ]
         
+        cleaned = value
         for pattern in dangerous_patterns:
-            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
+            cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE | re.DOTALL)
+        
+        # PASSO 2: Escapar HTML restante para converter < e > em entidades
+        sanitized = html.escape(cleaned)
+        
+        # PASSO 3: Remover qualquer <script> que possa ter sobrevivido em forma escapada
+        # (improvável, mas por segurança)
+        if '<script' in sanitized or 'onerror' in sanitized or 'onclick' in sanitized:
+            # Se ainda houver tags perigosas, fazer mais uma limpeza
+            sanitized = re.sub(r'&lt;\s*script[^&]*&gt;.*?&lt;\s*/\s*script\s*&gt;', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         
         return sanitized
     

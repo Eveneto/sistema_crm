@@ -9,11 +9,18 @@ class ChatRoomPermissions(BasePermission):
     
     def has_permission(self, request, view):
         """Verificar permissão geral"""
+        # Superuser tem acesso a tudo
+        if request.user and request.user.is_superuser:
+            return True
         return request.user and request.user.is_authenticated
     
     def has_object_permission(self, request, view, obj):
         """Verificar permissão específica do objeto"""
         user = request.user
+        
+        # Superuser tem permissão total
+        if user.is_superuser:
+            return True
         
         # Para leitura, verificar se tem acesso ao chat
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -59,11 +66,68 @@ class ChatMessagePermissions(BasePermission):
     
     def has_permission(self, request, view):
         """Verificar permissão geral"""
-        return request.user and request.user.is_authenticated
+        # Superuser tem acesso a tudo
+        if request.user and request.user.is_superuser:
+            return True
+        
+        # Usuário deve estar autenticado
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Se está em nested route (/rooms/{room_pk}/messages/)
+        room_pk = view.kwargs.get('room_pk') if hasattr(view, 'kwargs') else None
+        
+        # Se não encontrou em kwargs, tentar extrair da URL
+        if not room_pk and hasattr(request, 'path'):
+            import re
+            match = re.search(r'/rooms/([^/]+)/', request.path)
+            if match:
+                room_pk = match.group(1)
+        
+        if room_pk:
+            # Para CREATE (POST), verificar se é membro da sala
+            if request.method == 'POST':
+                try:
+                    room = ChatRoom.objects.get(pk=room_pk, is_active=True)
+                    
+                    # Verificar se tem acesso à sala
+                    if not room.can_user_access(request.user):
+                        return False
+                    
+                    # Para CREATE, verificar se é membro
+                    # Verificar membership direto
+                    is_member = ChatRoomMember.objects.filter(
+                        room=room,
+                        user=request.user,
+                        is_active=True
+                    ).exists()
+                    
+                    # Ou membro de comunidade se for community room
+                    if not is_member and room.room_type == 'community' and room.community:
+                        try:
+                            from apps.communities.models import CommunityMember
+                            is_member = CommunityMember.objects.filter(
+                                community=room.community,
+                                user=request.user,
+                                is_active=True
+                            ).exists()
+                        except (ImportError, AttributeError):
+                            pass
+                    
+                    return is_member
+                except ChatRoom.DoesNotExist:
+                    return False
+        
+        # Para flat route, apenas verificar autenticação
+        return True
     
     def has_object_permission(self, request, view, obj):
         """Verificar permissão específica da mensagem"""
         user = request.user
+        
+        # Superuser tem permissão total
+        if user.is_superuser:
+            return True
         
         # Verificar se o usuário tem acesso ao chat da mensagem
         if not obj.room.can_user_access(user):
@@ -119,9 +183,29 @@ class CommunityMemberPermissions(BasePermission):
         return False
 
 
+class IsChatRoomOwner(BasePermission):
+    """
+    Permissão customizada para verificar se usuário é dono da sala
+    """
+    def has_object_permission(self, request, view, obj):
+        # Superuser sempre tem acesso
+        if request.user.is_superuser:
+            return True
+        
+        # Se obj é um ChatRoom
+        if isinstance(obj, ChatRoom):
+            return obj.created_by == request.user
+        
+        # Se obj é um ChatMessage (verificar se criou a sala)
+        from .models import ChatMessage
+        if isinstance(obj, ChatMessage):
+            return obj.room.created_by == request.user
+        
+        return False
+
+
 # Aliases para compatibilidade com testes
 IsChatRoomMember = ChatRoomPermissions
-IsChatRoomOwner = ChatMessagePermissions
 IsChatRoomModerator = CommunityMemberPermissions
 CanDeleteMessage = ChatMessagePermissions
 CanEditMessage = ChatMessagePermissions

@@ -228,6 +228,37 @@ class ChatMessage(models.Model):
         preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
         return f"{self.sender.username}: {preview}"
 
+    def save(self, *args, **kwargs):
+        """Sanitiza conteúdo XSS antes de salvar"""
+        if self.content:
+            import html
+            import re
+            
+            # PASSO 1: Remover tags e atributos perigosos
+            dangerous_patterns = [
+                r'<\s*script[^>]*>.*?</\s*script\s*>',
+                r'<\s*iframe[^>]*>.*?</\s*iframe\s*>',
+                r'<\s*object[^>]*>.*?</\s*object\s*>',
+                r'<\s*embed[^>]*>.*?</\s*embed\s*>',
+                r'<\s*link[^>]*>',
+                r'<\s*meta[^>]*>',
+                r'<\s*style[^>]*>.*?</\s*style\s*>',
+                r'\s+on\w+\s*=\s*["\']?[^"\'>\s]*["\']?',
+                r'\s+javascript\s*:\s*',
+                r'\s+data\s*:\s*text/html',
+                r'<\s*img[^>]*\s+(?:onerror|onload)[^>]*>',
+                r'vbscript\s*:',
+            ]
+            
+            cleaned = self.content
+            for pattern in dangerous_patterns:
+                cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE | re.DOTALL)
+            
+            # PASSO 2: Escapar HTML
+            self.content = html.escape(cleaned)
+        
+        super().save(*args, **kwargs)
+
     def can_user_edit(self, user):
         """Verifica se o usuário pode editar esta mensagem"""
         if self.is_deleted:

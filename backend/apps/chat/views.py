@@ -479,6 +479,25 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         """Retorna apenas mensagens de chats acessíveis pelo usuário"""
         user = self.request.user
         
+        # Se está em nested route (/rooms/{room_pk}/messages/), filtrar por room
+        room_pk = self.kwargs.get('room_pk')
+        if room_pk:
+            queryset = ChatMessage.objects.filter(room_id=room_pk, is_deleted=False)
+            
+            # Para retrieve/detail, não filtrar mais
+            if self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'mark_as_read']:
+                return queryset
+            
+            # Para list/create, verificar se usuário tem acesso à sala
+            room = get_object_or_404(ChatRoom, pk=room_pk)
+            if not room.can_user_access(user):
+                return ChatMessage.objects.none()
+            
+            return queryset.select_related(
+                'room', 'sender', 'reply_to__sender'
+            ).prefetch_related('attachments')
+        
+        # Se está em flat route (/messages/), retornar mensagens acessíveis
         # Para retrieve/detail, não filtrar para permitir 403 em vez de 404
         if self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'mark_as_read']:
             return ChatMessage.objects.filter(is_deleted=False)
@@ -492,6 +511,18 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         ).distinct().select_related(
             'room', 'sender', 'reply_to__sender'
         ).prefetch_related('attachments')
+    
+    def perform_create(self, serializer):
+        """Cria mensagem e seta room/sender automaticamente"""
+        room_pk = self.kwargs.get('room_pk')
+        
+        if room_pk:
+            # Em nested route - usar room_pk
+            room = get_object_or_404(ChatRoom, pk=room_pk)
+            serializer.save(room=room, sender=self.request.user)
+        else:
+            # Em flat route - room deve vir no body
+            serializer.save(sender=self.request.user)
     
     def update(self, request, *args, **kwargs):
         """Edita mensagem (apenas conteúdo)"""
