@@ -62,7 +62,7 @@ class TokenService {
 
   private async performRefresh(refreshToken: string): Promise<TokenRefreshResponse> {
     try {
-      const response = await api.post('/api/auth/refresh/', {
+      const response = await api.post('/auth/refresh/', {
         refresh: refreshToken
       });
 

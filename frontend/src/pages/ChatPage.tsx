@@ -11,7 +11,6 @@ import {
   Alert, 
   Button,
   Input,
-  Drawer,
   Tag,
   Space,
   Tooltip,
@@ -24,20 +23,25 @@ import {
   SearchOutlined,
   ArrowLeftOutlined,
   WifiOutlined,
-  DisconnectOutlined
+  DisconnectOutlined,
+  BellOutlined
 } from '@ant-design/icons';
 import { RootState, AppDispatch } from '../redux/store';
 import {
   fetchChatRooms,
   fetchChatRoomDetail,
   fetchMessages,
+  sendMessage,
   clearCurrentRoom,
   ChatMessage as ChatMessageType,
   ChatRoom,
 } from '../redux/slices/chatSlice';
 import { useChatWebSocket } from '../hooks/useChatWebSocket';
+import { useNotifications } from '../hooks/useNotifications';
 import ChatMessage from '../components/chat/ChatMessage';
 import MessageInput from '../components/chat/MessageInput';
+import NotificationSettingsModal from '../components/chat/NotificationSettingsModal';
+import MembersModal from '../components/chat/MembersModal';
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -78,6 +82,7 @@ const ChatPage: React.FC = () => {
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageType | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
@@ -88,6 +93,14 @@ const ChatPage: React.FC = () => {
     sendTyping, 
     markAsRead: wsMarkAsRead 
   } = useChatWebSocket(roomId || null, isAuthenticated);
+  
+  // Notifications hook
+  const {
+    permission: notificationPermission,
+    requestPermission: requestNotificationPermission,
+    notifyNewMessage,
+    clearRoomNotifications,
+  } = useNotifications();
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -136,6 +149,45 @@ const ChatPage: React.FC = () => {
     }
   }, [messages, roomId]);
 
+  // Solicitar permissão de notificação ao entrar no chat
+  useEffect(() => {
+    if (isAuthenticated && notificationPermission === 'default') {
+      const timer = setTimeout(() => {
+        requestNotificationPermission();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, notificationPermission, requestNotificationPermission]);
+  
+  // Limpar notificações da sala quando entrar nela
+  useEffect(() => {
+    if (roomId) {
+      clearRoomNotifications(roomId);
+    }
+  }, [roomId, clearRoomNotifications]);
+  
+  // Notificar sobre novas mensagens
+  useEffect(() => {
+    if (!roomId || !currentRoom || !user) return;
+    
+    const roomMessages = messages[roomId] || [];
+    if (roomMessages.length === 0) return;
+    
+    const lastMessage = roomMessages[roomMessages.length - 1];
+    
+    // Notificar apenas se a mensagem for de outro usuário
+    if (lastMessage.sender.id !== user.id) {
+      notifyNewMessage(
+        lastMessage.sender.full_name || lastMessage.sender.username,
+        lastMessage.content,
+        lastMessage.sender.id,
+        currentRoom.id.toString(),
+        currentRoom.name
+      );
+    }
+  }, [messages, roomId, currentRoom, user, notifyNewMessage]);
+
   // Filter rooms based on search
   const filteredRooms = Array.isArray(rooms) ? rooms.filter(room =>
     room.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -143,6 +195,14 @@ const ChatPage: React.FC = () => {
 
   // Get current room messages
   const currentMessages = roomId ? messages[roomId] || [] : [];
+  
+  // DEBUG: Log mensagens da sala atual
+  console.log('📨 [ChatPage] Current Messages:', {
+    roomId,
+    messagesInState: messages[roomId || ''],
+    messagesCount: currentMessages.length,
+    lastMessage: currentMessages[currentMessages.length - 1]
+  });
 
   // Get typing users for current room
   const currentTypingUsers = roomId ? typingUsers[roomId] || [] : [];
@@ -155,12 +215,47 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = (content: string, messageType = 'text', replyTo?: string) => {
-    if (!roomId || !content.trim()) return;
+  const handleSendMessage = (content: string, messageType = 'text', replyTo?: string, files?: File[]) => {
+    console.log('📨 [ChatPage] handleSendMessage chamado:', {
+      content,
+      messageType,
+      replyTo,
+      filesCount: files?.length || 0,
+      files,
+      roomId
+    });
+
+    if (!roomId) {
+      console.error('❌ [ChatPage] Sem roomId!');
+      return;
+    }
     
+    // Se tem arquivos, usar HTTP API (não WebSocket)
+    if (files && files.length > 0) {
+      console.log('📁 [ChatPage] Enviando via HTTP API (com arquivos)');
+      dispatch(sendMessage({
+        roomId,
+        content: content || 'Arquivo anexado',
+        messageType,
+        replyTo,
+        files
+      }));
+      setReplyToMessage(null);
+      return;
+    }
+    
+    // Se não tem arquivos, validar conteúdo
+    if (!content.trim()) {
+      console.warn('⚠️ [ChatPage] Mensagem vazia, não enviando');
+      return;
+    }
+    
+    console.log('💬 [ChatPage] Enviando via WebSocket (sem arquivos)');
     // Send via WebSocket for real-time delivery
     if (isConnected) {
       wsSendMessage(content, messageType, replyTo);
+    } else {
+      console.error('❌ [ChatPage] WebSocket não conectado!');
     }
     
     // Clear reply
@@ -396,6 +491,14 @@ const ChatPage: React.FC = () => {
                   {connectionStatus}
                   <Button
                     type="text"
+                    icon={<BellOutlined />}
+                    onClick={() => setShowNotificationSettings(true)}
+                    title="Configurações de notificações"
+                    size="large"
+                    className="hover:bg-crm-bg-hover"
+                  />
+                  <Button
+                    type="text"
                     icon={<UsergroupAddOutlined />}
                     onClick={() => setShowMembersDrawer(true)}
                     title="Ver membros"
@@ -502,52 +605,20 @@ const ChatPage: React.FC = () => {
         )}
       </div>
 
-      {/* Drawer de Membros (Mobile) */}
-      <Drawer
-        title="Membros do Chat"
-        placement="right"
-        onClose={() => setShowMembersDrawer(false)}
-        open={showMembersDrawer}
-        width={320}
-        className="md:hidden"
-      >
-        {currentRoom?.members && (
-          <List
-            dataSource={currentRoom.members}
-            renderItem={(member) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={
-                    <Badge
-                      dot
-                      status={member.is_online ? 'success' : 'default'}
-                      offset={[-8, 8]}
-                    >
-                      <Avatar>
-                        {member.user.username.charAt(0).toUpperCase()}
-                      </Avatar>
-                    </Badge>
-                  }
-                  title={member.user.full_name || member.user.username}
-                  description={
-                    <Space>
-                      <Tag color={
-                        member.role === 'admin' ? 'red' :
-                        member.role === 'moderator' ? 'orange' : 'blue'
-                      }>
-                        {member.role}
-                      </Tag>
-                      {member.is_online && (
-                        <Text type="success">Online</Text>
-                      )}
-                    </Space>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        )}
-      </Drawer>
+      {/* Modal de Membros */}
+      {roomId && (
+        <MembersModal
+          visible={showMembersDrawer}
+          onClose={() => setShowMembersDrawer(false)}
+          roomId={roomId}
+        />
+      )}
+      
+      {/* Modal de Configurações de Notificações */}
+      <NotificationSettingsModal
+        open={showNotificationSettings}
+        onClose={() => setShowNotificationSettings(false)}
+      />
     </div>
   );
 };

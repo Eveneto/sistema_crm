@@ -1,6 +1,12 @@
 import React, { useMemo } from 'react';
 import { Avatar, Button, Dropdown, Tag, Tooltip } from 'antd';
-import { EllipsisOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { 
+  EllipsisOutlined, 
+  EditOutlined, 
+  DeleteOutlined, 
+  FileOutlined,
+  PaperClipOutlined 
+} from '@ant-design/icons';
 import { ChatMessage as ChatMessageType } from '../../redux/slices/chatSlice';
 
 interface ChatMessageProps {
@@ -22,6 +28,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onDelete,
   onMarkAsRead,
 }) => {
+  // DEBUG: Log mensagem
+  console.log('💬 [ChatMessage] Renderizando:', {
+    id: message.id,
+    type: message.message_type,
+    content: message.content,
+    hasAttachments: !!message.attachments?.length,
+    attachmentsCount: message.attachments?.length || 0,
+    file_url: message.file_url,
+    file_name: message.file_name
+  });
+
   const formattedTime = useMemo(() => {
     try {
       const messageDate = new Date(message.created_at);
@@ -163,40 +180,128 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
           {message.message_type === 'image' && (
             <div>
-              {message.file_url && (
-                <img
-                  src={message.file_url}
-                  alt={message.file_name || 'Imagem'}
-                  className="rounded-lg max-w-full h-auto mb-2"
-                />
-              )}
-              {message.content && (
-                <div className="text-sm">{message.content}</div>
+              {/* Renderizar attachments de imagem se existirem */}
+              {message.attachments && message.attachments.length > 0 ? (
+                <div className="space-y-2">
+                  {message.attachments.map((attachment) => (
+                    <div key={attachment.id}>
+                      {/* Nome do arquivo de imagem */}
+                      <div className={`flex items-center gap-2 mb-2 ${
+                        isOwn ? 'text-white/90' : 'text-crm-text-secondary'
+                      }`}>
+                        <PaperClipOutlined className="text-xs" />
+                        <span className="text-xs font-medium">{attachment.file_name}</span>
+                      </div>
+                      {/* Preview da imagem */}
+                      <img
+                        src={attachment.file}
+                        alt={attachment.file_name}
+                        className="rounded-lg max-w-full h-auto mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(attachment.file, '_blank')}
+                        title="Clique para abrir em tamanho completo"
+                      />
+                    </div>
+                  ))}
+                  {message.content && message.content !== 'Arquivo anexado' && (
+                    <div className="text-sm mt-2">{message.content}</div>
+                  )}
+                </div>
+              ) : (
+                /* Fallback para formato antigo (sem attachments array) */
+                <div>
+                  {message.file_url && (
+                    <img
+                      src={message.file_url}
+                      alt={message.file_name || 'Imagem'}
+                      className="rounded-lg max-w-full h-auto mb-2"
+                    />
+                  )}
+                  {message.content && (
+                    <div className="text-sm">{message.content}</div>
+                  )}
+                </div>
               )}
             </div>
           )}
 
           {message.message_type === 'file' && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium">{message.file_name}</span>
-                {message.file_size && (
-                  <span className="text-xs opacity-70">
-                    ({Math.round(message.file_size / 1024)} KB)
-                  </span>
-                )}
-              </div>
-              {message.file_url && (
-                <Button
-                  type="link"
-                  size="small"
-                  href={message.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-0 h-auto text-xs"
-                >
-                  Download
-                </Button>
+              {/* Renderizar attachments se existirem */}
+              {message.attachments && message.attachments.length > 0 ? (
+                <div className="space-y-2">
+                  {message.attachments.map((attachment) => (
+                    <div key={attachment.id} className={`p-3 rounded-lg border ${
+                      isOwn 
+                        ? 'bg-white/10 border-white/20' 
+                        : 'bg-gray-100 border-gray-200'
+                    }`}>
+                      <div className="flex items-start gap-3">
+                        {/* Ícone do arquivo */}
+                        <div className={`flex-shrink-0 ${
+                          isOwn ? 'text-white/80' : 'text-crm-primary'
+                        }`}>
+                          <PaperClipOutlined className="text-xl" />
+                        </div>
+                        
+                        {/* Informações do arquivo */}
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm font-semibold truncate ${
+                            isOwn ? 'text-white' : 'text-crm-text-primary'
+                          }`}>
+                            {attachment.file_name}
+                          </div>
+                          {attachment.file_size && (
+                            <div className={`text-xs mt-1 ${
+                              isOwn ? 'text-white/70' : 'text-crm-text-secondary'
+                            }`}>
+                              {Math.round(attachment.file_size / 1024)} KB
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Botão de download */}
+                        <Button
+                          type="primary"
+                          size="small"
+                          href={attachment.file}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={isOwn ? 'bg-white/20 hover:bg-white/30 border-white/30' : ''}
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {message.content && message.content !== 'Arquivo anexado' && (
+                    <div className="text-sm mt-2">{message.content}</div>
+                  )}
+                </div>
+              ) : (
+                /* Fallback para formato antigo (sem attachments array) */
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <PaperClipOutlined />
+                    <span className="text-sm font-medium">{message.file_name}</span>
+                    {message.file_size && (
+                      <span className="text-xs opacity-70">
+                        ({Math.round(message.file_size / 1024)} KB)
+                      </span>
+                    )}
+                  </div>
+                  {message.file_url && (
+                    <Button
+                      type="link"
+                      size="small"
+                      href={message.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-0 h-auto text-xs"
+                    >
+                      Download
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           )}

@@ -38,7 +38,7 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ username_or_email, password, rememberMe }: LoginPayload) => {
     console.log('🚀 Fazendo login com API base URL:', api.defaults.baseURL);
-    const response = await api.post('/api/auth/login/', {
+    const response = await api.post('/auth/login/', {
       username_or_email,
       password,
     });
@@ -56,7 +56,7 @@ export const registerUser = createAsyncThunk(
     first_name?: string;
     last_name?: string;
   }) => {
-    const response = await api.post('/api/auth/register/', userData);
+    const response = await api.post('/auth/register/', userData);
     return response.data;
   }
 );
@@ -64,7 +64,7 @@ export const registerUser = createAsyncThunk(
 export const googleLogin = createAsyncThunk(
   'auth/googleLogin',
   async ({ token }: { token: string }) => {
-    const response = await api.post('/api/auth/google-login/', { token });
+    const response = await api.post('/auth/google-login/', { token });
     return response.data;
   }
 );
@@ -77,7 +77,7 @@ export const verifyToken = createAsyncThunk(
       console.log('🔍 Verificando autenticação via cookies...');
       
       // Tentar fazer uma requisição protegida para verificar se está autenticado
-      const response = await api.get('/api/auth/profile/');
+      const response = await api.get('/auth/profile/');
       console.log('✅ Usuário autenticado via cookies:', response.data.email);
       
       return response.data;
@@ -96,7 +96,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       // Fazer logout no backend para limpar cookies
-      api.post('/api/auth/logout/').catch(() => {
+      api.post('/auth/logout/').catch(() => {
         console.log('Logout backend falhou, mas continuando...');
       });
       

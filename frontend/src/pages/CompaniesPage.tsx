@@ -108,7 +108,7 @@ const CompaniesPage: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/api/companies/companies/stats/');
+      const response = await api.get('/companies/companies/stats/');
       setStats(response.data);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -162,7 +162,7 @@ const CompaniesPage: React.FC = () => {
         console.log('➕ Criando nova empresa');
         console.log('📦 Dados enviados:', values);
         
-        const response = await api.post('/api/companies/companies/', values);
+        const response = await api.post('/companies/companies/', values);
         console.log('✅ Resposta do CREATE:', response.data);
         
         setCompanies([response.data, ...companies]);

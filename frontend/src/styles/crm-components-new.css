@@ -1268,6 +1268,77 @@
   transform: none;
 }
 
+/* ===== FILE PREVIEW ===== */
+.crm-message-input-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--crm-space-2);
+  padding: var(--crm-space-3);
+  background: var(--crm-bg-secondary);
+  border-bottom: 1px solid var(--crm-border);
+}
+
+.file-preview-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--crm-space-2);
+  padding: var(--crm-space-2);
+  background: var(--crm-bg-elevated);
+  border: 1px solid var(--crm-border);
+  border-radius: var(--crm-radius-md);
+  max-width: 250px;
+}
+
+.file-preview-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--crm-radius-sm);
+  flex-shrink: 0;
+}
+
+.file-preview-icon {
+  font-size: 24px;
+  color: var(--crm-text-secondary);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.file-preview-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-preview-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--crm-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-preview-size {
+  font-size: 11px;
+  color: var(--crm-text-secondary);
+}
+
+.file-preview-remove {
+  flex-shrink: 0;
+  color: var(--crm-text-secondary);
+}
+
+.file-preview-remove:hover {
+  color: var(--crm-danger);
+}
+
 /* ===== ERROR STATES ===== */
 .crm-error-boundary {
   display: flex;

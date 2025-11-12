@@ -80,9 +80,9 @@ const Dashboard: React.FC = () => {
       
       // Buscar dados das APIs existentes
       const [companiesRes, tasksRes, communitiesRes] = await Promise.all([
-        api.get('/api/companies/companies/'),
-        api.get('/api/kanban/tasks/'),
-        api.get('/api/communities/communities/')
+        api.get('/companies/companies/'),
+        api.get('/kanban/tasks/'),
+        api.get('/communities/communities/')
       ]);
 
       // Calcular estatísticas

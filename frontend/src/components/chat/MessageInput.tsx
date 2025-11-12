@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, Button, Upload, Popover } from 'antd';
-import { SendOutlined, PaperClipOutlined, SmileOutlined } from '@ant-design/icons';
+import { Input, Button, Upload, Popover, message as antdMessage } from 'antd';
+import { SendOutlined, PaperClipOutlined, SmileOutlined, FileOutlined, CloseOutlined } from '@ant-design/icons';
 import { ChatMessage } from '../../redux/slices/chatSlice';
 
 const { TextArea } = Input;
 
 interface MessageInputProps {
-  onSendMessage: (content: string, messageType?: string, replyTo?: string) => void;
+  onSendMessage: (content: string, messageType?: string, replyTo?: string, files?: File[]) => void;
   onTyping: (isTyping: boolean) => void;
   replyToMessage?: ChatMessage | null;
   onCancelReply?: () => void;
@@ -24,6 +24,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const inputRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -58,10 +59,26 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSend = () => {
     const content = message.trim();
-    if (!content || disabled) return;
+    if (!content && attachedFiles.length === 0) return;
+    if (disabled) return;
 
-    onSendMessage(content, 'text', replyToMessage?.id);
+    console.log('📤 [MessageInput] Enviando mensagem:', {
+      content: content || 'Arquivo anexado',
+      messageType: attachedFiles.length > 0 ? 'file' : 'text',
+      replyTo: replyToMessage?.id,
+      filesCount: attachedFiles.length,
+      files: attachedFiles
+    });
+
+    onSendMessage(
+      content || 'Arquivo anexado',
+      attachedFiles.length > 0 ? 'file' : 'text',
+      replyToMessage?.id,
+      attachedFiles.length > 0 ? attachedFiles : undefined
+    );
+    
     setMessage('');
+    setAttachedFiles([]);
     setIsTyping(false);
     onTyping(false);
     
@@ -83,9 +100,36 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const handleFileUpload = (file: File) => {
-    // Implementar upload de arquivo
-    console.log('Upload file:', file);
-    return false; // Prevenir upload automático
+    // Validar tamanho (10MB máximo)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      antdMessage.error('Arquivo muito grande! Tamanho máximo: 10MB');
+      return false;
+    }
+
+    // Validar tipo de arquivo
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain'
+    ];
+
+    if (!allowedTypes.includes(file.type) && !file.type.startsWith('image/')) {
+      antdMessage.error('Tipo de arquivo não suportado');
+      return false;
+    }
+
+    // Adicionar arquivo à lista
+    setAttachedFiles(prev => [...prev, file]);
+    return false; // Prevenir upload automático do Ant Design
+  };
+
+  const handleRemoveFile = (fileToRemove: File) => {
+    setAttachedFiles(prev => prev.filter(f => f !== fileToRemove));
   };
 
   const handleEmojiSelect = (emoji: string) => {
@@ -128,14 +172,44 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 : replyToMessage.content}
             </div>
           </div>
-          <button 
-            type="button" 
+          <Button
+            type="text"
+            size="small"
+            icon={<CloseOutlined />}
             onClick={onCancelReply}
-            className="crm-message-input-reply-cancel"
-            title="Cancelar resposta"
-          >
-            ×
-          </button>
+          />
+        </div>
+      )}
+
+      {/* File preview */}
+      {attachedFiles.length > 0 && (
+        <div className="crm-message-input-files">
+          {attachedFiles.map((file, index) => (
+            <div key={index} className="file-preview-chip">
+              {file.type.startsWith('image/') ? (
+                <img 
+                  src={URL.createObjectURL(file)} 
+                  alt={file.name}
+                  className="file-preview-thumbnail"
+                />
+              ) : (
+                <FileOutlined className="file-preview-icon" />
+              )}
+              <div className="file-preview-info">
+                <span className="file-preview-name">{file.name}</span>
+                <span className="file-preview-size">
+                  {(file.size / 1024).toFixed(1)} KB
+                </span>
+              </div>
+              <Button
+                type="text"
+                size="small"
+                icon={<CloseOutlined />}
+                onClick={() => handleRemoveFile(file)}
+                className="file-preview-remove"
+              />
+            </div>
+          ))}
         </div>
       )}
 
@@ -191,7 +265,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           type="primary"
           icon={<SendOutlined />}
           onClick={handleSend}
-          disabled={disabled || !message.trim()}
+          disabled={disabled || (!message.trim() && attachedFiles.length === 0)}
           className="crm-message-input-send"
           title="Enviar mensagem (Enter)"
         />

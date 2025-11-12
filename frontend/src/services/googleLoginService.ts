@@ -27,7 +27,7 @@ class GoogleLoginService {
       console.log('🔄 Trocando Firebase token por Django JWT...');
       
       // 3. Exchange Firebase token por Django JWT (em cookies)
-      const response = await api.post('/api/auth/google-login/', {
+      const response = await api.post('/auth/google-login/', {
         firebase_token: firebaseToken
       });
       
