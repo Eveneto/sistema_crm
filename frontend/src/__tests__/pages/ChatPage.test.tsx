@@ -1,27 +1,71 @@
-"""
-Testes unitários para componentes de chat do frontend.
+/**
+ * Testes unitários para componentes de chat do frontend.
+ * 
+ * Cobre: ChatPage, ChatMessage, MessageInput components usando Jest e React Testing Library
+ */
 
-Cobre: ChatPage, ChatMessage, MessageInput components usando Jest e React Testing Library
-"""
+// Mocks devem vir ANTES de qualquer import
+jest.mock('axios');
+jest.mock('../../services/api', () => ({
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    patch: jest.fn(),
+  },
+}));
+jest.mock('react-router-dom', () => ({
+  useParams: jest.fn(() => ({ roomId: '123' })),
+  useNavigate: jest.fn(() => jest.fn()),
+  useLocation: jest.fn(() => ({ pathname: '/chat/123' })),
+  useHistory: jest.fn(),
+  BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  MemoryRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Routes: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Route: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  NavLink: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+}));
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import '@testing-library/jest-dom';
 
-import ChatPage from '../pages/ChatPage';
-import ChatMessage from '../components/chat/ChatMessage';
-import MessageInput from '../components/chat/MessageInput';
+import ChatPage from '../../pages/ChatPage';
+import ChatMessage from '../../components/chat/ChatMessage';
+import MessageInput from '../../components/chat/MessageInput';
+import { ChatMessage as ChatMessageType, ChatUser } from '../../redux/slices/chatSlice';
 
+// Mock Router Component for tests
+const MemoryRouter = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 
 const mockStore = configureStore([]);
 
+// Mock window.matchMedia (necessário para Ant Design)
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+});
+
 // Mock do useChatWebSocket
-jest.mock('../hooks/useChatWebSocket', () => ({
-  useChatWebSocket: () => ({
+jest.mock('../../hooks/useChatWebSocket', () => ({
+  __esModule: true,
+  default: () => ({
     isConnected: true,
     sendMessage: jest.fn(),
     sendTyping: jest.fn(),
@@ -29,25 +73,36 @@ jest.mock('../hooks/useChatWebSocket', () => ({
   }),
 }));
 
-// Mock do useParams
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ roomId: '123' }),
-  useNavigate: () => jest.fn(),
-}));
-
-
-describe('ChatMessage Component', () => {
-  const mockMessage = {
+// Helper para criar mensagens mock completas
+const createMockMessage = (overrides?: Partial<ChatMessageType>): ChatMessageType => {
+  return {
     id: '1',
-    content: 'Hello World',
-    sender: { id: 'user1', username: 'John', email: 'john@test.com' },
+    content: 'Test message',
+    sender: {
+      id: 1,  // number, não string
+      username: 'testuser',
+      email: 'test@test.com',
+      first_name: 'Test',
+      last_name: 'User',
+      full_name: 'Test User',
+    },
     created_at: '2025-01-01T10:00:00Z',
+    updated_at: '2025-01-01T10:00:00Z',
     message_type: 'text',
     is_edited: false,
     is_deleted: false,
-    reply_to: null,
+    is_read: false,
+    can_edit: true,
+    can_delete: true,
+    ...overrides,
   };
+};
+
+
+describe('ChatMessage Component', () => {
+  const mockMessage = createMockMessage({
+    content: 'Hello World',
+  });
 
   const mockHandlers = {
     onReply: jest.fn(),
@@ -115,7 +170,10 @@ describe('ChatMessage Component', () => {
   });
 
   it('displays "edited" indicator when message is edited', () => {
-    const editedMessage = { ...mockMessage, is_edited: true };
+    const editedMessage = createMockMessage({
+      content: 'Edited message',
+      is_edited: true,
+    });
 
     render(
       <ChatMessage
@@ -148,12 +206,11 @@ describe('ChatMessage Component', () => {
   });
 
   it('displays reply preview when replying to message', () => {
-    const replyMessage = {
-      ...mockMessage,
+    const replyMessage = createMockMessage({
       id: '2',
       content: 'This is a reply',
-      reply_to: mockMessage,
-    };
+      reply_to: mockMessage.id, // reply_to deve ser string (ID da mensagem)
+    });
 
     render(
       <ChatMessage
@@ -186,11 +243,10 @@ describe('ChatMessage Component', () => {
   });
 
   it('shows system message styling', () => {
-    const systemMessage = {
-      ...mockMessage,
-      message_type: 'system',
+    const systemMessage: ChatMessageType = createMockMessage({
+      message_type: 'system', // Usa type annotation no objeto inteiro
       content: 'User John joined the chat',
-    };
+    });
 
     const { container } = render(
       <ChatMessage
@@ -207,10 +263,9 @@ describe('ChatMessage Component', () => {
   });
 
   it('truncates very long messages', () => {
-    const longMessage = {
-      ...mockMessage,
+    const longMessage = createMockMessage({
       content: 'A'.repeat(500),
-    };
+    });
 
     const { container } = render(
       <ChatMessage
@@ -224,14 +279,13 @@ describe('ChatMessage Component', () => {
 
     // Verificar se mensagem foi truncada
     const contentElement = container.querySelector('.crm-chat-message-text');
-    expect(contentElement.textContent.length).toBeLessThan(600);
+    expect(contentElement!.textContent!.length).toBeLessThan(600);
   });
 
   it('renders emoji in message', () => {
-    const emojiMessage = {
-      ...mockMessage,
+    const emojiMessage = createMockMessage({
       content: 'Hello 🎉 World 🚀',
-    };
+    });
 
     render(
       <ChatMessage
@@ -282,7 +336,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Hello World');
 
     expect(input.value).toBe('Hello World');
@@ -298,7 +352,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Test message{Enter}');
 
     expect(mockHandlers.onSendMessage).toHaveBeenCalledWith('Test message', 'text', undefined);
@@ -314,7 +368,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Line 1{Shift>}{Enter}{/Shift}Line 2');
 
     expect(mockHandlers.onSendMessage).not.toHaveBeenCalled();
@@ -330,7 +384,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Test message');
 
     const sendButton = screen.getByRole('button', { name: /send|enviar/i });
@@ -349,7 +403,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Test message{Enter}');
 
     await waitFor(() => {
@@ -367,7 +421,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     expect(input).toBeDisabled();
   });
 
@@ -394,7 +448,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     const sendButton = screen.getByRole('button', { name: /send|enviar/i });
 
     await user.type(input, 'Test');
@@ -412,7 +466,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'T');
 
     await waitFor(() => {
@@ -421,11 +475,18 @@ describe('MessageInput Component', () => {
   });
 
   it('shows reply preview', () => {
-    const replyMessage = {
+    const replyMessage = createMockMessage({
       id: '1',
-      sender: { username: 'John' },
       content: 'Original message',
-    };
+      sender: {
+        id: 1,
+        username: 'John',
+        email: 'john@test.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        full_name: 'John Doe',
+      },
+    });
 
     render(
       <MessageInput
@@ -443,11 +504,18 @@ describe('MessageInput Component', () => {
 
   it('cancels reply', async () => {
     const user = userEvent.setup();
-    const replyMessage = {
+    const replyMessage = createMockMessage({
       id: '1',
-      sender: { username: 'John' },
       content: 'Original message',
-    };
+      sender: {
+        id: 1,
+        username: 'John',
+        email: 'john@test.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        full_name: 'John Doe',
+      },
+    });
 
     render(
       <MessageInput
@@ -507,7 +575,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
     await user.type(input, 'Line 1{Shift>}{Enter}{/Shift}Line 2');
 
     expect(input.value).toBe('Line 1\nLine 2');
@@ -523,7 +591,7 @@ describe('MessageInput Component', () => {
       />
     );
 
-    const input = container.querySelector('textarea');
+    const input = container.querySelector('textarea')!;
 
     // Digitar muitas linhas
     for (let i = 0; i < 10; i++) {
@@ -574,9 +642,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -589,9 +657,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -604,9 +672,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -619,9 +687,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -638,9 +706,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -658,9 +726,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 
@@ -678,9 +746,9 @@ describe('ChatPage Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <MemoryRouter>
           <ChatPage />
-        </BrowserRouter>
+        </MemoryRouter>
       </Provider>
     );
 

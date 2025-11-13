@@ -3,6 +3,9 @@
  * Cobre: renderização, busca, CRUD de membros, permissões, estados
  */
 
+// Mock do serviço api ANTES de qualquer import
+jest.mock('../../services/api');
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +17,7 @@ import '@testing-library/jest-dom';
 import MembersModal from '../../components/chat/MembersModal';
 import * as chatSlice from '../../redux/slices/chatSlice';
 
-const middlewares = [thunk];
+const middlewares = [thunk as any];
 const mockStore = configureStore(middlewares);
 
 // Mock das actions do Redux
@@ -105,19 +108,19 @@ describe('MembersModal Component', () => {
     jest.clearAllMocks();
     
     // Mock retornando promises resolvidas
-    (chatSlice.fetchRoomMembers as jest.Mock).mockReturnValue({
+    (chatSlice.fetchRoomMembers as any).mockReturnValue({
       type: 'chat/fetchRoomMembers',
       payload: Promise.resolve({ members: mockMembers }),
     });
-    (chatSlice.addRoomMember as jest.Mock).mockReturnValue({
+    (chatSlice.addRoomMember as any).mockReturnValue({
       type: 'chat/addRoomMember',
       payload: Promise.resolve({ member: mockMembers[0] }),
     });
-    (chatSlice.removeRoomMember as jest.Mock).mockReturnValue({
+    (chatSlice.removeRoomMember as any).mockReturnValue({
       type: 'chat/removeRoomMember',
       payload: Promise.resolve({ userId: '3' }),
     });
-    (chatSlice.changeMemberRole as jest.Mock).mockReturnValue({
+    (chatSlice.changeMemberRole as any).mockReturnValue({
       type: 'chat/changeMemberRole',
       payload: Promise.resolve({ member: mockMembers[0] }),
     });

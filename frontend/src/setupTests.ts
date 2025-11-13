@@ -47,6 +47,17 @@ Object.defineProperty(window, 'ResizeObserver', {
   value: ResizeObserverMock,
 });
 
+// Mock global para URL.createObjectURL e revokeObjectURL
+Object.defineProperty(global.URL, 'createObjectURL', {
+  writable: true,
+  value: jest.fn(() => 'mock-url'),
+});
+
+Object.defineProperty(global.URL, 'revokeObjectURL', {
+  writable: true,
+  value: jest.fn(),
+});
+
 // Mock global para requestAnimationFrame
 Object.defineProperty(window, 'requestAnimationFrame', {
   writable: true,

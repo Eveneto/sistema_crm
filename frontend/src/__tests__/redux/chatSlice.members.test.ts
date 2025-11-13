@@ -3,10 +3,14 @@
  * Cobre: fetchRoomMembers, addRoomMember, removeRoomMember, changeMemberRole
  */
 
-import configureMockStore from 'redux-mock-store';
-import thunk from 'redux-thunk';
+// Mockar o módulo api.ts para usar a versão mockada em __mocks__
+jest.mock('../../services/api');
+
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import configureMockStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import api from '../../services/api';
 
 import {
   fetchRoomMembers,
@@ -14,20 +18,21 @@ import {
   removeRoomMember,
   changeMemberRole,
 } from '../../redux/slices/chatSlice';
-import api from '../../services/api';
 
-const middlewares = [thunk];
+const middlewares = [thunk as any];
 const mockStore = configureMockStore(middlewares);
 
-// Mock do axios
+// Criar instância do MockAdapter usando a instância de api
 const mockAxios = new MockAdapter(api);
 
 describe('Redux - Member Management Actions', () => {
   beforeEach(() => {
+    // Resetar mocks antes de cada teste
     mockAxios.reset();
   });
 
   afterEach(() => {
+    // Restaurar mocks depois de cada teste
     mockAxios.reset();
   });
 
@@ -341,7 +346,7 @@ describe('Redux - Member Management Actions', () => {
     it('should handle invalid role error', async () => {
       const roomId = 'room-1';
       const userId = '2';
-      const role = 'invalid_role';
+      const role = 'invalid_role' as any; // Testing invalid role scenario
 
       mockAxios.onPost(`/chat/rooms/${roomId}/change_member_role/`).reply(400, {
         error: 'Invalid role',
